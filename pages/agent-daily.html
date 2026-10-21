@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="小日日报 Agent 的公开交互演示、岗位规范、工作流程与能力边界。">
+  <meta name="theme-color" content="#f4f5f0">
+  <title>小日｜日报 Agent 公开体验</title>
+  <style>
+    :root {
+      --paper: #f4f5f0;
+      --white: #ffffff;
+      --ink: #151917;
+      --muted: #667069;
+      --line: #d9ded8;
+      --red: #e84a34;
+      --green: #1d7957;
+      --green-soft: #e7f4ec;
+      --yellow: #f1c84b;
+      --blue: #31728f;
+      --panel: #edf0eb;
+      --shadow: 0 14px 40px rgba(25, 34, 29, .09);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+      letter-spacing: 0;
+    }
+    button, textarea { font: inherit; letter-spacing: 0; }
+    button { cursor: pointer; }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 62px;
+      padding: 0 5vw;
+      border-bottom: 1px solid var(--line);
+      background: rgba(244, 245, 240, .96);
+      backdrop-filter: blur(12px);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; }
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      color: #fff;
+      background: var(--red);
+      font-size: 17px;
+    }
+    .demo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--green);
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .demo-badge::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+    nav { display: flex; gap: 22px; }
+    nav a { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 700; }
+    nav a:hover { color: var(--ink); }
+    main { width: min(1500px, 100%); margin: 0 auto; }
+    .intro {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(270px, .85fr);
+      gap: clamp(28px, 5vw, 72px);
+      align-items: end;
+      padding: clamp(36px, 6vw, 82px) 5vw 34px;
+    }
+    .eyebrow { margin: 0 0 12px; color: var(--red); font-size: 14px; font-weight: 800; }
+    h1 { margin: 0; max-width: 780px; font-size: clamp(38px, 5vw, 68px); line-height: 1.08; letter-spacing: 0; }
+    .lede { max-width: 730px; margin: 20px 0 0; color: var(--muted); font-size: clamp(17px, 1.6vw, 21px); }
+    .privacy-note { border-left: 4px solid var(--green); padding: 12px 0 12px 18px; color: var(--muted); }
+    .privacy-note strong { display: block; color: var(--ink); margin-bottom: 4px; }
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(320px, .9fr) minmax(360px, 1.1fr);
+      min-height: 690px;
+      margin: 0 3vw 80px;
+      overflow: hidden;
+      border: 1px solid #cfd5cf;
+      border-radius: 8px;
+      background: var(--white);
+      box-shadow: var(--shadow);
+    }
+    .chat, .report { min-width: 0; }
+    .chat { display: grid; grid-template-rows: auto 1fr auto auto; border-right: 1px solid var(--line); background: #f7f8f5; }
+    .pane-head { display: flex; align-items: center; justify-content: space-between; min-height: 68px; padding: 14px 20px; border-bottom: 1px solid var(--line); background: var(--white); }
+    .agent-id { display: flex; align-items: center; gap: 12px; }
+    .avatar { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 8px; background: var(--red); color: white; font-weight: 900; }
+    .agent-id strong, .pane-head h2 { display: block; margin: 0; font-size: 16px; }
+    .agent-id small, .pane-head small { color: var(--muted); font-size: 12px; }
+    .messages { padding: 22px; overflow: auto; min-height: 350px; max-height: 465px; }
+    .message { display: flex; margin-bottom: 16px; }
+    .message.user { justify-content: flex-end; }
+    .bubble { max-width: 82%; padding: 11px 14px; border-radius: 8px; background: var(--white); border: 1px solid var(--line); }
+    .user .bubble { background: var(--green); color: white; border-color: var(--green); }
+    .bubble time { display: block; margin-top: 5px; color: #89918c; font-size: 11px; }
+    .user .bubble time { color: #d9ede4; }
+    .quick-actions { display: flex; gap: 8px; padding: 10px 16px; overflow-x: auto; border-top: 1px solid var(--line); background: var(--white); }
+    .quick-actions button, .tab, .secondary {
+      flex: 0 0 auto;
+      min-height: 38px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: var(--ink);
+      background: var(--white);
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .quick-actions button:hover, .tab:hover, .secondary:hover { border-color: var(--green); color: var(--green); }
+    .composer { display: grid; grid-template-columns: 1fr auto; gap: 10px; padding: 14px 16px; border-top: 1px solid var(--line); background: var(--white); }
+    textarea { width: 100%; min-height: 52px; max-height: 130px; resize: vertical; padding: 12px; border: 1px solid var(--line); border-radius: 6px; background: #fbfcfa; color: var(--ink); }
+    textarea:focus { outline: 2px solid rgba(29, 121, 87, .18); border-color: var(--green); }
+    .primary { min-width: 72px; border: 0; border-radius: 6px; background: var(--ink); color: white; font-weight: 800; }
+    .primary:hover { background: var(--green); }
+    .report { display: grid; grid-template-rows: auto auto 1fr; background: var(--white); }
+    .report .pane-head { padding-left: 26px; }
+    .timeline { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; padding: 20px 26px; border-bottom: 1px solid var(--line); }
+    .step { position: relative; padding-top: 17px; color: var(--muted); font-size: 12px; font-weight: 700; }
+    .step::before { content: ""; position: absolute; top: 3px; left: 0; width: 9px; height: 9px; border: 2px solid var(--line); border-radius: 50%; background: white; z-index: 2; }
+    .step::after { content: ""; position: absolute; top: 8px; left: 9px; right: 0; height: 2px; background: var(--line); }
+    .step:last-child::after { display: none; }
+    .step.active { color: var(--green); }
+    .step.active::before { border-color: var(--green); background: var(--green); }
+    .step.active::after { background: var(--green); }
+    .report-body { padding: clamp(24px, 4vw, 46px); overflow: auto; }
+    .report-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+    .pill { padding: 5px 9px; border-radius: 4px; color: var(--green); background: var(--green-soft); font-size: 12px; font-weight: 800; }
+    .pill.warn { color: #745d08; background: #fff5c9; }
+    .report-body h3 { margin: 0 0 16px; font-size: clamp(22px, 2.3vw, 32px); line-height: 1.3; }
+    .summary { margin: 0 0 28px; padding: 18px 20px; border-left: 4px solid var(--red); background: #faf5f1; }
+    .report-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+    .metric { padding: 16px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .metric small { color: var(--muted); }
+    .metric strong { display: block; margin-top: 3px; }
+    .missing { margin-top: 24px; padding: 16px 18px; background: #fff8df; border: 1px solid #ead994; border-radius: 6px; }
+    .missing strong { display: block; margin-bottom: 5px; }
+    .location { margin-top: 22px; color: var(--muted); font-size: 13px; word-break: break-all; }
+    .section { padding: 74px 5vw; border-top: 1px solid var(--line); }
+    .section-head { display: grid; grid-template-columns: .7fr 1.3fr; gap: 30px; margin-bottom: 38px; }
+    .section h2 { margin: 0; font-size: clamp(30px, 4vw, 48px); line-height: 1.15; }
+    .section-head p { margin: 0; color: var(--muted); font-size: 18px; }
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+    .tab.active { color: white; border-color: var(--ink); background: var(--ink); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .spec-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+    .spec { min-height: 210px; padding: 24px; background: var(--white); }
+    .spec .number { color: var(--red); font-size: 13px; font-weight: 900; }
+    .spec h3 { margin: 12px 0 9px; font-size: 19px; }
+    .spec p, .spec li { color: var(--muted); font-size: 14px; }
+    .spec ul { margin: 0; padding-left: 18px; }
+    .flow { display: grid; grid-template-columns: repeat(6, minmax(130px, 1fr)); gap: 10px; overflow-x: auto; padding-bottom: 10px; }
+    .flow-step { min-height: 150px; padding: 20px; border-top: 4px solid var(--green); background: var(--white); }
+    .flow-step:nth-child(2n) { border-top-color: var(--blue); }
+    .flow-step:nth-child(3n) { border-top-color: var(--red); }
+    .flow-step strong { display: block; margin-bottom: 10px; }
+    .flow-step span { color: var(--muted); font-size: 13px; }
+    .boundary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .boundary { padding: 26px; border: 1px solid var(--line); border-radius: 8px; background: var(--white); }
+    .boundary h3 { margin: 0 0 14px; }
+    .boundary ul { margin: 0; padding-left: 20px; color: var(--muted); }
+    .boundary.good { border-top: 5px solid var(--green); }
+    .boundary.stop { border-top: 5px solid var(--red); }
+    .boundary.human { border-top: 5px solid var(--yellow); }
+    .evidence { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .evidence-block { padding: 26px; border: 1px solid var(--line); background: var(--white); }
+    .evidence-block h3 { margin-top: 0; }
+    .log-line { display: flex; justify-content: space-between; gap: 18px; padding: 12px 0; border-bottom: 1px solid var(--line); font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
+    .log-line:last-child { border: 0; }
+    .online { color: var(--green); font-weight: 800; }
+    .security { display: grid; grid-template-columns: .9fr 1.1fr; gap: 34px; align-items: start; padding: 42px; color: white; background: #1c2420; }
+    .security h2 { margin: 0; font-size: 34px; }
+    .security ul { margin: 0; padding-left: 20px; color: #d5ddd8; }
+    footer { padding: 28px 5vw 50px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); }
+    .notice { position: fixed; left: 50%; bottom: 24px; z-index: 50; transform: translate(-50%, 120px); padding: 10px 16px; border-radius: 6px; background: var(--ink); color: white; box-shadow: var(--shadow); transition: transform .25s ease; }
+    .notice.show { transform: translate(-50%, 0); }
+    @media (max-width: 900px) {
+      nav { display: none; }
+      .intro, .section-head, .workspace, .security { grid-template-columns: 1fr; }
+      .workspace { margin-inline: 14px; }
+      .chat { border-right: 0; border-bottom: 1px solid var(--line); }
+      .spec-grid, .boundary-grid, .evidence { grid-template-columns: 1fr; }
+      .spec { min-height: auto; }
+      .messages { max-height: 390px; }
+    }
+    @media (max-width: 520px) {
+      .topbar { padding-inline: 16px; }
+      .demo-badge { font-size: 12px; }
+      .intro, .section { padding-inline: 20px; }
+      .workspace { border-radius: 0; margin-inline: 0; }
+      .timeline { padding-inline: 18px; }
+      .step { font-size: 10px; }
+      .report-grid { grid-template-columns: 1fr; }
+      .security { padding: 30px 20px; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
+  </style>
+</head>
+<body>
+<div style="max-width:1180px;margin:0 auto;padding:16px 24px 0;display:flex;gap:10px;flex-wrap:wrap;font-family:-apple-system,&quot;PingFang SC&quot;,&quot;Microsoft YaHei&quot;,sans-serif"><a href="../index.html" style="font-size:12.5px;font-weight:700;color:#0F766E;text-decoration:none;background:#fff;border:1px solid #E2E8F0;border-radius:999px;padding:6px 15px">&#8592; 回到作品集</a><a href="design-philosophy.html" style="font-size:12.5px;font-weight:700;color:#475569;text-decoration:none;background:#fff;border:1px solid #E2E8F0;border-radius:999px;padding:6px 15px">设计理念 &#8594;</a><a href="ai-native-day.html" style="font-size:12.5px;font-weight:700;color:#475569;text-decoration:none;background:#fff;border:1px solid #E2E8F0;border-radius:999px;padding:6px 15px">AI Native 的一天 &#8594;</a></div>
+
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">日</span><span>小日</span><span class="demo-badge">公开演示</span></div>
+    <nav aria-label="页面导航">
+      <a href="#experience">体验</a><a href="#spec">岗位规范</a><a href="#flow">工作流</a><a href="#boundary">能力边界</a><a href="#evidence">运行证据</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="intro">
+      <div>
+        <p class="eyebrow">每日执行闭环 Agent</p>
+        <h1>把散落的一天，收成一个闭环。</h1>
+        <p class="lede">小日白天承接素材，中午做一次巡检问进度，晚上汇总飞书、知识库与项目对话，回答「今日闭环八问」，生成日报并保留版本——<strong>日报只是它每天闭环后的一个输出</strong>。</p>
+      </div>
+      <div class="privacy-note"><strong>这是脱敏的交互演示</strong>不连接真实飞书、知识库或任何 API。你在页面中输入的内容只存在于当前浏览器页面，刷新后清空。</div>
+    </section>
+
+    <section class="workspace" id="experience" aria-label="小日交互演示">
+      <div class="chat">
+        <div class="pane-head">
+          <div class="agent-id"><span class="avatar">日</span><div><strong>小日</strong><small>执行闭环 Agent · 演示模式</small></div></div>
+          <button class="secondary" id="resetBtn" title="重置演示">重置</button>
+        </div>
+        <div class="messages" id="messages" aria-live="polite">
+          <div class="message"><div class="bubble">你好，我是小日。白天你只管把事情发给我，晚上我负责把它们整理成日报。<time>09:00</time></div></div>
+        </div>
+        <div class="quick-actions" aria-label="演示素材">
+          <button data-demo="work">发送工作成果</button>
+          <button data-demo="sleep">发送睡眠</button>
+          <button data-demo="feeling">发送身体感受</button>
+          <button data-demo="close">模拟 21:00</button>
+          <button data-demo="generate">就这样生成</button>
+        </div>
+        <div class="composer">
+          <textarea id="messageInput" aria-label="输入演示素材" placeholder="输入一条当天素材，例如：下午完成了客户方案……"></textarea>
+          <button class="primary" id="sendBtn">发送</button>
+        </div>
+      </div>
+
+      <div class="report">
+        <div class="pane-head"><div><h2>日报预览</h2><small>脱敏样例 · 内容随演示更新</small></div><span class="pill" id="statusPill">收集中</span></div>
+        <div class="timeline" aria-label="处理状态">
+          <div class="step active" data-step="0">已记录</div><div class="step" data-step="1">汇总中</div><div class="step" data-step="2">已生成</div><div class="step" data-step="3">待确认</div>
+        </div>
+        <div class="report-body">
+          <div class="report-meta"><span class="pill">演示数据</span><span class="pill warn" id="completePill">等待收口</span></div>
+          <h3>今天还在发生，先替你稳稳接住。</h3>
+          <p class="summary" id="summary">当前已经记录 0 条素材。点击左侧的演示素材，体验小日如何收件、检查缺失并生成日报。</p>
+          <div class="report-grid">
+            <div class="metric"><small>工作推进</small><strong id="workMetric">尚未记录</strong></div>
+            <div class="metric"><small>睡眠</small><strong id="sleepMetric">尚未记录</strong></div>
+            <div class="metric"><small>身体与情绪</small><strong id="feelingMetric">尚未记录</strong></div>
+            <div class="metric"><small>版本</small><strong id="versionMetric">尚未生成</strong></div>
+          </div>
+          <div class="missing" id="missingBox"><strong>待补充</strong><span id="missingText">工作推进、睡眠、饮食、身体与情绪、明天第一件事。</span></div>
+          <p class="location" id="location">生成后将显示脱敏的 Obsidian 日报位置。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="spec">
+      <div class="section-head"><h2>它不是聊天机器人，而是一个岗位。</h2><p>小日有固定入口、输入、判断规则、交付标准和人工兜底。下列规范决定它什么时候算完成，而不是只看回答是否好听。</p></div>
+      <div class="tabs" role="tablist"><button class="tab active" data-tab="job">岗位卡</button><button class="tab" data-tab="rules">关键规则</button><button class="tab" data-tab="delivery">交付标准</button></div>
+      <div class="tab-panel active" id="job">
+        <div class="spec-grid">
+          <article class="spec"><span class="number">01</span><h3>岗位</h3><p>个人日报员。持续承接一天的素材，并在固定时间完成日报收口。</p></article>
+          <article class="spec"><span class="number">02</span><h3>输入</h3><p>飞书私聊、知识库当天事实、WorkBuddy 当天所有项目对话。</p></article>
+          <article class="spec"><span class="number">03</span><h3>输出</h3><p>Obsidian 完整日报、飞书总汇报、缺失清单和可追溯出处。</p></article>
+          <article class="spec"><span class="number">04</span><h3>时间</h3><p>21:00 集中处理，22:00 兜底生成，次日 08:00 自动封版。</p></article>
+          <article class="spec"><span class="number">05</span><h3>版本</h3><p>新增事实或纠错时递增 V 号，不覆盖旧版，不删除历史。</p></article>
+          <article class="spec"><span class="number">06</span><h3>成功</h3><p>写入、校验、回读、状态登记、飞书通知全部完成才算成功。</p></article>
+        </div>
+      </div>
+      <div class="tab-panel" id="rules">
+        <div class="spec-grid">
+          <article class="spec"><span class="number">MUST</span><h3>事实优先</h3><p>用户最新明确更正优先，其次是事实原件、项目对话，最后才是 AI 推断。</p></article>
+          <article class="spec"><span class="number">MUST</span><h3>先取数再追问</h3><p>能够从已有记录取得的信息不重复问；多个缺口一次发完整清单。</p></article>
+          <article class="spec"><span class="number">MUST NOT</span><h3>不编造</h3><p>缺失值写“无记录”“未提供”或“获取失败”，不能用猜测补齐。</p></article>
+        </div>
+      </div>
+      <div class="tab-panel" id="delivery">
+        <div class="spec-grid">
+          <article class="spec"><span class="number">A</span><h3>详细日报</h3><p>完整事实、时间账、判断、产物、缺失和出处写入知识库。</p></article>
+          <article class="spec"><span class="number">B</span><h3>飞书总汇报</h3><p>状态、完整度、综合开场、主线、结果、缺失、待拍板和日报位置。</p></article>
+          <article class="spec"><span class="number">C</span><h3>可验收证据</h3><p>文件可回读、重要结论有出处、失败可见、重试有限、人工接管明确。</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="flow">
+      <div class="section-head"><h2>一天的工作流</h2><p>白天低成本承接，晚上集中理解。这样既减少重复读取和 Token 消耗，也不会让附件问题拖到夜里才暴露。</p></div>
+      <div class="flow">
+        <div class="flow-step"><strong>01 白天收件</strong><span>保存消息时间和来源，立即回复“已记录”。</span></div>
+        <div class="flow-step"><strong>02 附件检查</strong><span>只检查可下载和格式支持；失败当场提醒。</span></div>
+        <div class="flow-step"><strong>03 三路取数</strong><span>21:00 汇总飞书、知识库与项目对话。</span></div>
+        <div class="flow-step"><strong>04 事实判断</strong><span>转写、去重、分层、解决冲突并建立出处。</span></div>
+        <div class="flow-step"><strong>05 生成验收</strong><span>新建版本，校验并回读；失败只自动修复一次。</span></div>
+        <div class="flow-step"><strong>06 汇报封版</strong><span>飞书发送总汇报，确认或次日自动封版。</span></div>
+      </div>
+    </section>
+
+    <section class="section" id="boundary">
+      <div class="section-head"><h2>能力边界</h2><p>一个可靠 Agent 不只说明能做什么，也清楚知道何时停止、何时交还给人。</p></div>
+      <div class="boundary-grid">
+        <article class="boundary good"><h3>小日可以做</h3><ul><li>汇总当天跨库信息</li><li>筛选有效 AI 回答和实际产物</li><li>检查缺失并生成新版本</li><li>标注事实出处和异常</li></ul></article>
+        <article class="boundary stop"><h3>小日不会做</h3><ul><li>编造缺失事实</li><li>替用户做经营决策</li><li>把 AI 推断当用户原话</li><li>覆盖或删除历史日报</li></ul></article>
+        <article class="boundary human"><h3>需要人工介入</h3><ul><li>同级来源无法判断</li><li>附件损坏或格式不支持</li><li>涉及金额、责任或公开发布</li><li>自动修复后仍然失败</li></ul></article>
+      </div>
+    </section>
+
+    <section class="section" id="evidence">
+      <div class="section-head"><h2>脱敏运行证据</h2><p>这里展示的是已经发生过的运行类型和验收方式，不暴露真实身份、消息内容、应用标识或本机目录。</p></div>
+      <div class="evidence">
+        <div class="evidence-block"><h3>运行组件</h3><div class="log-line"><span>实时收件</span><span class="online">运行中</span></div><div class="log-line"><span>即时指令</span><span class="online">运行中</span></div><div class="log-line"><span>定时收口</span><span class="online">运行中</span></div><div class="log-line"><span>身份策略</span><span>BOT ONLY</span></div></div>
+        <div class="evidence-block"><h3>已有成果</h3><div class="log-line"><span>真实私聊入库</span><span>已验证</span></div><div class="log-line"><span>日报版本写入</span><span>已验证</span></div><div class="log-line"><span>文件校验与回读</span><span>已接入</span></div><div class="log-line"><span>连续 7 天验收</span><span>进行中</span></div></div>
+      </div>
+    </section>
+
+    <section class="security">
+      <h2>真实体验，零真实权限。</h2>
+      <ul><li>页面不连接飞书、Codex、Obsidian 或任何个人账户。</li><li>不包含 Token、Secret、Cookie、App ID、chat_id 或消息 ID。</li><li>演示输入不上传、不保存，刷新页面后清空。</li><li>展示内容均为重新编写的脱敏样例，不能调用真实小日。</li></ul>
+    </section>
+  </main>
+  <footer>小日 · 每日执行闭环 Agent 公开体验站　｜　演示版本 2026.10</footer>
+  <div class="notice" id="notice" role="status">已记录</div>
+
+  <script>
+    const state = { work: false, sleep: false, feeling: false, count: 0, generated: false };
+    const messages = document.getElementById('messages');
+    const input = document.getElementById('messageInput');
+    const notice = document.getElementById('notice');
+    const demoText = {
+      work: '今天把日报 Agent 的公开体验页做出来了，也完成了一轮流程复核。',
+      sleep: '昨晚睡了 8 小时 12 分钟，早上精神还可以。',
+      feeling: '下午有一点累，休息半小时以后恢复了一些。'
+    };
+    function now() { return new Date().toLocaleTimeString('zh-CN', {hour:'2-digit', minute:'2-digit'}); }
+    function addMessage(text, who='user') {
+      const wrap = document.createElement('div');
+      wrap.className = 'message ' + (who === 'user' ? 'user' : '');
+      const bubble = document.createElement('div'); bubble.className = 'bubble';
+      bubble.append(document.createTextNode(text));
+      const time = document.createElement('time'); time.textContent = now(); bubble.append(time); wrap.append(bubble);
+      messages.append(wrap); messages.scrollTop = messages.scrollHeight;
+    }
+    function toast(text) { notice.textContent = text; notice.classList.add('show'); setTimeout(()=>notice.classList.remove('show'), 1300); }
+    function updateReport() {
+      document.getElementById('workMetric').textContent = state.work ? '完成体验页与流程复核' : '尚未记录';
+      document.getElementById('sleepMetric').textContent = state.sleep ? '8h12m · 精神尚可' : '尚未记录';
+      document.getElementById('feelingMetric').textContent = state.feeling ? '稍累 · 休息后恢复' : '尚未记录';
+      const missing = [];
+      if (!state.work) missing.push('工作推进'); if (!state.sleep) missing.push('睡眠');
+      missing.push('饮食'); if (!state.feeling) missing.push('身体与情绪'); missing.push('明天第一件事');
+      document.getElementById('missingText').textContent = missing.length ? missing.join('、') + '。' : '暂无。';
+      document.getElementById('summary').textContent = state.generated
+        ? `今天已汇总 ${state.count} 条素材。主要推进了日报 Agent 体验页与流程复核；已记录的信息进入待确认日报，未提供的内容保持明确缺失。`
+        : `当前已经记录 ${state.count} 条素材。小日只做轻量收件，21:00 后再集中理解和汇总。`;
+    }
+    function record(text, key) {
+      addMessage(text); state.count += 1; if (key) state[key] = true; updateReport();
+      setTimeout(()=>{ addMessage('已记录', 'agent'); toast('已记录'); }, 280);
+    }
+    function setSteps(n) { document.querySelectorAll('.step').forEach((el,i)=>el.classList.toggle('active', i <= n)); }
+    function closeDay() {
+      addMessage('现在还缺哪些？'); setSteps(1);
+      const missing = document.getElementById('missingText').textContent;
+      setTimeout(()=>addMessage('21:00 完整度检查完成。仍缺：' + missing + '你可以继续补充，或发送“就这样生成”。', 'agent'), 350);
+      document.getElementById('statusPill').textContent = '等待补充'; document.getElementById('completePill').textContent = '信息待补充';
+    }
+    function generate() {
+      if (state.generated) { toast('已经生成演示日报'); return; }
+      addMessage('就这样生成'); state.generated = true; state.count += 1; setSteps(3); updateReport();
+      document.getElementById('statusPill').textContent = '待确认 · V1'; document.getElementById('completePill').textContent = '信息不完整';
+      document.getElementById('versionMetric').textContent = 'V1 · 待确认';
+      document.getElementById('location').textContent = '日报位置：个人知识库 / 日报 / 2026-09-29_日报_V1.md（演示路径）';
+      setTimeout(()=>addMessage('日报已经生成：待确认 · V1，完整度为“信息不完整”。右侧可以查看总汇报与演示位置。', 'agent'), 420);
+    }
+    document.querySelectorAll('[data-demo]').forEach(btn => btn.addEventListener('click', ()=>{
+      const key = btn.dataset.demo; if (demoText[key]) record(demoText[key], key); else if (key === 'close') closeDay(); else generate();
+    }));
+    document.getElementById('sendBtn').addEventListener('click', ()=>{ const text=input.value.trim(); if (!text) return; record(text); input.value=''; });
+    input.addEventListener('keydown', e=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); document.getElementById('sendBtn').click(); }});
+    document.getElementById('resetBtn').addEventListener('click', ()=>location.reload());
+    document.querySelectorAll('.tab').forEach(tab=>tab.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); document.querySelectorAll('.tab-panel').forEach(x=>x.classList.remove('active'));
+      tab.classList.add('active'); document.getElementById(tab.dataset.tab).classList.add('active');
+    }));
+  </script>
+</body>
+</html>

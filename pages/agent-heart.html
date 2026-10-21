@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新力 · 心力运营官</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#fff; --ink:#111827; --ink-2:#4b5563; --ink-3:#8b93a7;
+    --line:#e6e8ee;
+    --teal:#9f1239; --teal-soft:#ffe4e6;
+    --amber:#b26a00; --amber-soft:#fff6e6;
+    --red:#d93025; --red-soft:#fdecea;
+    --indigo:#4f46e5;
+    --gray-s:#8a8f98; --gray-soft:#f2f3f5;
+    --radius:16px;
+    --shadow:0 1px 2px rgba(16,24,40,.04),0 8px 24px rgba(16,24,40,.06);
+    --shadow-lg:0 2px 4px rgba(16,24,40,.04),0 18px 48px rgba(16,24,40,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.75;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 24px}
+  section{padding:64px 0}
+  h2{font-size:25px;letter-spacing:-.01em;margin-bottom:8px}
+  .sub{color:var(--ink-3);font-size:14px;margin-bottom:30px;max-width:680px}
+  section + section{border-top:1px solid var(--line)}
+
+  nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.86);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .nav-in{max-width:1040px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:20px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px}
+  .logo .mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#9f1239,#4f46e5);
+    color:#fff;display:grid;place-items:center;font-size:13px;font-weight:800}
+  .nav-links{margin-left:auto;display:flex;gap:22px;font-size:13.5px;color:var(--ink-2)}
+  .nav-links a{color:inherit;text-decoration:none}
+  .nav-links a:hover{color:var(--teal)}
+  @media(max-width:720px){.nav-links{display:none}}
+
+  .hero{padding:78px 0 56px;position:relative;overflow:hidden}
+  .hero::before{content:"";position:absolute;inset:-40% 40% 40% -20%;
+    background:radial-gradient(closest-side,rgba(159,18,57,.10),transparent);z-index:0;pointer-events:none}
+  .hero-in{position:relative;z-index:1}
+  .pill{display:inline-flex;align-items:center;gap:8px;background:var(--teal-soft);color:var(--teal);
+    font-size:12.5px;font-weight:700;padding:6px 14px;border-radius:999px;margin-bottom:22px}
+  .pill .dot{width:7px;height:7px;border-radius:50%;background:var(--teal)}
+  h1{font-size:44px;font-weight:800;line-height:1.25;letter-spacing:-.5px}
+  h1 .grad{background:linear-gradient(92deg,var(--teal),var(--indigo));-webkit-background-clip:text;
+    background-clip:text;-webkit-text-fill-color:transparent}
+  .lede{font-size:16px;color:var(--ink-2);margin-top:20px;max-width:720px}
+  .quote{border-left:3px solid var(--teal);padding:4px 0 4px 18px;margin:26px 0 0;
+    font-size:17px;font-weight:700;color:var(--ink);max-width:640px}
+  .hero-note{display:flex;gap:11px;margin-top:30px;padding:14px 16px;background:var(--card);
+    border:1px solid var(--line);border-radius:12px;max-width:760px}
+  .hero-note .k{color:var(--teal);font-weight:800;font-size:13px;flex:0 0 auto}
+  .hero-note .v{font-size:13px;color:var(--ink-2);line-height:1.7}
+  .cta{display:flex;gap:12px;margin-top:28px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:700;
+    text-decoration:none;padding:11px 20px;border-radius:11px;transition:.15s;border:1px solid transparent}
+  .btn.primary{background:var(--teal);color:#fff}
+  .btn.primary:hover{filter:brightness(1.07)}
+  .btn.ghost{background:var(--card);color:var(--ink-2);border-color:var(--line)}
+  .btn.ghost:hover{border-color:var(--teal);color:var(--teal)}
+  .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:38px}
+  @media(max-width:860px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px 20px;box-shadow:var(--shadow)}
+  .stat .n{font-size:26px;font-weight:800;letter-spacing:-.4px;color:var(--teal)}
+  .stat .n.r{color:var(--red)} .stat .n.a{color:var(--amber)} .stat .n.g{color:var(--gray-s)}
+  .stat .k{font-size:12.5px;color:var(--ink-3);margin-top:5px;line-height:1.6}
+
+  .rv{opacity:0;transform:translateY(16px)}
+  .rv.in{opacity:1;transform:none;transition:opacity .5s ease,transform .5s ease}
+  @media(prefers-reduced-motion:reduce){.rv{opacity:1;transform:none}}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:22px 22px 20px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gray-soft)}
+  .card.a:before{background:var(--red)} .card.b:before{background:var(--amber)}
+  .card.g:before{background:var(--gray-s)}
+  .card .tag{font-size:11px;font-weight:800;letter-spacing:1.4px;color:var(--gray-s)}
+  .card.a .tag{color:var(--red)} .card.b .tag{color:var(--amber)}
+  .card h3{font-size:18px;font-weight:800;margin:8px 0 4px}
+  .card .who{font-size:12.5px;color:var(--ink-3);font-weight:600}
+  .card p{font-size:13.5px;color:var(--ink-2);margin-top:12px;line-height:1.75}
+  .card .eg{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);
+    font-size:12.5px;color:var(--ink-3);line-height:1.7}
+
+  .tbl{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    overflow:hidden;box-shadow:var(--shadow)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th{text-align:left;font-size:11.5px;font-weight:800;letter-spacing:.6px;color:var(--ink-3);
+    padding:13px 18px;background:#fbfcfe;border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.7}
+  tr:last-child td{border-bottom:none}
+  td b{font-weight:700}
+  .pill-s{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;
+    background:var(--gray-soft);color:var(--gray-s);white-space:nowrap}
+  .pill-s.no{background:var(--red-soft);color:var(--red)}
+  .pill-s.yes{background:var(--teal-soft);color:var(--teal)}
+
+  .rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+  .rule{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;box-shadow:var(--shadow)}
+  .rule .no{font-size:11px;font-weight:800;letter-spacing:1.4px;color:var(--teal)}
+  .rule .t{font-size:16px;font-weight:800;margin:8px 0 8px}
+  .rule .d{font-size:13.5px;color:var(--ink-2);line-height:1.75}
+
+  .said,.dont{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px 26px;box-shadow:var(--shadow)}
+  .said{border-left:4px solid var(--teal)}
+  .dont{border-left:4px solid var(--red)}
+  .said .lbl{font-size:11.5px;font-weight:800;letter-spacing:1.4px;color:var(--teal);margin-bottom:12px}
+  .dont .lbl{font-size:11.5px;font-weight:800;letter-spacing:1.4px;color:var(--red);margin-bottom:12px}
+  .said ul,.dont ul{list-style:none}
+  .said li,.dont li{font-size:14.5px;color:var(--ink);padding:7px 0 7px 20px;position:relative;line-height:1.7}
+  .said li:before{content:"";position:absolute;left:2px;top:16px;width:6px;height:6px;border-radius:50%;background:var(--teal)}
+  .dont li:before{content:"×";position:absolute;left:2px;top:7px;color:var(--red);font-weight:800;font-size:15px}
+  .said li em{font-style:normal;color:var(--ink-3);font-size:13px;display:block;margin-top:2px}
+
+  .run{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:22px 24px;box-shadow:var(--shadow)}
+  .run .hd{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+  .run .hd .t{font-size:17px;font-weight:800}
+  .run .hd .s{font-size:12.5px;color:var(--ink-3);font-family:ui-monospace,Menlo,Consolas,monospace}
+  .run .sum{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+  .run .chip{font-size:12.5px;font-weight:700;padding:6px 13px;border-radius:999px;background:var(--gray-soft);color:var(--gray-s)}
+  .run .chip.r{background:var(--red-soft);color:var(--red)}
+  .run .chip.a{background:var(--amber-soft);color:var(--amber)}
+
+  .tl{position:relative;padding-left:26px}
+  .tl:before{content:"";position:absolute;left:8px;top:12px;bottom:12px;width:2px;background:var(--line)}
+  .tl-i{position:relative;padding:0 0 20px}
+  .tl-i:last-child{padding-bottom:0}
+  .tl-i:before{content:"";position:absolute;left:-22px;top:9px;width:10px;height:10px;border-radius:50%;
+    background:var(--card);border:2.5px solid var(--gray-s)}
+  .tl-i.k1:before{border-color:var(--teal)}
+  .tl-i.k2:before{border-color:var(--indigo)}
+  .tl-i.k3:before{border-color:var(--amber)}
+  .tl-n{font-size:11px;font-weight:800;letter-spacing:1.4px;color:var(--ink-3)}
+  .tl-t{font-size:15.5px;font-weight:800;margin:4px 0 4px}
+  .tl-d{font-size:13.5px;color:var(--ink-2);line-height:1.75}
+  .tl-d b{color:var(--ink)}
+  .tl-q{margin-top:10px;padding:11px 15px;background:#fbfcfe;border:1px solid var(--line);
+    border-radius:10px;font-size:13.5px;color:var(--ink);line-height:1.75}
+  .tl-q .who{font-size:11.5px;font-weight:800;color:var(--ink-3);display:block;margin-bottom:3px}
+
+  .hl{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--teal);
+    border-radius:12px;padding:18px 22px;margin-top:22px;box-shadow:var(--shadow)}
+  .hl .lbl{font-size:11.5px;font-weight:800;letter-spacing:1.4px;color:var(--teal);margin-bottom:8px}
+  .hl p{font-size:14.5px;line-height:1.8;color:var(--ink)}
+
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:0}
+  .step{position:relative;padding:20px 22px 20px 26px}
+  .step:before{content:"";position:absolute;left:0;top:20px;bottom:20px;width:3px;background:var(--line)}
+  .step:first-child:before{background:var(--teal)}
+  .step .n{font-size:11px;font-weight:800;letter-spacing:1.4px;color:var(--ink-3)}
+  .step .t{font-size:16px;font-weight:800;margin:6px 0 6px}
+  .step .d{font-size:13px;color:var(--ink-2);line-height:1.7}
+
+  footer{background:#fbfcfe;border-top:1px solid var(--line);padding:30px 0;font-size:12.5px;color:var(--ink-3)}
+  .foot-in{max-width:1040px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  footer p{max-width:660px;line-height:1.75}
+  footer b{color:var(--ink-2)}
+</style>
+</head>
+<body>
+
+<div style="max-width:1180px;margin:0 auto;padding:16px 24px 0;display:flex;gap:10px;flex-wrap:wrap;font-family:-apple-system,&quot;PingFang SC&quot;,&quot;Microsoft YaHei&quot;,sans-serif"><a href="../index.html" style="font-size:12.5px;font-weight:700;color:#0F766E;text-decoration:none;background:#fff;border:1px solid #E2E8F0;border-radius:999px;padding:6px 15px">&#8592; 回到作品集</a><a href="design-philosophy.html" style="font-size:12.5px;font-weight:700;color:#475569;text-decoration:none;background:#fff;border:1px solid #E2E8F0;border-radius:999px;padding:6px 15px">设计理念 &#8594;</a><a href="earth-online.html" style="font-size:12.5px;font-weight:700;color:#475569;text-decoration:none;background:#fff;border:1px solid #E2E8F0;border-radius:999px;padding:6px 15px">Agent 队伍图鉴 &#8594;</a></div>
+
+<nav>
+  <div class="nav-in">
+    <div class="logo"><div class="mark">力</div>新力 · 心力运营官</div>
+    <div class="nav-links">
+      <a href="#what">它是什么</a>
+      <a href="#run">一次真实会诊</a>
+      <a href="#rules">三条设计原则</a>
+      <a href="#bounds">边界</a>
+      <a href="#wire">与其他 Agent 的关系</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-in">
+    <div class="pill"><span class="dot"></span>production · 2026-10-17 接线验收通过 · 心力运营部主管</div>
+    <h1>你只需要跟<span class="grad">一个人</span>说话</h1>
+    <p class="lede">它不是"更会聊天的 AI"，是一个<b>主管</b>。七个岗挂在它下面，彼此看不见对方。它分诊、调度、汇总，把几份专业结论收成一个人的话回给你——你不需要知道该找谁。</p>
+    <div class="quote">「不是一个群里的七个 AI，是一个主管 + 六个专科。」</div>
+    <div class="hero-note">
+      <div class="k">i</div>
+      <div class="v"><b>这是一个展示页，不是可调用的接口。</b>页面内「一次真实会诊」的时间线来自该 Agent 2026-10-17 接线验收中的真实一次调用，用于说明它的协作结构；耗时与响应时间为实测值。页面本身不连接任何服务，不含凭据与内部标识，他人无法通过本页调用该 Agent。</div>
+    </div>
+    <div class="cta">
+      <a class="btn primary" href="#run">看一次真实会诊 <span style="opacity:.75">→</span></a>
+      <a class="btn ghost" href="#cant">它现在还做不到什么</a>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="n">7</div><div class="k">在编岗位<br>1 主管 + 6 专科</div></div>
+      <div class="stat"><div class="n">7.3s</div><div class="k">群里 @ 它的<br>实测响应耗时</div></div>
+      <div class="stat"><div class="n a">103.8s</div><div class="k">一次双岗会诊<br>27 字输入 → 汇总回传</div></div>
+      <div class="stat"><div class="n g">0</div><div class="k">专业岗之间的<br>直连通路（星型，非网状）</div></div>
+    </div>
+  </div>
+</header>
+
+<section id="what">
+  <div class="wrap">
+    <h2>它的职责只有三个词</h2>
+    <p class="sub">分诊、调度、汇总。它自己不下专业判断——那是专科岗的活，它只负责叫对人、收回来、说清楚。</p>
+
+    <div class="said">
+      <div class="lbl">它说的</div>
+      <ul>
+        <li>「这句话里有两个不同的问题，我分别叫了两个人。」<em>拆开，而不是混成一个模糊答案</em></li>
+        <li>「这两份结论不一致，我不替它们合并。」<em>把冲突原样交出来，并说明为什么不一致</em></li>
+        <li>「这个岗这次没取得有效结果，如实告诉你。」<em>调不通就说调不通，不补一个编出来的答案</em></li>
+        <li>「我上一轮说错了，更正一下。」<em>会主动改口</em></li>
+      </ul>
+    </div>
+
+    <div class="dont" style="margin-top:16px">
+      <div class="lbl">它绝不说的</div>
+      <ul>
+        <li>「你应该……」——任何建议句式</li>
+        <li>把你的原话原文回进群里（私密原话只进私密库）</li>
+        <li>替专科岗下专业判断、替它们干活</li>
+        <li>在你难受的时候甩清单、布置作业</li>
+        <li>「都是因为你心力不够」——心力是候选解释，不是默认结论</li>
+      </ul>
+    </div>
+
+    <h3 style="font-size:19px;font-weight:800;margin:38px 0 6px">它为什么存在</h3>
+    <p class="sub" style="margin-bottom:18px">不是为了"多一个会聊天的入口"，是为了让归因不再出错。</p>
+    <div class="tbl">
+      <table>
+        <thead><tr><th style="width:64px">层</th><th style="width:230px">问什么</th><th>谁给</th></tr></thead>
+        <tbody>
+          <tr><td><b>①</b></td><td>成果：出了什么 / 没出什么</td><td>工作库事实层（已有）</td></tr>
+          <tr><td><b>②</b></td><td>状态：那天身体 + 心理各是 +1 / 0 / -1</td><td><b>心力账（本岗管的）</b></td></tr>
+          <tr><td><b>③</b></td><td>断环：哪一环断了（触发 → 取数 → 规则 → 格式 → 容器 → 回读）</td><td>六环检查</td></tr>
+          <tr><td><b>④</b></td><td>调整：下次改哪一个具体动作</td><td>只有这层能落到明天</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="hl">
+      <div class="lbl">刹车装置</div>
+      <p>①②③ 全是证据，④ 才是闭环。<b>停在 ② 会把所有问题都算到心力头上</b>——那天明明写着"滋养"却还是没产出，就不是心力问题，可能这事本来就不该做。这条一松，它就退化成情绪化的自我归罪。</p>
+    </div>
+  </div>
+</section>
+
+<section id="run">
+  <div class="wrap">
+    <h2>一次真实会诊</h2>
+    <p class="sub">2026-10-17 接线验收中的一次调用。输入 27 个字，背后跑了两岗、103.8 秒。下面每一步都是真实发生的，包括最后那个"没合并"。</p>
+
+    <div class="run">
+      <div class="hd"><div class="t">心力运营部 · 会诊记录</div><div class="s">input 27 字 · wall clock 103.8s · 2 岗并行</div></div>
+      <div class="sum">
+        <div class="chip r">结论冲突 1 处</div>
+        <div class="chip a">未合并</div>
+        <div class="chip">写入记录 1 条</div>
+      </div>
+
+      <div class="tl">
+        <div class="tl-i k1">
+          <div class="tl-n">STEP 01 · 0s</div>
+          <div class="tl-t">收到一句话</div>
+          <div class="tl-d">群里 @ 主管，说了一句同时包含<b>睡眠</b>和<b>情绪</b>的话。7.3 秒后回话，不是沉默等待。</div>
+          <div class="tl-q"><span class="who">输入</span>「最近一周都睡不好，白天特别烦躁，帮我综合看一下」</div>
+        </div>
+        <div class="tl-i k2">
+          <div class="tl-n">STEP 02 · 分诊</div>
+          <div class="tl-t">一句话里有两个不同的问题</div>
+          <div class="tl-d">它没有把整句当成一个"状态不好"来处理，而是拆成两条：睡眠归睡眠、情绪归情绪。</div>
+        </div>
+        <div class="tl-i k2">
+          <div class="tl-n">STEP 03 · 并行</div>
+          <div class="tl-t">同时叫两个专科，两人互不知情</div>
+          <div class="tl-d">叫了<b>小眠</b>（睡眠）与<b>小察</b>（情绪）。两个岗各自独立跑，<b>互相不知道对方存在</b>——这是设计，不是缺陷。</div>
+        </div>
+        <div class="tl-i k3">
+          <div class="tl-n">STEP 04 · 回收</div>
+          <div class="tl-t">两份原始结论回到主管手上</div>
+          <div class="tl-d">它没有把两份结论揉成一段通顺的话，而是先看它们对不对得上。</div>
+        </div>
+        <div class="tl-i k3">
+          <div class="tl-n">STEP 05 · 冲突</div>
+          <div class="tl-t">两边打架了：一个说正常，一个说偏移</div>
+          <div class="tl-d">小眠看 7 天窗口，说"这一周在正常范围内"；异常值看跨月全量，说"节律偏移"。<br>主管的处理是<b>不合并</b>——原样告诉你两边不一致，并说明为什么（一个看 7 天，一个看跨月）。</div>
+          <div class="tl-q"><span class="who">它的处理</span>「这个我不替它们合并，先记着。」</div>
+        </div>
+      </div>
+
+      <div class="hl">
+        <div class="lbl">第 5 步是整个系统最值钱的地方</div>
+        <p>大部分 AI 产品在这里会强行编一个统一结论，因为"看起来更聪明"。它选择把冲突摆出来——<b>承认两个专业岗看同一件事得出不同结论，这本身就是信息。</b></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="rules">
+  <div class="wrap">
+    <h2>三条设计原则</h2>
+    <p class="sub">这三条决定了它不会变成"一群机器人互相叫来叫去"。</p>
+    <div class="rules">
+      <div class="rule"><div class="no">原则 01</div><div class="t">星型，不是网状</div><div class="d">六个专科岗之间<b>没有任何通路</b>。只有主管有调用权，专科岗只能被调、不能主动拉人。理由很直接：多 Agent 系统失控，几乎都发生在"互相能叫"的那一刻。每次调用是独立进程，跑完就退——它们不是常驻同事，是随叫随到。</div></div>
+      <div class="rule"><div class="no">原则 02</div><div class="t">结论打架时不合并</div><div class="d">强行统一会丢掉"两个视角看到的不一样"这个信息。它的动作是原样交出冲突，并说明分歧来源（窗口不同 / 口径不同 / 证据不同）。</div></div>
+      <div class="rule"><div class="no">原则 03</div><div class="t">每个岗都有一条"弃权"规则</div><div class="d">证据不足就说"暂时无法确定"；数据不够就弃权，<b>弃权是硬性验收项，不是失败</b>；调不通就说调不通。被要求"答不出来就说答不出来"，这是设计，不是漏洞。</div></div>
+    </div>
+
+    <h3 style="font-size:19px;font-weight:800;margin:38px 0 14px">七个岗位怎么分</h3>
+    <div class="tbl">
+      <table>
+        <thead><tr><th style="width:92px">岗位</th><th style="width:200px">一句话职责</th><th style="width:180px">什么时候被叫</th><th>明确不做</th></tr></thead>
+        <tbody>
+          <tr><td><b>新力</b><br><span class="pill-s yes">主管</span></td><td>分诊、调度、汇总</td><td>我 @ 他</td><td>不自己下专业判断、不替岗干活</td></tr>
+          <tr><td><b>小察</b></td><td>此刻什么情绪、强度多少、背后缺什么需要</td><td>我说"烦""累""状态不对"</td><td>不安慰、不分析人格、不追问根源、不诊断</td></tr>
+          <tr><td><b>心理咨询</b></td><td>深度对话、承接、陪我想清楚</td><td>我说"想聊聊""不知道怎么办"</td><td>不做诊断、不替我做决定</td></tr>
+          <tr><td><b>小镜</b></td><td>周/月/季尺度的反复模式，必须带日期 + 原话 + 反证</td><td>我说"什么在反复出现"</td><td>不诊断、不贴人格标签、没证据就弃权</td></tr>
+          <tr><td><b>小眠</b></td><td>睡眠现场支持 + 睡眠记录分析</td><td>我说"睡不着""睡不好"</td><td>不管情绪、不管疾病、不打分</td></tr>
+          <tr><td><b>异常值</b></td><td>指标偏离基线时报警，带证据</td><td>睡眠/身体/产出跟以前不一样</td><td>只报变化，不猜原因、不诊断</td></tr>
+          <tr><td><b>小F</b></td><td>事实记录（底层原料层）</td><td>我说"记一下"</td><td>不分类、不分析、只存原话</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="sub" style="margin-top:16px">两个最容易混的岗：<b>小察看"此刻"，小镜看"跨月"</b>。同一条边界曾互相抢活，现在按时间尺度切开——7 天内 ≥3 次归小察，跨 ≥2 个月才叫模式归小镜。</p>
+  </div>
+</section>
+
+<section id="bounds">
+  <div class="wrap">
+    <h2>它的硬红线</h2>
+    <p class="sub">这几条不是"尽量不做"，是写进运行规则里、越线即停的条款。</p>
+    <div class="dont">
+      <div class="lbl">越界即停</div>
+      <ul>
+        <li>不做心理咨询：不诊断、不分析根源（会在最弱的时候递刀子）</li>
+        <li>不给建议、不给作业、不连甩清单</li>
+        <li>不打分、不排名、不连击、不跨周比较</li>
+        <li>不催、不追问"今天怎么没记"（输入本来就不定时）</li>
+        <li>原话不改写：不擅自改字、补标点、通顺化</li>
+        <li>私密的原话 / 姓名 / 关系细节只进私密库，不回群里</li>
+        <li>确认门：升级、移动、归档、跨库输出都要本人点头，它不能自己搬</li>
+        <li>你说停就停：不新增作业、不深挖、不把探索变成新法庭</li>
+      </ul>
+    </div>
+
+    <h3 style="font-size:19px;font-weight:800;margin:38px 0 14px">遇到这四种情况，它的动作是交棒并停下</h3>
+    <div class="tbl">
+      <table>
+        <thead><tr><th style="width:250px">它遇到的情况</th><th>它的动作</th><th style="width:170px">交给谁</th></tr></thead>
+        <tbody>
+          <tr><td>你说"迷你咨询 / 继续咨询"</td><td>停记录，交棒</td><td>心理咨询通道</td></tr>
+          <tr><td>你说"三件好事 / 充电"</td><td>停记录，交棒</td><td>上行（快乐）模式</td></tr>
+          <tr><td>命中本人自己写的「崩溃前兆三条」</td><td><b>不记录、不分析、不追问</b>，只给一个处理动作</td><td>心理咨询 / 身体类告警</td></tr>
+          <tr><td>出现危机信号</td><td><b>立刻停</b>，先给安全通道</td><td>人。它不分析、不陪聊</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="sub" style="margin-top:16px">判断只有一条：<b>这件事需不需要"被理解"？</b>需要 → 交棒；只是"被记下来" → 它干。</p>
+  </div>
+</section>
+
+<section id="cant">
+  <div class="wrap">
+    <h2>它现在还做不到什么</h2>
+    <p class="sub">这页不装。下面每一条都是实测出来的现状，不是"计划中"。</p>
+    <div class="cards">
+      <div class="card a"><div class="tag">未实现</div><h3>没有顺序分诊</h3><div class="who">现在是"一次性决定叫谁"</div><p>小察不会"答完再决定要不要转咨询"，两个人是同时被叫的。真实咨询是边聊边判断：先接住，听着听着才升级。</p><div class="eg">缺的是一条顺序链，不是多一个岗。</div></div>
+      <div class="card a"><div class="tag">未实现</div><h3>没有上下文传递</h3><div class="who">各环互相看不到</div><p>小察的结论不会自动成为心理咨询的输入。下一环拿不到上一环的判断。</p><div class="eg">这是"会诊台"和"流水线"的差别。</div></div>
+      <div class="card b"><div class="tag">硬伤</div><h3>慢</h3><div class="who">单岗 20–40 秒，双岗 100 秒以上</div><p>当面对话等到 100 秒会很难受。人说话是一来一回的，不是提交工单。</p><div class="eg">方向是把岗位从"每次重新叫一遍"改成"常驻待命"，但要改架构。</div></div>
+      <div class="card g"><div class="tag">实测发现</div><h3>多数岗不会自己去拿活</h3><div class="who">六个岗里只有一个会主动领活</div><p>其余几张待办躺着等人搬。主管把单子发出去，对面的岗未必接得住。</p><div class="eg">没有巡检岗时，出问题只能人肉查。</div></div>
+    </div>
+
+    <h3 style="font-size:19px;font-weight:800;margin:38px 0 14px">两种门诊形态，只有一种跑起来了</h3>
+    <div class="tbl">
+      <table>
+        <thead><tr><th style="width:110px"></th><th>会诊台（现在跑的）</th><th>流水线（原本设想的）</th></tr></thead>
+        <tbody>
+          <tr><td><b>形态</b></td><td>主管同时叫 2–3 个，各答各的，主管汇总</td><td>小察觉察 → 判断是否升级 → 咨询接上 → 小F 记录</td></tr>
+          <tr><td><b>上下文</b></td><td>各环互相看不到</td><td>下一环能看到上一环的结论</td></tr>
+          <tr><td><b>分诊</b></td><td>一次性决定叫谁</td><td>边聊边判断</td></tr>
+          <tr><td><b>适合</b></td><td>"帮我综合看看"（体检）</td><td>"我今天很难受"（看病）</td></tr>
+          <tr><td><b>现状</b></td><td><span class="pill-s yes">已跑通</span></td><td><span class="pill-s no">未实现</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="hl">
+      <div class="lbl">直白说</div>
+      <p>脑子里的"流水线"目前不存在，现在是一条"会诊台"。这两者不是谁替代谁，是两种不同的门诊——真实使用里大概率两条都要，由主管按话术自动选。<b>但这是我的猜测，不是已验证的结论。</b></p>
+    </div>
+  </div>
+</section>
+
+<section id="wire">
+  <div class="wrap">
+    <h2>与其他 Agent 的关系</h2>
+    <p class="sub">它是交接总线上唯一有出单与结算权的岗：判断该派给谁、单子状态怎么改、最后由谁收口。下面的调用关系全部取自岗位注册表。</p>
+    <div class="tbl">
+      <table>
+        <thead><tr><th style="width:130px">对方</th><th style="width:230px">对方的活</th><th>它为什么叫它</th></tr></thead>
+        <tbody>
+          <tr><td><b>小察</b></td><td>此刻的情绪与需要</td><td>一句话里有情绪信号时，先分一路出去识别</td></tr>
+          <tr><td><b>心理咨询</b></td><td>深度对话与承接</td><td>判断需要"被理解"而不是"被记下"时交棒</td></tr>
+          <tr><td><b>小镜</b></td><td>跨周/月/季的反复模式</td><td>问题不是"今天怎么样"而是"什么在重复"时叫</td></tr>
+          <tr><td><b>小眠</b></td><td>睡眠现场支持与分析</td><td>睡眠相关的那一半拆给它</td></tr>
+          <tr><td><b>异常值</b></td><td>指标偏离基线的报警</td><td>要一个"跟以前比变没变"的独立视角</td></tr>
+          <tr><td><b>小运</b></td><td>巡检与派单（meta 层）</td><td>链路本身出问题时找它，不自己修</td></tr>
+          <tr><td><b>小管家</b></td><td>顶层路由</td><td>心力域之外的事退回给它分派</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="sub" style="margin-top:16px"><b>它自己只写一个地方</b>：交接单与事件流。不写事实主数据、不写心理正文——把记录交给记录岗，把判断交给专业岗。</p>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-in">
+    <p><b>新力 · 心力运营官</b> —— 本页为静态展示页。页面内的会诊时间线、响应耗时与该 Agent 一次真实调用一致，用于说明协作结构；页面本身不连接任何真实服务，不含凭据、内部标识或可调用接口。心理类内容为敏感域，本页不展示任何私密原话。</p>
+    <p style="color:#c3c8d4">Showcase · 页面更新于 2026-10-21 · 对齐 2026-10-17 接线验收</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.06});
+  document.querySelectorAll('.rv').forEach(function(n){io.observe(n)});
+})();
+</script>
+
+</body>
+</html>

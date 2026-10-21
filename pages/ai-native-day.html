@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Native 的一天 · 山楂的 Life OS</title>
+<style>
+  :root{
+    --ink:#0F172A; --ink2:#475569; --ink3:#94A3B8;
+    --bg:#F8FAFC; --card:#FFFFFF; --line:#E2E8F0; --line2:#CBD5E1;
+    --teal:#0D9488; --teal-l:#CCFBF1; --teal-d:#0F766E;
+    --indigo:#4F46E5; --indigo-l:#E0E7FF;
+    --amber:#B45309; --amber-l:#FEF3C7;
+    --sky:#0284C7; --sky-l:#E0F2FE;
+    --rose:#BE123C; --rose-l:#FFE4E6;
+    --radius:16px;
+    --shadow:0 1px 2px rgba(16,24,40,.04),0 8px 24px rgba(16,24,40,.06);
+    --shadow-lg:0 2px 4px rgba(16,24,40,.04),0 18px 48px rgba(16,24,40,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;
+    background:
+      radial-gradient(1100px 620px at 6% -10%,rgba(13,148,136,.10) 0%,transparent 60%),
+      radial-gradient(820px 520px at 98% 2%,rgba(79,70,229,.09) 0%,transparent 55%),
+      radial-gradient(900px 560px at 50% 108%,rgba(2,132,199,.07) 0%,transparent 60%),
+      linear-gradient(165deg,#ECFDF5 0%,#F0F9FF 22%,#F8FAFC 44%,#EEF2FF 72%,#F5F3FF 100%);
+    background-attachment:fixed;
+    color:var(--ink); -webkit-font-smoothing:antialiased; min-height:100vh;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px 90px}
+
+  .back{display:inline-flex;align-items:center;gap:7px;margin:30px 0 0;
+    font-size:13px;font-weight:700;color:var(--teal-d);text-decoration:none;
+    background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 16px;
+    box-shadow:var(--shadow);transition:.15s}
+  .back:hover{border-color:var(--teal);transform:translateY(-1px)}
+  .backrow{display:flex;gap:10px;flex-wrap:wrap;margin:30px 0 0}
+  .backrow .back{margin:0}
+
+  .hero{padding:50px 0 22px}
+  .kicker{font-size:12.5px;letter-spacing:3.5px;color:var(--teal);font-weight:700;margin-bottom:16px}
+  .hero h1{font-size:38px;font-weight:800;letter-spacing:-.5px;line-height:1.2;color:var(--ink)}
+  .hero h1 em{font-style:normal;background:linear-gradient(92deg,var(--teal-d),var(--teal) 45%,var(--indigo));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .hero p.lead{font-size:15.5px;color:var(--ink2);line-height:1.85;margin-top:18px;max-width:760px}
+  .hero p.lead b{color:var(--teal-d);font-weight:700}
+
+  section{margin-top:44px}
+  .sec-h{display:flex;align-items:baseline;gap:14px;margin-bottom:8px;flex-wrap:wrap}
+  .sec-h h2{font-size:21px;font-weight:800;letter-spacing:.2px;color:var(--ink)}
+  .sec-h em{font-size:13px;color:var(--ink3);font-style:normal}
+  .sec-h i{flex:1;height:1px;background:linear-gradient(90deg,var(--line2),transparent)}
+  .claim{font-size:25px;font-weight:800;line-height:1.55;color:var(--ink);margin:6px 0 22px;letter-spacing:.2px}
+  .claim b{color:var(--teal-d)}
+
+  /* ===== 前后对比 ===== */
+  .cmp{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+  .cmp .col{background:var(--card);border:1px solid var(--line);border-radius:18px;
+    padding:22px 24px;box-shadow:var(--shadow)}
+  .cmp .col.before{border-color:#E2E8F0;background:linear-gradient(180deg,#FBFCFD,#F5F7FA)}
+  .cmp .col.after{border-color:#B7E4DC;background:linear-gradient(180deg,#F2FBF9,#FFFFFF)}
+  .cmp .cap{font-size:12px;font-weight:800;letter-spacing:1.5px;margin-bottom:13px}
+  .cmp .col.before .cap{color:var(--ink3)}
+  .cmp .col.after .cap{color:var(--teal-d)}
+  .cmp blockquote{font-size:14.5px;line-height:1.85;color:var(--ink);font-weight:600;
+    border-left:3px solid var(--line2);padding:2px 0 2px 15px;margin:0 0 16px}
+  .cmp .col.after blockquote{border-left-color:var(--teal)}
+  .cmp blockquote b{color:var(--teal-d)}
+  .cmp ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+  .cmp li{font-size:13.5px;color:var(--ink2);line-height:1.7;padding-left:24px;position:relative}
+  .cmp .col.before li::before{content:"✕";position:absolute;left:2px;top:2px;
+    font-size:11px;font-weight:800;color:var(--ink3)}
+  .cmp .col.after li::before{content:"✓";position:absolute;left:1px;top:1px;
+    font-size:13px;font-weight:800;color:var(--teal)}
+
+  /* ===== 时间轴 ===== */
+  .day{background:var(--card);border:1px solid var(--line);border-radius:20px;
+    box-shadow:var(--shadow);padding:26px 28px 20px;position:relative}
+  .phase{padding:16px 0;border-top:1px dashed var(--line)}
+  .phase:first-child{border-top:0;padding-top:4px}
+  .ph-t{font-size:12px;font-weight:800;letter-spacing:2px;color:var(--teal);margin-bottom:12px}
+  .ph-t.night{color:var(--indigo)}
+  .ev{display:grid;grid-template-columns:88px 150px 1fr;gap:14px;align-items:baseline;
+    padding:8px 0;font-size:14px}
+  .ev .tm{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;color:var(--ink);font-size:13px}
+  .ev .ag{font-weight:800;color:var(--teal-d)}
+  .ev .ds{color:var(--ink2);line-height:1.65}
+  .ev.warn .ag{color:var(--rose)}
+  .ev .tag{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.6px;
+    background:var(--teal-l);color:var(--teal-d);border-radius:999px;padding:1px 8px;margin-left:7px}
+  .ev.warn .tag{background:var(--rose-l);color:var(--rose)}
+
+  .day-note{margin-top:16px;padding-top:16px;border-top:1px solid var(--line);
+    font-size:12.5px;color:var(--ink3);line-height:1.9}
+  .day-note b{color:var(--ink2)}
+  .day-note code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;
+    background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:1px 5px}
+
+  /* ===== 带着我走 ===== */
+  .drive{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+  .drive .card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:19px 20px;box-shadow:var(--shadow)}
+  .drive .t{font-size:12px;font-weight:800;letter-spacing:1px;color:var(--teal);margin-bottom:10px}
+  .drive .t span{color:var(--ink3);font-weight:700;letter-spacing:0}
+  .drive .b{font-size:13.5px;color:var(--ink2);line-height:1.78}
+  .drive .b b{color:var(--ink)}
+  .focus{margin-top:16px;background:linear-gradient(92deg,var(--teal-l),#FFFFFF 78%);
+    border:1px solid #B7E4DC;border-radius:16px;padding:19px 23px;
+    font-size:14px;color:var(--ink);line-height:1.85;box-shadow:var(--shadow)}
+  .focus b{color:var(--teal-d)}
+
+  .note{margin-top:30px;padding:18px 22px;border:1px dashed var(--line2);border-radius:14px;
+    background:var(--card);font-size:13.5px;color:var(--ink2);line-height:1.85}
+  .note b{color:var(--teal-d)}
+
+  footer{margin-top:66px;padding-top:26px;border-top:1px solid var(--line);
+    font-size:12px;color:var(--ink3);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+
+  @media(max-width:820px){
+    .claim{font-size:20px}
+    .cmp{grid-template-columns:1fr}
+    .drive{grid-template-columns:1fr}
+    .ev{grid-template-columns:1fr;gap:2px;padding:10px 0}
+    .ev .tm{color:var(--teal)}
+    .hero h1{font-size:30px}.wrap{padding:0 18px 60px}.hero{padding:38px 0 16px}
+    .day{padding:22px 20px 16px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="backrow">
+    <a class="back" href="../index.html">← 回到作品集</a>
+    <a class="back" href="design-philosophy.html">设计理念 →</a>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">A DAY IN AN AI-NATIVE LIFE</div>
+    <h1>AI Native 的<em>一天</em></h1>
+    <p class="lead">它不是一个"我点开才动"的东西——<b>它有自己的作息</b>。<br>从凌晨到深夜，哪些岗位什么时候醒、干什么，下面这张表就是真的在跑的时间表。</p>
+  </header>
+
+  <section>
+    <div class="sec-h"><h2>有它之前，和之后</h2><em>这页真正的分水岭</em><i></i></div>
+
+    <div class="cmp">
+      <div class="col before">
+        <div class="cap">没有 AI NATIVE 的时候</div>
+        <blockquote>「之前没有 AI native 的时候，一天就不知道干了啥，<b>全部都没了，啥也没干，也没推进</b>。」</blockquote>
+        <ul>
+          <li>一天过完，说不清算过了什么</li>
+          <li>没有记录，就没有可回看的东西</li>
+          <li>没有收口，事情做没做完没人问</li>
+          <li>第二天醒来，昨天等于没发生</li>
+        </ul>
+      </div>
+      <div class="col after">
+        <div class="cap">有 AI NATIVE 之后</div>
+        <blockquote>「有了 AI native 之后，<b>它会带着我去走完这一天</b>，会让我每天都聚焦在一个事情上。」</blockquote>
+        <ul>
+          <li>一天有几段固定节点在跑，到点就来</li>
+          <li>每件事都落成事实，可以回看</li>
+          <li>每天收口一次：做完了什么、卡在哪</li>
+          <li>每天只推一件最该推进的事</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-h"><h2>一天的时间表</h2><em>来自真实运行链路，不是设想</em><i></i></div>
+
+    <div class="day">
+      <div class="phase">
+        <div class="ph-t night">凌晨 · 夜班</div>
+        <div class="ev"><span class="tm">00:30</span><span class="ag">小日</span><span class="ds">读昨天的事实，深度重跑一遍日报——不是重发，是重算</span></div>
+        <div class="ev"><span class="tm">03:00</span><span class="ag">小F</span><span class="ds">扫飞书 / WorkBuddy / Codex 三路会话，把昨天漏掉的事实补进总事实库</span></div>
+      </div>
+      <div class="phase">
+        <div class="ph-t">早上 · 开机之后</div>
+        <div class="ev"><span class="tm">07–13</span><span class="ag">收口通知</span><span class="ds">开机后第一次整点就发：昨天日报在哪、有什么要你拍板。每小时整点试一次，当天只发一条<span class="tag">心跳式</span></span></div>
+        <div class="ev"><span class="tm">08:00</span><span class="ag">小日</span><span class="ds">昨天的日报封版，最大版本号转正</span></div>
+        <div class="ev"><span class="tm">08:00</span><span class="ag">小运维</span><span class="ds">每日给全部 Agent 做健康巡检（PASS / WARN / FAIL）</span></div>
+      </div>
+      <div class="phase">
+        <div class="ph-t">白天 · 你说话的时候</div>
+        <div class="ev"><span class="tm">随时</span><span class="ag">小管家</span><span class="ds">你在群里说一句 → 判断归谁 → 派最少的人，派完就停</span></div>
+        <div class="ev"><span class="tm">随时</span><span class="ag">小F / 小察 / 心理咨询 / 小健</span><span class="ds">按分派各自接手：记事实 / 识情绪 / 接住 / 记训练</span></div>
+      </div>
+      <div class="phase">
+        <div class="ph-t">中午</div>
+        <div class="ev"><span class="tm">12:00</span><span class="ag">小日</span><span class="ds">日中巡检：发「日中五问」（本轮只发问，不生成日报）</span></div>
+        <div class="ev"><span class="tm">08:00</span><span class="ag">小察</span><span class="ds">昨日情绪觉察：扫昨天、补漏最近 7 天，画一张情绪波动图，私聊给你</span></div>
+      </div>
+      <div class="phase">
+        <div class="ph-t">晚上 · 收口</div>
+        <div class="ev"><span class="tm">20:30</span><span class="ag">生活总账</span><span class="ds">报问：今天都干了啥（你一句话口述，它记）</span></div>
+        <div class="ev"><span class="tm">21:00</span><span class="ag">生活总账 + 小日</span><span class="ds">总账汇总 24h 闭合账；小日做完整度检查——齐了就直接生成日报</span></div>
+        <div class="ev"><span class="tm">22:00</span><span class="ag">小日</span><span class="ds">还没生成就兜底生成一版，标成待确认</span></div>
+      </div>
+      <div class="phase">
+        <div class="ph-t">周期性</div>
+        <div class="ev"><span class="tm">周一 09:00</span><span class="ag">小D</span><span class="ds">监控播客，有新一期才下载转写</span></div>
+        <div class="ev"><span class="tm">月初 / 月中 / 月末</span><span class="ag">小月</span><span class="ds">月目标、月度巡检、月底验收与月报</span></div>
+      </div>
+
+      <div class="day-note">
+        <b>时间表来自真实运行链路：</b>小日 = 日报链路（00:30 / 08:00 / 12:00 / 21:00 / 22:00）；
+        收口通知 = 07–13 心跳窗口（通知层，不是小日）；
+        生活总账 = 20:30 报问 / 21:00 汇总；
+        小察 = 08:00 情绪觉察；
+        小F = 每日 03:00 凌晨补录（外部计划任务）；
+        小D = 周一 09:00 播客监控转写；
+        小运维 = 08:00 巡检。
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-h"><h2>"带着我走完一天"靠什么</h2><em>它不是提醒，是到点就来</em><i></i></div>
+
+    <div class="drive">
+      <div class="card">
+        <div class="t">早上 <span>· 开机后</span></div>
+        <div class="b">收口通知先到：<b>昨天日报在哪、有什么要你拍板</b>。你一天从"昨天结了没有"开始，不是从一片空白开始。</div>
+      </div>
+      <div class="card">
+        <div class="t">中午 <span>· 12:00</span></div>
+        <div class="b">日中巡检：<b>发五问 + 进度 / 偏差 / 下午建议</b>。当天偏没偏航，中午就拦一次。</div>
+      </div>
+      <div class="card">
+        <div class="t">晚上 <span>· 21:00 起</span></div>
+        <div class="b">生活总账先汇总 24h 闭合账，小日做完整度检查 → <b>生成日报正本</b>（没齐 22:00 兜底）。今天干了什么、留下什么，当天就封存。</div>
+      </div>
+    </div>
+
+    <div class="focus">
+      <b>"每天聚焦一件"落在哪：</b>每天日报里都会写清什么<b>还没闭环</b>、<b>明天第一件事</b>是什么；中午的巡检再把当天的偏差指出来。所以每天不是"想起来干嘛干嘛"，而是被明确地推着走一件事。
+    </div>
+
+    <div class="note">
+      <b>为什么值得看这张表：</b>大部分"AI 助手"是你在场它才动。这套系统不一样——它自己的时段表在跑：
+      凌晨补数据、早上报收口、中午巡检、晚上汇总。<b>你不用记得找它，它到点会来。</b>
+    </div>
+  </section>
+
+  <footer>
+    <span>山楂 · 个人 Life OS · 2026</span>
+    <span>更新于 2026-10-16</span>
+  </footer>
+
+</div>
+</body>
+</html>

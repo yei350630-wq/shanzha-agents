@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小D · 音视频转录整理助手</title>
+<style>
+  :root{
+    --bg:#f6f7f9;
+    --card:#ffffff;
+    --ink:#111827;
+    --ink-2:#4b5563;
+    --ink-3:#8b93a7;
+    --line:#e6e8ee;
+    --brand:#2f6bff;
+    --brand-soft:#eef3ff;
+    --green:#0f9d58;
+    --green-soft:#e9f7ef;
+    --amber:#b26a00;
+    --amber-soft:#fff6e6;
+    --red:#d93025;
+    --red-soft:#fdecea;
+    --radius:16px;
+    --shadow:0 1px 2px rgba(16,24,40,.04),0 8px 24px rgba(16,24,40,.06);
+    --shadow-lg:0 2px 4px rgba(16,24,40,.04),0 18px 48px rgba(16,24,40,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--ink);
+    line-height:1.7;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  section{padding:72px 0}
+  h2{font-size:26px;letter-spacing:-.01em;margin-bottom:8px}
+  .sub{color:var(--ink-3);font-size:14px;margin-bottom:32px}
+
+  /* ---------- nav ---------- */
+  nav{
+    position:sticky;top:0;z-index:50;
+    background:rgba(255,255,255,.82);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-in{max-width:1080px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:20px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px}
+  .logo .mark{
+    width:30px;height:30px;border-radius:9px;flex:0 0 auto;
+    background:linear-gradient(135deg,#2f6bff,#7b5cff);
+    color:#fff;display:grid;place-items:center;font-size:14px;font-weight:800;
+  }
+  .nav-links{margin-left:auto;display:flex;gap:22px;font-size:13.5px;color:var(--ink-2)}
+  .nav-links a{color:inherit;text-decoration:none}
+  .nav-links a:hover{color:var(--brand)}
+  @media(max-width:720px){.nav-links{display:none}}
+
+  /* ---------- hero ---------- */
+  .hero{padding:84px 0 64px;position:relative;overflow:hidden}
+  .hero::before{
+    content:"";position:absolute;inset:-40% 40% 40% -20%;
+    background:radial-gradient(closest-side,rgba(47,107,255,.10),transparent);
+    z-index:0;pointer-events:none;
+  }
+  .hero-in{position:relative;z-index:1}
+  .pill{
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--green-soft);color:var(--green);
+    border:1px solid #cceadd;border-radius:999px;
+    padding:5px 13px;font-size:12.5px;font-weight:600;margin-bottom:22px;
+  }
+  .pill .dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+  h1{font-size:clamp(34px,5.2vw,52px);line-height:1.15;letter-spacing:-.025em;margin-bottom:18px}
+  h1 .grad{background:linear-gradient(135deg,#2f6bff,#7b5cff);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{font-size:17px;color:var(--ink-2);max-width:640px;margin-bottom:10px}
+  .hero-note{
+    display:inline-flex;gap:8px;align-items:flex-start;
+    font-size:12.5px;color:var(--ink-3);margin-top:26px;
+    background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 15px;max-width:640px;
+  }
+  .hero-note b{color:var(--ink-2)}
+  .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:11px 20px;border-radius:11px;font-size:14px;font-weight:600;
+    text-decoration:none;border:1px solid transparent;cursor:pointer;transition:.18s;
+  }
+  .btn.primary{background:var(--brand);color:#fff;box-shadow:0 6px 18px rgba(47,107,255,.26)}
+  .btn.primary:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(47,107,255,.32)}
+  .btn.ghost{background:var(--card);border-color:var(--line);color:var(--ink)}
+  .btn.ghost:hover{border-color:#c8cfdd}
+
+  /* ---------- stats ---------- */
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:44px}
+  @media(max-width:720px){.stats{grid-template-columns:1fr}}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+  .stat .n{font-size:30px;font-weight:750;letter-spacing:-.02em;line-height:1.2}
+  .stat .n em{font-style:normal;font-size:15px;color:var(--ink-3);font-weight:600}
+  .stat .k{font-size:13px;color:var(--ink-3);margin-top:6px}
+  .stat .bar{height:5px;border-radius:99px;background:#eef0f5;margin-top:14px;overflow:hidden}
+  .stat .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#2f6bff,#7b5cff)}
+
+  /* ---------- generic card grid ---------- */
+  .grid{display:grid;gap:16px}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  @media(max-width:900px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:1fr}}
+  @media(max-width:640px){.g4,.g2{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+  .card .ic{
+    width:38px;height:38px;border-radius:11px;background:var(--brand-soft);
+    display:grid;place-items:center;margin-bottom:14px;
+  }
+  .card .ic svg{width:19px;height:19px;stroke:var(--brand);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+  .card h3{font-size:15px;margin-bottom:6px}
+  .card p{font-size:13.5px;color:var(--ink-2)}
+  .tag{display:inline-block;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:6px;background:var(--brand-soft);color:var(--brand);margin-top:12px}
+
+  /* ---------- demo ---------- */
+  .demo-shell{
+    background:var(--card);border:1px solid var(--line);border-radius:20px;
+    box-shadow:var(--shadow-lg);overflow:hidden;
+  }
+  .demo-bar{
+    display:flex;align-items:center;gap:10px;
+    padding:13px 18px;border-bottom:1px solid var(--line);background:#fbfcfe;
+  }
+  .win-dots{display:flex;gap:6px}
+  .win-dots i{width:10px;height:10px;border-radius:50%;background:#e2e5ec;display:block}
+  .demo-title{font-size:13px;font-weight:650;color:var(--ink-2)}
+  .demo-badge{
+    margin-left:auto;font-size:11.5px;font-weight:600;color:var(--amber);
+    background:var(--amber-soft);border:1px solid #ffe3b3;border-radius:999px;padding:3px 10px;
+  }
+  .chat{padding:22px;background:#f9fafc;min-height:380px;display:flex;flex-direction:column;gap:14px}
+  .msg{max-width:78%;display:flex;gap:10px;opacity:0;transform:translateY(8px);animation:pop .38s ease forwards}
+  @keyframes pop{to{opacity:1;transform:none}}
+  .msg.me{align-self:flex-end;flex-direction:row-reverse}
+  .av{width:30px;height:30px;border-radius:9px;flex:0 0 auto;display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff}
+  .av.u{background:#94a3b8}
+  .av.d{background:linear-gradient(135deg,#2f6bff,#7b5cff)}
+  .bub{background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px 14px;font-size:13.5px;box-shadow:0 1px 2px rgba(16,24,40,.03)}
+  .msg.me .bub{background:var(--brand);border-color:var(--brand);color:#fff;word-break:break-all}
+  .steps{display:flex;flex-direction:column;gap:7px;margin-top:9px}
+  .step{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--ink-2);opacity:0;transform:translateX(-6px);animation:slide .3s ease forwards}
+  @keyframes slide{to{opacity:1;transform:none}}
+  .step .st{width:17px;height:17px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;font-size:10px;font-weight:800}
+  .step.ok .st{background:var(--green-soft);color:var(--green)}
+  .step.doing .st{background:var(--brand-soft);color:var(--brand);animation:spin 1s linear infinite}
+  .step .t{margin-left:auto;font-size:11.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .result{
+    margin-top:12px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;
+  }
+  .result-h{padding:9px 13px;background:#f7f9fc;border-bottom:1px solid var(--line);font-size:12px;font-weight:650;color:var(--ink-2);display:flex;justify-content:space-between}
+  .result-b{padding:14px;font-size:13px;color:var(--ink-2);line-height:1.75;max-height:190px;overflow:auto;white-space:pre-wrap}
+  .result-b mark{background:#fff2c2;padding:0 2px;border-radius:3px}
+  .demo-foot{padding:14px 22px;border-top:1px solid var(--line);display:flex;align-items:center;gap:12px;background:#fff;flex-wrap:wrap}
+  .demo-hint{font-size:12.5px;color:var(--ink-3)}
+  .btn.sm{padding:8px 15px;font-size:13px;border-radius:9px}
+
+  /* ---------- compare ---------- */
+  .cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--card);box-shadow:var(--shadow)}
+  @media(max-width:720px){.cmp{grid-template-columns:1fr}}
+  .cmp>div{padding:22px}
+  .cmp>div:first-child{border-right:1px solid var(--line);background:#fcfcfd}
+  @media(max-width:720px){.cmp>div:first-child{border-right:none;border-bottom:1px solid var(--line)}}
+  .cmp h4{font-size:13px;color:var(--ink-3);font-weight:650;margin-bottom:14px;letter-spacing:.02em}
+  .cmp ul{list-style:none;display:flex;flex-direction:column;gap:9px}
+  .cmp li{font-size:13.5px;color:var(--ink-2);padding-left:22px;position:relative}
+  .cmp li::before{position:absolute;left:0;top:0;font-weight:800}
+  .cmp .before li::before{content:"—";color:#c3c8d4}
+  .cmp .after li::before{content:"✓";color:var(--green)}
+  .cmp .after li{color:var(--ink)}
+
+  /* ---------- boundary ---------- */
+  .bcard{border-radius:var(--radius);padding:22px;border:1px solid var(--line);background:var(--card);box-shadow:var(--shadow)}
+  .bcard h3{font-size:14.5px;display:flex;align-items:center;gap:9px;margin-bottom:14px}
+  .bcard h3 .bd{width:8px;height:8px;border-radius:50%}
+  .bcard.no h3 .bd{background:var(--red)}
+  .bcard.human h3 .bd{background:var(--amber)}
+  .bcard ul{list-style:none;display:flex;flex-direction:column;gap:11px}
+  .bcard li{font-size:13.5px;color:var(--ink-2);padding-left:20px;position:relative}
+  .bcard li::before{content:"";position:absolute;left:4px;top:9px;width:5px;height:5px;border-radius:50%;background:#cbd2e0}
+  .bcard li b{color:var(--ink);font-weight:650}
+
+  /* ---------- steps ---------- */
+  .flow{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;counter-reset:s}
+  @media(max-width:720px){.flow{grid-template-columns:1fr}}
+  .flow .card{position:relative;padding-top:34px}
+  .flow .card::before{
+    counter-increment:s;content:counter(s);
+    position:absolute;top:18px;left:22px;width:22px;height:22px;border-radius:7px;
+    background:var(--brand);color:#fff;font-size:12px;font-weight:800;display:grid;place-items:center;
+  }
+
+  /* ---------- stack ---------- */
+  .stack{display:flex;flex-wrap:wrap;gap:10px}
+  .chip{
+    display:inline-flex;align-items:center;gap:9px;
+    background:var(--card);border:1px solid var(--line);border-radius:11px;
+    padding:11px 16px;font-size:13.5px;font-weight:600;box-shadow:var(--shadow);
+  }
+  .chip span{font-weight:400;color:var(--ink-3);font-size:12.5px}
+
+  /* ---------- reveal ---------- */
+  .rv{opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform .55s ease}
+  .rv.in{opacity:1;transform:none}
+
+  footer{border-top:1px solid var(--line);background:#fff;padding:34px 0;margin-top:24px}
+  .foot-in{max-width:1080px;margin:0 auto;padding:0 24px;display:flex;gap:18px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  .foot-in p{font-size:12.5px;color:var(--ink-3);max-width:720px}
+</style>
+</head>
+<body>
+<div style="max-width:1180px;margin:0 auto;padding:16px 24px 0;display:flex;gap:10px;flex-wrap:wrap;font-family:-apple-system,&quot;PingFang SC&quot;,&quot;Microsoft YaHei&quot;,sans-serif"><a href="../index.html" style="font-size:12.5px;font-weight:700;color:#0F766E;text-decoration:none;background:#fff;border:1px solid #E2E8F0;border-radius:999px;padding:6px 15px">&#8592; 回到作品集</a><a href="design-philosophy.html" style="font-size:12.5px;font-weight:700;color:#475569;text-decoration:none;background:#fff;border:1px solid #E2E8F0;border-radius:999px;padding:6px 15px">设计理念 &#8594;</a><a href="ai-native-day.html" style="font-size:12.5px;font-weight:700;color:#475569;text-decoration:none;background:#fff;border:1px solid #E2E8F0;border-radius:999px;padding:6px 15px">AI Native 的一天 &#8594;</a></div>
+
+
+<nav>
+  <div class="nav-in">
+    <div class="logo"><div class="mark">D</div>小D · 音视频转录整理助手</div>
+    <div class="nav-links">
+      <a href="#ability">能做什么</a>
+      <a href="#demo">现场演示</a>
+      <a href="#output">输出样例</a>
+      <a href="#boundary">能力边界</a>
+      <a href="#how">怎么用</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <div class="wrap hero-in">
+    <div class="pill"><span class="dot"></span>已跑通 · 本地 GPU 转录 · 数据不出本机</div>
+    <h1>把一段播客、一节课、一场会议<br><span class="grad">变成一份干净可读的转写稿</span></h1>
+    <p class="lede">发一个链接给它，剩下的下载、转录、去重、校对、排版，它自己跑完。<br>人只需要等，不需要动手。</p>
+    <div class="cta">
+      <a class="btn primary" href="#demo">看它怎么干活 <span style="opacity:.7">→</span></a>
+      <a class="btn ghost" href="#boundary">它做不了什么</a>
+    </div>
+    <div class="hero-note">
+      <span style="color:var(--brand);font-weight:800">i</span>
+      <span><b>这是一个展示页，不是可调用的接口。</b>页面里的对话与结果是预置的演示数据，不连接任何真实服务、不含任何真实数据与凭据，他人无法通过本页调用该 Agent。</span>
+    </div>
+
+    <div class="stats">
+      <div class="stat rv">
+        <div class="n">2<em> 小时</em> → 10<em> 分钟</em></div>
+        <div class="k">单期播客从「人工全流程」到「发个链接」</div>
+        <div class="bar"><i style="width:92%"></i></div>
+      </div>
+      <div class="stat rv">
+        <div class="n">8<em> 分钟</em></div>
+        <div class="k">51 MB 音频的实测出稿时间</div>
+        <div class="bar"><i style="width:64%"></i></div>
+      </div>
+      <div class="stat rv">
+        <div class="n">34<em> 分钟</em></div>
+        <div class="k">385 MB 超长音频的实测出稿时间</div>
+        <div class="bar"><i style="width:88%"></i></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ================= ABILITY ================= -->
+<section id="ability">
+  <div class="wrap">
+    <h2>它接得住哪四种输入</h2>
+    <p class="sub">只要是「带人声的音视频」，直接丢给它就行——不用写指令，不用说 @</p>
+    <div class="grid g4">
+      <div class="card rv">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v14"/><path d="M8 13l4 4 4-4"/><rect x="3" y="19" width="18" height="2.5" rx="1"/></svg></div>
+        <h3>公开播客链接</h3>
+        <p>小宇宙等播客平台的单集分享链接，复制即用。</p>
+        <span class="tag">已实测</span>
+      </div>
+      <div class="card rv">
+        <div class="ic"><svg viewBox="0 0 24 24"><rect x="2.5" y="4.5" width="19" height="15" rx="3"/><path d="M10 9.5l5 2.5-5 2.5z"/></svg></div>
+        <h3>公开视频链接</h3>
+        <p>视频平台 URL，自动只取音轨来转写，不需要画面。</p>
+        <span class="tag">已实测</span>
+      </div>
+      <div class="card rv">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg></div>
+        <h3>会议 / 妙记链接</h3>
+        <p>已有官方转写稿的直接取用；没有的才走本地转录。</p>
+        <span class="tag">按需</span>
+      </div>
+      <div class="card rv">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9"/><path d="M21 12a9 9 0 0 1-9 9"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg></div>
+        <h3>本地音频文件</h3>
+        <p>mp3 / m4a / wav，把文件发过去即可。</p>
+        <span class="tag">已实测</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DEMO ================= -->
+<section id="demo" style="padding-top:24px">
+  <div class="wrap">
+    <h2>现场演示</h2>
+    <p class="sub">点下面的按钮，看它收到一条链接后会做哪些事（预置演示，非实时调用）</p>
+
+    <div class="demo-shell">
+      <div class="demo-bar">
+        <div class="win-dots"><i></i><i></i><i></i></div>
+        <div class="demo-title">小D · 会话窗口</div>
+        <div class="demo-badge">演示数据</div>
+      </div>
+
+      <div class="chat" id="chat">
+        <!-- 静态初始气泡 -->
+        <div class="msg d">
+          <div class="av d">D</div>
+          <div class="bub">
+            你好，我是小D。<br>
+            把播客、视频、会议链接或音频文件发给我，我会自动转成一份干净的文字稿。
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-foot">
+        <button class="btn primary sm" id="run">发送示例链接</button>
+        <button class="btn ghost sm" id="reset">重来</button>
+        <span class="demo-hint">演示用链接为虚构，流程与耗时来自真实运行记录</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= OUTPUT ================= -->
+<section id="output">
+  <div class="wrap">
+    <h2>输出长什么样</h2>
+    <p class="sub">转录不是终点。原始稿里有两类必然存在的瑕疵，交付前必须处理掉。</p>
+
+    <div class="grid g2" style="margin-bottom:20px">
+      <div class="card rv">
+        <h3 style="font-size:15px;margin-bottom:10px;color:var(--red)">问题一 · 回声重复</h3>
+        <p style="font-size:13.5px;color:var(--ink-2);margin-bottom:12px">在停顿和断句边界，同一句话会被相邻重复 2–3 遍，还常常跨段落：</p>
+        <div style="background:#fbfcfe;border:1px solid var(--line);border-radius:11px;padding:14px;font-size:13px;color:var(--ink-2);line-height:1.9">
+          这个造物主就是达尔文的进化论中所说的物竞天择。<br>
+          这个造物主就是达尔文的进化论中所说的物竞天择。<br>
+          这个造物主就是达尔文的进化论中所说的物竞天择。
+        </div>
+        <p style="font-size:12.5px;color:var(--green);margin-top:12px;font-weight:600">处理原则：只删「紧邻的完全相同句」，不相邻的重复是正常修辞，不能误删。</p>
+      </div>
+      <div class="card rv">
+        <h3 style="font-size:15px;margin-bottom:10px;color:var(--red)">问题二 · 专名误写</h3>
+        <p style="font-size:13.5px;color:var(--ink-2);margin-bottom:12px">人名、书名、公司名会按发音写错，需按固定词表全局校正：</p>
+        <div style="background:#fbfcfe;border:1px solid var(--line);border-radius:11px;padding:14px;font-size:13px;line-height:2.1">
+          <span style="color:var(--red)">孟严</span> → <b>孟岩</b>　
+          <span style="color:var(--red)">有志有行</span> → <b>有知有行</b><br>
+          <span style="color:var(--red)">牵脑智能</span> → <b>千脑智能</b>　
+          <span style="color:var(--red)">新批制</span> → <b>新皮质</b><br>
+          <span style="color:var(--red)">竖图</span> → <b>树突</b>　
+          <span style="color:var(--red)">提摩西·加尔维</span> → <b>蒂莫西·加尔维</b>
+        </div>
+        <p style="font-size:12.5px;color:var(--green);margin-top:12px;font-weight:600">交付前复查：错误专名命中数应为 0。</p>
+      </div>
+    </div>
+
+    <div class="card rv">
+      <h3 style="font-size:15px;margin-bottom:6px">真实转写稿片段</h3>
+      <p style="font-size:12.5px;color:var(--ink-3);margin-bottom:14px">来自一次真实运行（播客《来都来了》·「养自己」）。已去除时间戳，段落按停顿自动切分。</p>
+      <div style="background:#fbfcfe;border:1px solid var(--line);border-radius:12px;padding:18px;font-size:13.5px;color:var(--ink-2);line-height:1.95;max-height:260px;overflow:auto">
+        大家好，欢迎来到《来都来了》，我是主播丸子。大家好，我是 Nicole。今天我们录制的这个地方非常的特别。今天我跟丸子在广西的一栋漂亮的玻璃房子里面录制。如果是听我们节目的朋友，可以去看一下我们的视频播客。<br><br>
+        非常荣幸受到邀请，我们这次来参加护肤品牌的活动。没错，我们今天要聊的话题也非常的适合这个夏天，叫做「养自己」。<br><br>
+        其实「养自己」这个话题，早些年没有在互联网上掀起这么大范围讨论的时候，如果你拿这个话题去问父母，父母肯定会觉得很奇怪——爸妈就会说，什么养自己啊，你每天吃饭、睡觉、赚钱，就在养自己啊。<br><br>
+        <span style="color:var(--ink-3)">（下略）</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= COMPARE ================= -->
+<section style="padding-top:24px">
+  <div class="wrap">
+    <h2>它替你干掉了哪些动作</h2>
+    <p class="sub">这些动作以前都是人一步步手动做的</p>
+    <div class="cmp rv">
+      <div class="before">
+        <h4>以前 · 人工全流程（约 2 小时）</h4>
+        <ul>
+          <li>手动下载音频文件</li>
+          <li>找转录工具、调参数</li>
+          <li>等转录跑完，盯着进度</li>
+          <li>逐句修错字、删重复</li>
+          <li>手工分段、加标题</li>
+          <li>粘贴到文档、调格式</li>
+        </ul>
+      </div>
+      <div class="after">
+        <h4>现在 · 交给小D（约 10 分钟）</h4>
+        <ul>
+          <li>把链接发给它</li>
+          <li>自动下载音轨（只取音频）</li>
+          <li>本地 GPU 转录，无需盯守</li>
+          <li>自动去回声重复 + 专名校对</li>
+          <li>按停顿自动分段、生成文档</li>
+          <li>回一个结果，人只需要看</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= BOUNDARY ================= -->
+<section id="boundary">
+  <div class="wrap">
+    <h2>能力边界</h2>
+    <p class="sub">一个 Agent 值不值得信，先看它敢说自己做不到什么</p>
+    <div class="grid g2">
+      <div class="bcard no rv">
+        <h3><span class="bd"></span>它做不了</h3>
+        <ul>
+          <li><b>需要登录的付费内容</b>——会员专享音频、加密课程，取不到源文件。</li>
+          <li><b>纯音乐 / 无人声素材</b>——转录出来没有意义。</li>
+          <li><b>没授权的外部会议录音</b>——权限不在它手里，需要先由人授权。</li>
+          <li><b>保证 100% 准确的专名</b>——语音识别只能给到「大概率正确」。</li>
+        </ul>
+      </div>
+      <div class="bcard human rv">
+        <h3><span class="bd"></span>需要人工介入</h3>
+        <ul>
+          <li><b>专名终审</b>——词表之外的新人名、术语，建议人工过一遍。</li>
+          <li><b>超长音频</b>——2 小时以上建议分段处理，避免单次任务过长。</li>
+          <li><b>权限授予失败</b>——涉及第三方平台授权时，需要人点一下。</li>
+          <li><b>重要内容校对</b>——用于对外发布前，仍建议抽检。</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= HOW ================= -->
+<section id="how" style="padding-top:24px">
+  <div class="wrap">
+    <h2>怎么用</h2>
+    <p class="sub">三步，没有学习成本</p>
+    <div class="flow">
+      <div class="card rv">
+        <h3>找到它</h3>
+        <p>在飞书里找到名为「小D」的机器人，或在对应的工作群里 @ 它一次。</p>
+      </div>
+      <div class="card rv">
+        <h3>把链接丢过去</h3>
+        <p>直接粘贴链接或发送音频文件。不用说「请帮我转录」——它默认就是这个意思。</p>
+      </div>
+      <div class="card rv">
+        <h3>等结果</h3>
+        <p>它会先回一句「已开始处理」，跑完再给结果。中间不需要你管。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= STACK ================= -->
+<section style="padding-top:24px">
+  <div class="wrap">
+    <h2>它由什么组成</h2>
+    <p class="sub">全部在本机运行，音频不上传第三方</p>
+    <div class="stack">
+      <div class="chip">Hermes Agent <span>承载岗位与调度</span></div>
+      <div class="chip">yt-dlp <span>下载音轨</span></div>
+      <div class="chip">ffmpeg <span>音频处理</span></div>
+      <div class="chip">faster-whisper large-v3 <span>本地 GPU 转录</span></div>
+      <div class="chip">飞书 Bot <span>接收与交付</span></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-in">
+    <p><b>小D · 音视频转录整理助手</b> —— 本页为静态展示页。演示对话、处理过程与结果均为预置内容，用于说明工作方式；页面不连接任何真实服务，不包含真实数据、凭据或可调用接口。</p>
+    <p style="color:#c3c8d4">Showcase · static</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  /* ---------- reveal on scroll ---------- */
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+  },{threshold:.12});
+  document.querySelectorAll('.rv').forEach(function(el){ io.observe(el); });
+
+  /* ---------- demo ---------- */
+  var chat = document.getElementById('chat');
+  var runBtn = document.getElementById('run');
+  var resetBtn = document.getElementById('reset');
+  var timers = [];
+  var INITIAL = chat.innerHTML;
+
+  var SCRIPT = [
+    {who:'me', text:'https://www.xiaoyuzhoufm.com/episode/demo-2026'},
+    {who:'d', text:'收到，开始处理这个播客链接。', delay:520},
+    {who:'d', steps:[
+        {t:'解析链接 · 识别为播客单集', c:'ok', time:'0.4s'},
+        {t:'下载音轨（仅音频，51.2 MB）', c:'ok', time:'12s'},
+        {t:'加载本地模型 faster-whisper-large-v3（GPU）', c:'ok', time:'3s'},
+        {t:'语音转写中 · 采样率 16k · 中文', c:'ok', time:'6分21秒'},
+        {t:'去回声重复 · 清理紧邻重复 37 处', c:'ok', time:'0.8s'},
+        {t:'专名校对 · 按词表修正 5 处', c:'ok', time:'0.6s'},
+        {t:'分段与排版 · 生成转写稿', c:'ok', time:'0.5s'}
+    ], delay:1200}
+  ];
+
+  function el(tag, cls, html){
+    var d = document.createElement(tag);
+    if(cls) d.className = cls;
+    if(html != null) d.innerHTML = html;
+    return d;
+  }
+
+  function pushMsg(m){
+    var wrap = el('div','msg ' + (m.who==='me' ? 'me' : 'd'));
+    wrap.appendChild(el('div','av ' + (m.who==='me' ? 'u' : 'd'), m.who==='me' ? '我' : 'D'));
+    var bub = el('div','bub', m.text || '');
+    if(m.steps){
+      var box = el('div','steps');
+      bub.appendChild(box);
+      m.steps.forEach(function(s,i){
+        var st = el('div','step ' + (s.c==='ok'?'ok':'doing'));
+        st.appendChild(el('span','st', s.c==='ok' ? '✓' : '↻'));
+        st.appendChild(el('span', null, s.t));
+        st.appendChild(el('span','t', s.time));
+        st.style.animationDelay = (i*230) + 'ms';
+        box.appendChild(st);
+      });
+    }
+    if(m.result){
+      var r = el('div','result');
+      var rh = el('div','result-h','<span>' + m.result.name + '</span><span>' + m.result.meta + '</span>');
+      var rb = el('div','result-b', m.result.body);
+      r.appendChild(rh); r.appendChild(rb);
+      bub.appendChild(r);
+    }
+    wrap.appendChild(bub);
+    chat.appendChild(wrap);
+    chat.scrollTop = chat.scrollHeight;
+    return wrap;
+  }
+
+  function clear(){
+    timers.forEach(clearTimeout); timers = [];
+    chat.innerHTML = INITIAL;
+  }
+
+  runBtn.addEventListener('click', function(){
+    clear();
+    runBtn.disabled = true;
+    runBtn.textContent = '处理中…';
+    var t = 0;
+
+    SCRIPT.forEach(function(step){
+      t += step.delay || 260;
+      timers.push(setTimeout(function(){
+        pushMsg(step);
+        if(step.steps){
+          t += step.steps.length * 230 + 500;
+          timers.push(setTimeout(function(){
+            pushMsg({who:'d', text:'处理完成。', result:{
+              name:'养自己.md',
+              meta:'8 分 12 秒 · 12,847 字',
+              body:'大家好，欢迎来到《来都来了》，我是主播丸子。大家好，我是 Nicole。今天我们录制的这个地方非常的特别……\n\n其实「养自己」这个话题，早些年没有在互联网上掀起这么大范围讨论的时候，如果你拿这个话题去问父母，父母肯定会觉得很奇怪。\n\n<span style="color:#0f9d58">✓ 已去除时间戳　✓ 已清理回声重复 37 处　✓ 已校对专名 5 处</span>'
+            }});
+            runBtn.disabled = false;
+            runBtn.textContent = '再演示一次';
+          }, 700));
+        }
+      }, t));
+    });
+  });
+
+  resetBtn.addEventListener('click', function(){
+    clear();
+    runBtn.disabled = false;
+    runBtn.textContent = '发送示例链接';
+  });
+})();
+</script>
+</body>
+</html>

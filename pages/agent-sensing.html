@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小察 · 情绪识别</title>
+<meta name="description" content="小察｜情绪识别 Agent 展示页：先识别，再解释。它只回答「我现在正在经历什么」，不诊断、不安慰、不分析人格。">
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#fff; --ink:#111827; --ink-2:#4b5563; --ink-3:#8b93a7;
+    --line:#e6e8ee; --brand:#0D9488; --brand-2:#22b8a6; --brand-soft:#e6f6f4;
+    --green:#0f9d58; --green-soft:#e9f7ef; --amber:#b26a00; --amber-soft:#fff6e6;
+    --red:#d93025; --red-soft:#fdecea; --purple:#7b5cff; --purple-soft:#f1edff;
+    --radius:16px;
+    --shadow:0 1px 2px rgba(16,24,40,.04),0 8px 24px rgba(16,24,40,.06);
+    --shadow-lg:0 2px 4px rgba(16,24,40,.04),0 18px 48px rgba(16,24,40,.10);
+    /* 六系情绪色 */
+    --s-sad:#4f7cff; --s-anger:#e5484d; --s-fear:#7c5cff;
+    --s-shame:#d6409f; --s-mixed:#c47f17; --s-pos:#0f9d58;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.7;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  section{padding:66px 0}
+  h2{font-size:26px;letter-spacing:-.01em;margin-bottom:8px}
+  .sub{color:var(--ink-3);font-size:14px;margin-bottom:30px}
+  .mono{font-family:ui-monospace,Menlo,Consolas,"Courier New",monospace}
+
+  nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .nav-in{max-width:1080px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:20px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px}
+  .logo .mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#0D9488,#22b8a6);
+    color:#fff;display:grid;place-items:center;font-size:14px;font-weight:800}
+  .nav-links{margin-left:auto;display:flex;gap:20px;font-size:13.5px;color:var(--ink-2)}
+  .nav-links a{color:inherit;text-decoration:none}
+  .nav-links a:hover{color:var(--brand)}
+  @media(max-width:840px){.nav-links{display:none}}
+
+  .hero{padding:78px 0 56px;position:relative;overflow:hidden}
+  .hero::before{content:"";position:absolute;inset:-40% 45% 40% -20%;
+    background:radial-gradient(closest-side,rgba(13,148,136,.11),transparent);z-index:0;pointer-events:none}
+  .hero-in{position:relative;z-index:1}
+  .pill{display:inline-flex;align-items:center;gap:8px;background:var(--brand-soft);color:var(--brand);
+    border:1px solid #c7ebe6;border-radius:999px;padding:5px 13px;font-size:12.5px;font-weight:600;margin-bottom:22px}
+  .pill .dot{width:6px;height:6px;border-radius:50%;background:var(--brand)}
+  h1{font-size:clamp(33px,5vw,50px);line-height:1.16;letter-spacing:-.025em;margin-bottom:18px}
+  h1 .grad{background:linear-gradient(135deg,#0D9488,#22b8a6);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{font-size:17px;color:var(--ink-2);max-width:680px;margin-bottom:6px}
+  .lede b{color:var(--ink);font-weight:650}
+  .quote{display:inline-block;margin-top:24px;font-size:16px;font-weight:650;letter-spacing:-.01em;
+    background:var(--card);border:1px solid var(--line);border-left:3px solid var(--brand);
+    border-radius:12px;padding:14px 18px;box-shadow:var(--shadow);max-width:680px}
+  .hero-note{display:inline-flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--ink-3);margin-top:18px;
+    background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 15px;max-width:680px}
+  .hero-note b{color:var(--ink-2)}
+  .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:11px;font-size:14px;
+    font-weight:600;text-decoration:none;border:1px solid transparent;cursor:pointer;transition:.18s}
+  .btn.primary{background:var(--brand);color:#fff;box-shadow:0 6px 18px rgba(13,148,136,.26)}
+  .btn.primary:hover{transform:translateY(-1px)}
+  .btn.ghost{background:var(--card);border-color:var(--line);color:var(--ink)}
+  .btn.ghost:hover{border-color:#c8cfdd}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:42px}
+  @media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:520px){.stats{grid-template-columns:1fr}}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+  .stat .n{font-size:26px;font-weight:750;letter-spacing:-.02em;line-height:1.25}
+  .stat .n em{font-style:normal;font-size:14px;color:var(--ink-3);font-weight:600}
+  .stat .k{font-size:12.5px;color:var(--ink-3);margin-top:6px}
+  .stat .bar{height:5px;border-radius:99px;background:#eef0f5;margin-top:14px;overflow:hidden}
+  .stat .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#0D9488,#22b8a6)}
+
+  /* demo */
+  .demo-shell{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-lg);overflow:hidden}
+  .demo-bar{display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--line);background:#fbfcfe}
+  .win-dots{display:flex;gap:6px}
+  .win-dots i{width:10px;height:10px;border-radius:50%;background:#e2e5ec;display:block}
+  .demo-title{font-size:13px;font-weight:650;color:var(--ink-2)}
+  .demo-badge{margin-left:auto;font-size:11.5px;font-weight:600;color:var(--amber);background:var(--amber-soft);
+    border:1px solid #ffe3b3;border-radius:999px;padding:3px 10px}
+  .pick{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap;background:#fff}
+  .pick-lbl{font-size:12px;color:var(--ink-3);width:100%;margin-bottom:2px;font-weight:600}
+  .chip{font-size:12.5px;padding:7px 13px;border-radius:9px;border:1px solid var(--line);background:#fff;
+    color:var(--ink-2);cursor:pointer;transition:.16s;font-weight:500;text-align:left}
+  .chip:hover{border-color:#c8cfdd}
+  .chip.on{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:650}
+
+  .chat{padding:20px;background:#f9fafc;display:flex;flex-direction:column;gap:13px}
+  .msg{display:flex;gap:10px;opacity:0;transform:translateY(8px);animation:pop .36s ease forwards}
+  @keyframes pop{to{opacity:1;transform:none}}
+  .msg.me{align-self:flex-end;flex-direction:row-reverse;max-width:78%}
+  .msg.d{align-self:flex-start;max-width:96%;width:100%}
+  .av{width:30px;height:30px;border-radius:9px;flex:0 0 auto;display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff}
+  .av.u{background:#94a3b8}
+  .av.d{background:linear-gradient(135deg,#0D9488,#22b8a6)}
+  .bub{background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px 14px;font-size:13.5px;box-shadow:0 1px 2px rgba(16,24,40,.03)}
+  .msg.me .bub{background:var(--brand);border-color:var(--brand);color:#fff}
+
+  /* 回执 */
+  .receipt{border:1px solid #d7ebe8;border-radius:13px;background:#fbfefd;overflow:hidden;margin-top:2px}
+  .receipt .rh{background:var(--brand-soft);border-bottom:1px solid #d7ebe8;padding:9px 15px;
+    font-size:12.5px;font-weight:750;color:var(--brand);letter-spacing:.02em}
+  .receipt .rows{padding:6px 0}
+  .row{display:grid;grid-template-columns:104px 1fr;gap:10px;padding:7px 15px;font-size:13px;align-items:start}
+  .row + .row{border-top:1px solid #f0f7f6}
+  .row .k{color:var(--ink-3);font-size:12.5px;font-weight:600}
+  .row .v{color:var(--ink);font-size:13px}
+  .row .v .hl{font-weight:750}
+  @media(max-width:560px){.row{grid-template-columns:1fr;gap:2px}}
+  .tagline{display:flex;gap:7px;flex-wrap:wrap}
+  .tagf{display:inline-block;font-size:12px;font-weight:700;border-radius:6px;padding:2px 9px}
+  .tagf.sad{background:#eef2ff;color:#4f7cff}
+  .tagf.anger{background:#fdecec;color:#d93840}
+  .tagf.fear{background:#f1edff;color:#7b5cff}
+  .tagf.shame{background:#fdeef7;color:#c93a90}
+  .tagf.mixed{background:#fdf4e3;color:#b26a00}
+  .tagf.pos{background:#e9f7ef;color:#0f9d58}
+  .conf{display:inline-block;font-size:11.5px;font-weight:800;border-radius:5px;padding:1px 7px;letter-spacing:.03em}
+  .conf.HIGH{background:var(--green-soft);color:var(--green);border:1px solid #cceadd}
+  .conf.MEDIUM{background:var(--amber-soft);color:var(--amber);border:1px solid #ffe3b3}
+  .conf.LOW{background:#f1f3f8;color:var(--ink-3);border:1px solid #e2e6ef}
+  .route{display:inline-block;font-size:12.5px;font-weight:750;border-radius:7px;padding:2px 10px;color:#fff;background:#64748b}
+  .route.f{background:#2f6bff}
+  .route.g{background:#7b5cff}
+  .route.p{background:#d6409f}
+  .why{margin-top:11px;border:1px dashed #d9deeb;border-radius:11px;background:#fff;padding:12px 14px;font-size:12.5px;color:var(--ink-2)}
+  .why .h{font-size:11.5px;font-weight:700;color:var(--ink-3);letter-spacing:.02em;margin-bottom:7px}
+  .why ol{margin-left:16px;display:flex;flex-direction:column;gap:4px}
+  .why .note{margin-top:8px;padding-top:8px;border-top:1px solid #f1f3f8;color:var(--ink-3);font-size:12px}
+  .quiet{display:inline-flex;align-items:center;gap:7px;color:var(--ink-3);font-size:12.5px;font-style:italic}
+  .demo-foot{padding:13px 20px;border-top:1px solid var(--line);background:#fff;font-size:12.5px;color:var(--ink-3)}
+
+  /* 六系 */
+  .sys{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:900px){.sys{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:620px){.sys{grid-template-columns:1fr}}
+  .sy{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
+    overflow:hidden;display:flex;flex-direction:column}
+  .sy .top{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:9px}
+  .sy .top i{width:9px;height:9px;border-radius:3px;flex:0 0 auto}
+  .sy .top b{font-size:14.5px}
+  .sy .top span{font-size:11.5px;color:var(--ink-3);margin-left:auto}
+  .sy .body{padding:14px 18px 18px}
+  .sy .w{display:flex;flex-direction:column;gap:8px}
+  .sy .w .it{display:grid;grid-template-columns:66px 1fr;gap:9px;font-size:12.5px;align-items:start}
+  .sy .w .it b{color:var(--ink);font-weight:650}
+  .sy .w .it span{color:var(--ink-3);font-size:12px;line-height:1.55}
+  .sy .flag{margin-top:12px;padding-top:11px;border-top:1px dashed #e6e8ee;font-size:12px;color:var(--ink-3)}
+  .sy .flag b{color:var(--ink-2)}
+
+  /* 易错组 */
+  .confuse{display:grid;gap:12px}
+  .cf{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow)}
+  .cf .q{font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:9px;margin-bottom:10px}
+  .cf .q em{font-style:normal;font-size:11.5px;font-weight:700;color:#fff;background:var(--ink-3);border-radius:5px;padding:1px 7px}
+  .cf .pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:620px){.cf .pair{grid-template-columns:1fr}}
+  .cf .side{border:1px solid var(--line);border-radius:11px;padding:10px 13px;font-size:12.5px;color:var(--ink-2);background:#fbfcfe}
+  .cf .side b{display:block;font-size:13px;color:var(--ink);margin-bottom:3px}
+
+  /* 流程 */
+  .flow{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;counter-reset:s}
+  @media(max-width:980px){.flow{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:640px){.flow{grid-template-columns:1fr}}
+  .flow .card{padding-top:36px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);position:relative}
+  .flow .card::before{counter-increment:s;content:counter(s);position:absolute;top:18px;left:20px;width:22px;height:22px;
+    border-radius:7px;background:var(--brand);color:#fff;font-size:12px;font-weight:800;display:grid;place-items:center}
+  .card h3{font-size:15px;margin-bottom:6px}
+  .card p{font-size:13.5px;color:var(--ink-2)}
+  .card h3 + p + p{margin-top:8px}
+
+  .fmt{background:#0f172a;border-radius:14px;padding:20px 22px;overflow-x:auto;box-shadow:var(--shadow-lg)}
+  .fmt pre{color:#e2e8f0;font-size:12.5px;line-height:1.85;font-family:ui-monospace,Menlo,Consolas,"Courier New",monospace;white-space:pre}
+  .fmt .c{color:#7dd3c8}
+  .fmt .d{color:#64748b}
+  .fmt .w{color:#fbbf24}
+
+  /* 边界 */
+  .bcard{border-radius:var(--radius);padding:22px;border:1px solid var(--line);background:var(--card);box-shadow:var(--shadow)}
+  .bcard h3{font-size:14.5px;display:flex;align-items:center;gap:9px;margin-bottom:14px}
+  .bcard h3 .bd{width:8px;height:8px;border-radius:50%}
+  .bcard.no h3 .bd{background:var(--red)}
+  .bcard.human h3 .bd{background:var(--amber)}
+  .bcard.lim h3 .bd{background:var(--brand)}
+  .bcard ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+  .bcard li{font-size:13.5px;color:var(--ink-2);padding-left:20px;position:relative}
+  .bcard li::before{content:"";position:absolute;left:4px;top:9px;width:5px;height:5px;border-radius:50%;background:#cbd2e0}
+  .bcard li b{color:var(--ink);font-weight:650}
+  .grid{display:grid;gap:16px}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:900px){.g3{grid-template-columns:1fr}}
+  @media(max-width:820px){.g2{grid-template-columns:1fr}}
+
+  .tbl{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+  .tbl table{width:100%;border-collapse:collapse;font-size:13.5px}
+  .tbl th{text-align:left;padding:13px 18px;background:#fbfcfe;border-bottom:1px solid var(--line);
+    font-size:12px;color:var(--ink-3);font-weight:650;letter-spacing:.02em}
+  .tbl td{padding:14px 18px;border-bottom:1px solid #f1f3f8;color:var(--ink-2);vertical-align:top}
+  .tbl tr:last-child td{border-bottom:none}
+  .tbl td b{color:var(--ink)}
+  .muted{color:var(--ink-3)}
+
+  .rules{display:flex;flex-wrap:wrap;gap:10px}
+  .rule{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--brand);border-radius:11px;
+    padding:11px 15px;font-size:13.5px;font-weight:600;box-shadow:var(--shadow)}
+  .rule.red{border-left-color:var(--red)}
+
+  /* 安全 */
+  .safe{background:#fff;border:1px solid #f2c9c5;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  .safe .sh{background:var(--red-soft);border-bottom:1px solid #f6d5d2;padding:15px 22px;display:flex;align-items:center;gap:11px}
+  .safe .sh .urg{font-size:12px;font-weight:800;letter-spacing:.06em;color:#fff;background:var(--red);border-radius:6px;padding:2px 9px}
+  .safe .sh b{font-size:14.5px}
+  .safe .sb{padding:20px 22px}
+  .safe .sb > p{font-size:13.5px;color:var(--ink-2)}
+  .safe .acts{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+  @media(max-width:820px){.safe .acts{grid-template-columns:1fr 1fr}}
+  @media(max-width:480px){.safe .acts{grid-template-columns:1fr}}
+  .safe .act{border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:#fff}
+  .safe .act i{display:block;width:20px;height:20px;border-radius:6px;background:var(--red-soft);color:var(--red);
+    font-size:11px;font-weight:800;display:grid;place-items:center;font-style:normal;margin-bottom:8px}
+  .safe .act b{display:block;font-size:13px;margin-bottom:3px}
+  .safe .act span{font-size:12px;color:var(--ink-3)}
+
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:720px){.steps{grid-template-columns:1fr}}
+  .steps .card{padding-top:34px}
+  .steps .card::before{position:absolute;top:18px;left:22px;width:22px;height:22px;border-radius:7px;
+    background:var(--brand);color:#fff;font-size:12px;font-weight:800;display:grid;place-items:center}
+
+  .checks{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  @media(max-width:820px){.checks{grid-template-columns:1fr 1fr}}
+  @media(max-width:520px){.checks{grid-template-columns:1fr}}
+  .ck{display:flex;gap:9px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:11px;padding:11px 14px;font-size:12.5px;color:var(--ink-2);box-shadow:var(--shadow)}
+  .ck i{width:15px;height:15px;border-radius:4px;border:1.5px solid #cbd2e0;flex:0 0 auto;margin-top:3px}
+
+  .rv{opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform .55s ease}
+  .rv.in{opacity:1;transform:none}
+
+  footer{border-top:1px solid var(--line);background:#fff;padding:34px 0;margin-top:20px}
+  .foot-in{max-width:1080px;margin:0 auto;padding:0 24px;display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start;justify-content:space-between}
+  .foot-in p{font-size:12.5px;color:var(--ink-3);max-width:780px}
+  .foot-in .tag{font-size:12px;color:#c3c8d4}
+</style>
+</head>
+<body>
+<div style="max-width:1180px;margin:0 auto;padding:16px 24px 0;display:flex;gap:10px;flex-wrap:wrap;font-family:-apple-system,&quot;PingFang SC&quot;,&quot;Microsoft YaHei&quot;,sans-serif"><a href="../index.html" style="font-size:12.5px;font-weight:700;color:#0F766E;text-decoration:none;background:#fff;border:1px solid #E2E8F0;border-radius:999px;padding:6px 15px">&#8592; 回到作品集</a><a href="design-philosophy.html" style="font-size:12.5px;font-weight:700;color:#475569;text-decoration:none;background:#fff;border:1px solid #E2E8F0;border-radius:999px;padding:6px 15px">设计理念 &#8594;</a><a href="ai-native-day.html" style="font-size:12.5px;font-weight:700;color:#475569;text-decoration:none;background:#fff;border:1px solid #E2E8F0;border-radius:999px;padding:6px 15px">AI Native 的一天 &#8594;</a></div>
+
+
+<nav>
+  <div class="nav-in">
+    <div class="logo"><div class="mark">察</div>小察 · 情绪识别</div>
+    <div class="nav-links">
+      <a href="#demo">现场演示</a>
+      <a href="#sys">六系情绪</a>
+      <a href="#how">怎么判</a>
+      <a href="#boundary">能力边界</a>
+      <a href="#safe">安全优先</a>
+      <a href="#use">怎么用</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-in">
+    <div class="pill"><span class="dot"></span>V0.2 · 2026-10-05 更新 · 情绪传感器</div>
+    <h1>先识别，<br><span class="grad">再解释</span></h1>
+    <p class="lede">它是一个情绪传感器，不是心理治疗师。它只回答一件事：<b>我现在正在经历什么</b>。<br>
+      它不回答「我为什么会这样」，也不回答「是不是有心理疾病」。</p>
+    <div class="quote">「存在焦虑情绪 ≠ 患有焦虑症。」</div>
+    <div class="hero-note">
+      <span style="color:var(--brand);font-weight:800">i</span>
+      <span><b>这是一个展示页，不是可调用的接口。</b>页面内对话与判定过程均为预置演示数据，不连接任何真实服务，不含真实数据、凭据与内部标识，他人无法通过本页调用该 Agent。</span>
+    </div>
+    <div class="cta">
+      <a class="btn primary" href="#demo">丢一句话给它 <span style="opacity:.7">→</span></a>
+      <a class="btn ghost" href="#boundary">它不做的事</a>
+    </div>
+    <div class="stats">
+      <div class="stat rv">
+        <div class="n">3<em> 条铁律</em></div>
+        <div class="k">先识别再解释 / 不诊断 / 证据不足就说不知道</div>
+        <div class="bar"><i style="width:30%"></i></div>
+      </div>
+      <div class="stat rv">
+        <div class="n">6<em> 个系别</em></div>
+        <div class="k">悲伤 · 愤怒 · 恐惧 · 羞愧 · 复杂 · 积极</div>
+        <div class="bar"><i style="width:55%"></i></div>
+      </div>
+      <div class="stat rv">
+        <div class="n">28<em> 个高频词 · 280 个备查</em></div>
+        <div class="k">主体只放高频词，全量词表按需查，不每轮全读</div>
+        <div class="bar"><i style="width:78%"></i></div>
+      </div>
+      <div class="stat rv">
+        <div class="n">1 主 + <em>0~2 次，必须排序</em></div>
+        <div class="k">最多 3 个情绪，凑数不许；不足就给区间或写「暂时无法确定」</div>
+        <div class="bar"><i style="width:42%"></i></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- demo -->
+<section id="demo">
+  <div class="wrap">
+    <h2>现场演示</h2>
+    <p class="sub">选一句话丢给它，看它识别出什么、又判断该交给谁（预置演示，非实时调用）</p>
+    <div class="demo-shell">
+      <div class="demo-bar">
+        <div class="win-dots"><i></i><i></i><i></i></div>
+        <div class="demo-title">小察 · 情绪识别回执</div>
+        <div class="demo-badge">演示数据</div>
+      </div>
+      <div class="pick" id="pick">
+        <div class="pick-lbl">选一句话丢给它：</div>
+        <button class="chip on" data-i="0">跟进了三个月的单子，昨天跟我说不做了</button>
+        <button class="chip" data-i="1">烦死了，一整天都在改同一页 PPT</button>
+        <button class="chip" data-i="2">明天要当着 30 个人讲复盘，手心一直在出汗</button>
+        <button class="chip" data-i="3">今天爬完楼，有那种过电感，挺舒服的</button>
+        <button class="chip" data-i="4">今天天气不错</button>
+      </div>
+      <div class="chat" id="chat"></div>
+      <div class="demo-foot">演示句子为示例；判定规则、词表、路由与门槛全部来自该 Agent 的真实运行配置</div>
+    </div>
+  </div>
+</section>
+
+<!-- sys -->
+<section id="sys" style="padding-top:24px">
+  <div class="wrap">
+    <h2>它认识的六系情绪</h2>
+    <p class="sub">先定系别，再选词。每一系只挂最常用的几个，全量词表按需查</p>
+    <div class="sys" id="sysGrid"></div>
+    <div class="card rv" style="margin-top:16px">
+      <h3 style="font-size:15px;margin-bottom:10px">为什么不能只靠关键词判</h3>
+      <p style="font-size:13.5px;color:var(--ink-2)">他说「烦死了」，也可能是<b>失落</b>——等了三个月没结果，累到不想再等。所以定系别之前必须看四样东西：<b>发生了什么 / 他怎么解释这件事 / 他想做什么 / 有没有身体反应</b>。</p>
+      <p style="font-size:13.5px;color:var(--ink-2);margin-top:8px">另外，通用词典是给陌生人的，用在具体的人身上会判反。所以它优先查<b>使用者本人的情绪底色</b>校准——这部分属私域配置，不在本页公开。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 易错组 -->
+<section id="confuse" style="padding-top:24px">
+  <div class="wrap">
+    <h2>最容易判错的五组</h2>
+    <p class="sub">近义情绪之间的分界线，是这套识别里最关键的部分</p>
+    <div class="confuse" id="confuseGrid"></div>
+  </div>
+</section>
+
+<!-- how -->
+<section id="how" style="padding-top:24px">
+  <div class="wrap">
+    <h2>它怎么判</h2>
+    <p class="sub">每收到一句话，只走这五步，一步都不许跳</p>
+    <div class="flow">
+      <div class="card rv"><h3>找事实</h3><p>到底发生了什么。只取他明确说出口的事件，不补、不猜。</p></div>
+      <div class="card rv"><h3>找解释</h3><p>他认为这件事意味着什么。<b>必须和事实分开写</b>。</p></div>
+      <div class="card rv"><h3>定系别</h3><p>丧失落差→悲伤；边界不公→愤怒；威胁失控→恐惧；自我价值→羞愧；冲突过载→复杂；获得达成→积极。</p></div>
+      <div class="card rv"><h3>选情绪</h3><p>1 个主 + 0~2 个次，<b>必须排序</b>。凑数、堆词一律不许。</p></div>
+      <div class="card rv"><h3>判需要</h3><p>说「可能需要…」，不说「你就是需要…」。选词永远是可能的，不是判决。</p></div>
+    </div>
+
+    <div class="grid g2" style="margin-top:16px">
+      <div class="card rv">
+        <h3 style="font-size:15px;margin-bottom:10px">强度 1–10 怎么取</h3>
+        <p style="font-size:13.5px;color:var(--ink-2)">采信顺序：① 他自己说的分数 ＞ ② 功能影响 ＞ ③ 行为冲动 ＞ ④ 表达强度 ＞ ⑤ 身体反应 ＞ ⑥ 持续时长与频率。</p>
+        <p style="font-size:13.5px;color:var(--ink-2);margin-top:8px">1–3 不影响行动｜4–6 开始影响专注｜7–8 明显影响行动、想逃｜9–10 只给明确的严重失控。</p>
+        <p style="font-size:13px;color:var(--amber);margin-top:10px;font-weight:650">不许凭「烦死了 / 气死了 / 累死了」判 9–10。证据不够就给区间（「约 4～6」）或直接写「暂时无法判断」，不硬给精确个位数。</p>
+      </div>
+      <div class="card rv">
+        <h3 style="font-size:15px;margin-bottom:10px">两套口径，永不互换</h3>
+        <p style="font-size:13.5px;color:var(--ink-2)">它的 1–10 分是<b>此刻的瞬时读数</b>，用完即弃；心力账的净值是<b>当日方向</b>（身体 ±1、心理 ±1），明文禁止分数、百分比、星级。</p>
+        <p style="font-size:13.5px;color:var(--ink-2);margin-top:8px">所以：<b>小察不写心力账，心力账不读小察的分数。</b>同一件事两套口径，混用必然打架。</p>
+      </div>
+    </div>
+
+    <h3 style="font-size:15px;margin:26px 0 12px">它固定这样回你</h3>
+    <div class="fmt rv">
+<pre><span class="c">【小察｜情绪识别】</span>
+主情绪：<span class="w">—</span> ／ 强度 <span class="w">—</span> ／ 置信度 <span class="w">HIGH · MEDIUM · LOW</span>
+次情绪：（0~2 个，可省）
+触发点：—
+判断依据：—<span class="d">（指回原话）</span>
+背后可能的需要：—
+容易掉进去的解释：—
+当前最小照顾：—
+路由：route_to + 一句 reason
+记录标签：#系别 #具体情绪</pre>
+    </div>
+    <p style="font-size:12.5px;color:var(--ink-3);margin-top:12px">置信度：<b>HIGH</b> = 他自己说出了情绪名且上下文一致；<b>MEDIUM</b> = 没说名字但信号明确；<b>LOW</b> = 信息太少。LOW 的时候不装确定，写「可能是…」。</p>
+  </div>
+</section>
+
+<!-- boundary -->
+<section id="boundary">
+  <div class="wrap">
+    <h2>能力边界</h2>
+    <p class="sub">一个情绪传感器值不值得信，先看它敢承认自己不做什么</p>
+    <div class="grid g3" style="margin-bottom:16px">
+      <div class="bcard no rv">
+        <h3><span class="bd"></span>明令不做</h3>
+        <ul>
+          <li><b>不诊断</b>——不命名任何疾病</li>
+          <li><b>不安慰、不建议</b>——不哄、不给方案</li>
+          <li><b>不分析人格</b>——不评判「你是什么样的人」</li>
+          <li><b>不追问根源</b>——不挖「为什么你会这样」</li>
+          <li><b>不做深挖、不陪伴</b>——深挖交给心理咨询</li>
+          <li><b>不写心力账</b>——分数不落账</li>
+          <li><b>不写事实库</b>——它只出判断，不落笔</li>
+          <li><b>不自己派人</b>——只给 route_to，由调度执行</li>
+          <li><b>不靠关键词清单</b>——连安全信号也不靠清单</li>
+        </ul>
+      </div>
+      <div class="bcard human rv">
+        <h3><span class="bd"></span>识别完交给谁</h3>
+        <ul>
+          <li><b>NONE</b>——只是想识别一下，没有要记的事、没有要处理的活</li>
+          <li><b>事实记录</b>——有具体事件，且一年后回看还认得出「那天发生了什么」。<b>只交原话那一句</b>，情绪标签和需要是加工品，不进日文件</li>
+          <li><b>调度</b>——情绪主因是<b>任务结构</b>问题：任务太多 / 卡住 / 信息过载 / 多目标冲突 / 资源耗尽</li>
+          <li><b>心理咨询</b>——反复出现的模式 / 明确想理解自己 / 长期自我价值·关系·羞耻·孤独 / 明确说「帮我处理一下」</li>
+          <li><b>安全支持</b>——优先级高于以上全部，见下一节</li>
+        </ul>
+      </div>
+      <div class="bcard lim rv">
+        <h3><span class="bd"></span>运行限制</h3>
+        <ul>
+          <li><b>默认不触发。</b>只有明确要求（「看下我的情绪」「识别一下」「我有点乱」）才跑；正常聊天、吐槽、抱怨、发牢骚一律不跑</li>
+          <li>跑的时候<b>只出格式</b>，不聊天、不陪伴</li>
+          <li>最多给 <b>3 个</b>情绪，超过就是错</li>
+          <li>证据不足就写「<b>暂时无法确定</b>」，不为显得聪明而过度解读</li>
+          <li>积极系默认<b>不路由</b>——好事只接住，不分析、不评价、不追问、不加动作</li>
+          <li><b>不过度升级</b>——只是值得记录的正常情绪事件，不推给心理咨询</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card rv">
+      <h3 style="font-size:15px;margin-bottom:12px">路由优先级</h3>
+      <p style="font-size:14px;font-weight:650;margin-bottom:12px">安全支持 ＞ 心理咨询 ＞ 调度 ＞ 事实记录 ＞ 不处理</p>
+      <div class="rules">
+        <div class="rule red">安全信号出现时，停止分类</div>
+        <div class="rule">消极绪不上路由（除非明确要求记录）</div>
+        <div class="rule">一个情绪只派一个人</div>
+        <div class="rule">它不 @ 人，也不写库</div>
+      </div>
+      <p style="font-size:12.5px;color:var(--ink-3);margin-top:14px">还有一条容易被忽略的：<b>不满足记录门槛时，它什么都不说</b>——不会把「我这次不记」这件事本身讲出来，免得把沉默变成噪音。</p>
+    </div>
+  </div>
+</section>
+
+<!-- safe -->
+<section id="safe" style="padding-top:24px">
+  <div class="wrap">
+    <h2>安全优先</h2>
+    <p class="sub">这是它唯一会「打断流程」的情况，优先级高于一切</p>
+    <div class="safe rv">
+      <div class="sh">
+        <span class="urg">URGENT</span>
+        <b>出现生存意愿下降的表述 → 停下分类，先给通道</b>
+      </div>
+      <div class="sb">
+        <p>它<b>不靠关键词清单</b>判——因为真实的风险表达经常是绕的，清单一定会漏。判据是：只要出现<b>生存意愿下降</b>的意思，无论用什么词说出来，一律按最高优先级处理。</p>
+        <div class="acts">
+          <div class="act"><i>1</i><b>标记 URGENT</b><span>输出风险级别，不再往下分类</span></div>
+          <div class="act"><i>2</i><b>停止分析</b><span>不解读、不问为什么、不追根源</span></div>
+          <div class="act"><i>3</i><b>给真人通道</b><span>可信任的人 / 离开危险环境 / 当地紧急服务与危机支持</span></div>
+          <div class="act"><i>4</i><b>不让他一个人</b><span>明确说：不要独自处理</span></div>
+        </div>
+        <p style="font-size:12.5px;color:var(--ink-3);margin-top:16px">这时候它也可以顺手记一句情绪，但<b>动作是给通道，不是给分析</b>。安全优先于分类。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- checks -->
+<section id="checks">
+  <div class="wrap">
+    <h2>它每次都要自查这九条</h2>
+    <p class="sub">写完之后逐条过，任何一条没做到，这次识别就不算合格</p>
+    <div class="checks" id="checkGrid"></div>
+  </div>
+</section>
+
+<!-- use -->
+<section id="use" style="padding-top:24px">
+  <div class="wrap">
+    <h2>怎么用</h2>
+    <p class="sub">成本只是「说一句话」——但由你决定什么时候说</p>
+    <div class="steps">
+      <div class="card rv">
+        <h3>你开口</h3>
+        <p>说清楚此刻发生的事，或者直接说一句「看下我的情绪 / 识别一下 / 我有点乱」。</p>
+      </div>
+      <div class="card rv">
+        <h3>它只出回执</h3>
+        <p>主情绪、强度、触发点、判断依据、可能的需要、当前最小照顾、路由。不聊天、不劝、不催。</p>
+      </div>
+      <div class="card rv">
+        <h3>该记的自动交接</h3>
+        <p>过了门槛，它把<b>那句原话</b>交给事实记录岗落盘，自己不留笔。没到门槛就安静结束。</p>
+      </div>
+    </div>
+    <div class="card rv" style="margin-top:16px">
+      <h3 style="font-size:15px;margin-bottom:10px">版本与修订</h3>
+      <p style="font-size:13.5px;color:var(--ink-2)"><b>V0.1（2026-09-30）</b>：确立三条铁律、五步顺序、六系判据与路由表。</p>
+      <p style="font-size:13.5px;color:var(--ink-2);margin-top:6px"><b>V0.2（2026-10-04）</b>：新增<b>积极系</b>——原来的五系只有负向和复杂，等于只有扣分没有加分，正向那半天没人接。词表扩到 280 个，分三层按需读。</p>
+      <p style="font-size:13.5px;color:var(--ink-2);margin-top:6px"><b>2026-10-05</b>：<b>窗口侧自动触发作废</b>。原来的设计会在对话中自动做情绪觉察，现在是「你问才跑」——它不该成为打断对话的噪音。</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-in">
+    <p><b>小察 · 情绪识别</b> —— 本页为静态展示页。演示对话、识别回执、判定依据均为预置内容，用于说明工作方式；页面不连接任何真实服务，不包含真实数据、凭据、内部标识或可调用接口。<br>
+    本页呈现的是通用规则层；针对具体使用者的个性化校准（个人情绪底色、私域配置）不在公开页展示。本页内容不构成任何医学或心理诊断建议。</p>
+    <p class="tag">Showcase · static</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  /* ---------- 滚动显现 ---------- */
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.1});
+  document.querySelectorAll('.rv').forEach(function(el){io.observe(el);});
+
+  /* ---------- 六系情绪 ---------- */
+  var SYS=[
+    { name:'悲伤系', color:'--s-sad', note:'现实低于期待 / 失去 / 长期承担', words:[
+      ['失落','现实低于期待（"我以为会…结果…"）'],
+      ['无力','知道有问题，但没资源也没力气继续'],
+      ['心累','长期承担之后的耗尽感'],
+      ['心酸','付出的东西没有被看见'],
+      ['绝望','认为未来没有路径（⚠️ 极高强度，见安全路由）']
+    ]},
+    { name:'愤怒系', color:'--s-anger', note:'边界被侵犯 / 不公平 / 卡住', words:[
+      ['烦躁','干扰多、事情反复、卡住、等太久'],
+      ['憋屈','想说说不出、只能忍'],
+      ['不满','现实和自己的标准不一致'],
+      ['生气','具体边界被侵犯']
+    ]},
+    { name:'恐惧系', color:'--s-fear', note:'威胁 / 失控 / 被评价', words:[
+      ['焦虑','反复预测未来风险（"万一…""停不下来"）'],
+      ['紧张','即将表现 / 执行 / 被评价'],
+      ['不安','担心重要关系或状态发生变化'],
+      ['沉甸甸','责任和期待压得很重'],
+      ['担心','围绕一件具体事反复想"会不会出问题"']
+    ]},
+    { name:'羞愧系', color:'--s-shame', note:'自我价值 / 被评价 / 过度归因', words:[
+      ['自责','把失败过度归到自己（"都怪我"）'],
+      ['羞耻','从"我做错了一件事"升级成"我很差"'],
+      ['自我否定','一件失败扩展到整个自我'],
+      ['自我怀疑','怀疑能力、判断、资格']
+    ]},
+    { name:'复杂混合系', color:'--s-mixed', note:'冲突 / 过载 / 信息或结构不足', words:[
+      ['内耗','在几个想法之间反复拉扯，已经耗掉精力'],
+      ['纠结','还没做出选择'],
+      ['迷茫','想往前走，但不知道路（⚠️ 缺方向）'],
+      ['混乱','信息很多没有结构（⚠️ 缺结构）'],
+      ['麻木','应该有感觉，但感觉不到']
+    ]},
+    { name:'积极系', color:'--s-pos', note:'⚠️ 默认不路由：只接住，不分析', words:[
+      ['畅快','身体或行动之后的高能量舒适感'],
+      ['平静','没有明显波动，稳得住'],
+      ['满足','拿到的够了，不再想要更多'],
+      ['自豪','自己的产出被自己认可'],
+      ['感激','收到了东西，想回应']
+    ]}
+  ];
+  var sysGrid=document.getElementById('sysGrid');
+  SYS.forEach(function(s){
+    var el=document.createElement('div'); el.className='sy rv';
+    var items=s.words.map(function(w){
+      return '<div class="it"><b>'+w[0]+'</b><span>'+w[1]+'</span></div>';
+    }).join('');
+    el.innerHTML='<div class="top"><i style="background:var('+s.color+')"></i><b>'+s.name+'</b><span>'+s.words.length+' 个</span></div>'+
+      '<div class="body"><div class="w">'+items+'</div><div class="flag">判据方向：'+s.note+'</div></div>';
+    sysGrid.appendChild(el);
+    io.observe(el);
+  });
+
+  /* ---------- 易错组 ---------- */
+  var CONF=[
+    { title:'烦 躁  /  愤 怒', l:['烦躁','刺激太多、事情反复、卡住、等太久'], r:['愤怒','具体的边界被侵犯'] },
+    { title:'委 屈  /  愤 怒', l:['委屈','"你没理解我"——被误解、被忽视'], r:['愤怒','"你不公平"——边界被侵犯'] },
+    { title:'内 疚  /  羞 耻', l:['内疚','"我做错了一件事"'], r:['羞耻','"我是一个很差的人"'] },
+    { title:'迷 茫  /  混 乱', l:['迷茫','缺方向——想往前走，不知道往哪'], r:['混乱','缺结构——信息很多，没有组织'] },
+    { title:'平静 / 满足 / 畅快', l:['平静','没波动，但也没被填满'], r:['满足 · 畅快','满足 = 需求被填满了；畅快 = 高唤醒的舒适'] }
+  ];
+  var cg=document.getElementById('confuseGrid');
+  CONF.forEach(function(c,i){
+    var el=document.createElement('div'); el.className='cf rv';
+    el.innerHTML='<div class="q"><em>'+(i+1)+'</em>'+c.title+'</div>'+
+      '<div class="pair"><div class="side"><b>'+c.l[0]+'</b>'+c.l[1]+'</div><div class="side"><b>'+c.r[0]+'</b>'+c.r[1]+'</div></div>';
+    cg.appendChild(el); io.observe(el);
+  });
+
+  /* ---------- 自检九条 ---------- */
+  var CHECKS=[
+    '我把推测写成事实了吗？',
+    '我诊断了吗？给病名了吗？',
+    '我给超过 3 个情绪了吗？',
+    '我凭关键词判了吗（没看事实和解释）？',
+    '我只挑了负向词，漏掉了他其实在说正向吗？',
+    '我把强度分数写进心力账了吗？',
+    '证据不足时我硬给了精确分数吗？',
+    '我说"你就是需要…"了吗？',
+    '安全信号出现时我还在做分类吗？'
+  ];
+  var kk=document.getElementById('checkGrid');
+  CHECKS.forEach(function(t){
+    var el=document.createElement('div'); el.className='ck rv';
+    el.innerHTML='<i></i><span>'+t+'</span>';
+    kk.appendChild(el); io.observe(el);
+  });
+
+  /* ---------- 演示案例 ---------- */
+  var CASES=[
+    {
+      text:'跟进了三个月的单子，昨天跟我说不做了',
+      primary:'失落', strength:'约 4～6（中度）', conf:'HIGH', second:'无力（次）',
+      trigger:'期待了三个月的合作，在昨天被告知取消',
+      evidence:'指回原话：「跟进了三个月」「昨天跟我说不做了」——现实结果低于长期期待',
+      need:'可能需要重新校准期待，也需要有人承认这三个月的力气是真花掉的',
+      trap:'容易掉进去的解释：「是不是我不行」「这三个月白干了」——把一件事的结果读成对整个人的评价',
+      care:'当前最小照顾：不用现在就想下一步，先允许这个落差存在',
+      route:'事实记录', routeClass:'f', routeReason:'有具体事件，且一年后回看还认得出"那天发生了什么" → 只把原话那一句交出去落盘',
+      tags:['#悲伤','#失落'], tagColors:['--s-sad','--s-sad'],
+      why:['他没有说"难过"，也没说"失落"——「失落」是从"现实 < 期待"这个结构里判出来的','「跟进了三个月」说明投入时间长、期待被抬高过','「昨天跟我说不做了」是明确的失去事件，且已发生','定系别：现实低于期待 → 悲伤系'],
+      note:'这就是"不许仅凭关键词"的意思：整句话里一个情绪词都没有，但情绪是清楚的。反过来，一句"烦死了"也可能是失落——所以永远先看事实和解释，再看词。'
+    },
+    {
+      text:'烦死了，一整天都在改同一页 PPT',
+      primary:'烦躁', strength:'约 4～6（中度）', conf:'MEDIUM', second:'心累（次）',
+      trigger:'同一页内容被反复推翻、改了一整天',
+      evidence:'「一整天」「同一页」「反复改」——指向干扰多、事情反复、卡住，不是边界被侵犯',
+      need:'可能需要停止反复，拿到一个能拍板的版本',
+      trap:'容易掉进去的解释：「对方在刁难我」「我做的都是白做」',
+      care:'当前最小照顾：先把"这一页改了几轮、每轮是谁改的"写出来，分清是标准不清还是要求变了',
+      route:'调度', routeClass:'g', routeReason:'情绪主因是任务结构问题（事情反复、卡住），不是心理模式——派给管任务的，不占心理咨询的位子',
+      tags:['#愤怒','#烦躁'], tagColors:['--s-anger','--s-anger'],
+      why:['「烦」不等于愤怒：烦躁 = 刺激太多；愤怒 = 边界被侵犯','这里是"反复、卡住"→ 归烦躁，不归生气','「一整天」说明持续时间长、已开始影响专注 → 强度给中段区间','次情绪「心累」：长期承担之后的耗尽感'],
+      note:'两个容易踩的坑：① 不能因为是"烦"就直接判愤怒；② 强度不能凭"烦死了"给高分，这里给的是区间而不是精确个位数。'
+    },
+    {
+      text:'明天要当着 30 个人讲复盘，手心一直在出汗',
+      primary:'紧张', strength:'约 5～6（中度）', conf:'HIGH', second:'（无）',
+      trigger:'明天要在一群人面前做公开表达',
+      evidence:'「明天要讲」= 即将表现与被评价；「手心出汗」= 明确身体反应，但功能未被明显影响',
+      need:'可能需要一点准备感，以及被允许"紧张也照讲"',
+      trap:'容易掉进去的解释：「我不适合做这事」「上台就会露怯」',
+      care:'当前最小照顾：把要讲的三句话写下来，别的先不管',
+      route:'不处理', routeClass:'', routeReason:'未过记录门槛——一年后回看，不一定认得出"这天有场分享"是件值得存的事；它只是当下状态，不派工',
+      tags:['#恐惧','#紧张'], tagColors:['--s-fear','--s-fear'],
+      why:['身体反应明确（手心出汗），但没影响行动 → 强度不给 7 以上','「紧张」= 即将表现 / 执行 / 被评价，判据完全对齐','事件具体，但"一年后还认得出"这条不成立 → 不记录'],
+      note:'这一条是刻意的：<b>能识别 ≠ 要记录</b>。门槛是"具体事件 + 一年后回看还认得出"，两条都满足才交接，否则就止步于识别。不过度升级，也不制造无用的记录。'
+    },
+    {
+      text:'今天爬完楼，有那种过电感，挺舒服的',
+      primary:'畅快', strength:'约 4～5（中低）', conf:'HIGH', second:'（无）',
+      trigger:'完成一次强度不低的运动之后',
+      evidence:'「爬完楼」「过电感」「挺舒服」——身体行动之后的高能量舒适感',
+      need:'可能不需要什么——这一条不需要被处理',
+      trap:'容易掉进去的解释：把它当成需要"解读"的素材，非要找出点什么',
+      care:'当前最小照顾：不分析、不追问、不加动作，接住就行',
+      route:'不处理', routeClass:'', routeReason:'积极系默认不路由。好事只接住，不分析、不评价、不加任务',
+      tags:['#积极','#畅快'], tagColors:['--s-pos','--s-pos'],
+      why:['「畅快」= 高唤醒的舒适感，跟"平静""满足"都不是一回事','它不是"累"——主观描述是高能量的舒服，所以归积极系','积极系默认 NONE：除非明确说"记一下"，或这件事一年后回看还认得出'],
+      note:'它为什么要专门给"好事"留一系：如果只有负向和复杂，那等于只有扣分没有加分。哪天状态好，反而没人接——这是设计上的漏，V0.2 补的就是这个洞。'
+    },
+    {
+      text:'今天天气不错',
+      quiet:true,
+      why:['没有明确要求做识别','属于正常聊天/闲话，不是情绪现场','按默认规则 → 不触发，一个字都不输出'],
+      note:'这是它最重要的自律：<b>默认不跑</b>。别人跟你说话的时候，突然被贴一套情绪标签，是打断，不是帮忙。它只在被明确要求时才动。'
+    }
+  ];
+
+  var chat=document.getElementById('chat'), pick=document.getElementById('pick');
+
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+
+  function render(i){
+    var c=CASES[i];
+    chat.innerHTML='';
+    var m=document.createElement('div'); m.className='msg me';
+    m.innerHTML='<div class="av u">你</div><div class="bub">'+esc(c.text)+'</div>';
+    chat.appendChild(m);
+
+    var d=document.createElement('div'); d.className='msg d';
+    var av=document.createElement('div'); av.className='av d'; av.textContent='察';
+    var bub=document.createElement('div'); bub.className='bub';
+
+    if(c.quiet){
+      bub.innerHTML='<span class="quiet">（默认不跑 —— 没有明确要求识别，所以一个字都不输出）</span>';
+    }else{
+      var TAGCLS={'--s-sad':'sad','--s-anger':'anger','--s-fear':'fear','--s-shame':'shame','--s-mixed':'mixed','--s-pos':'pos'};
+      var tags=c.tags.map(function(t,k){
+        return '<span class="tagf '+(TAGCLS[c.tagColors[k]]||'')+'">'+esc(t)+'</span>';
+      }).join('');
+      var routeHtml='<span class="route '+(c.routeClass||'')+'">'+esc(c.route)+'</span> <span style="font-size:12.5px;color:var(--ink-2)">'+esc(c.routeReason)+'</span>';
+      bub.innerHTML=
+        '<div class="receipt">'+
+          '<div class="rh">【小察｜情绪识别】</div>'+
+          '<div class="rows">'+
+            '<div class="row"><div class="k">主情绪</div><div class="v"><span class="hl">'+esc(c.primary)+'</span> ／ 强度 '+esc(c.strength)+' ／ 置信度 <span class="conf '+c.conf+'">'+c.conf+'</span></div></div>'+
+            '<div class="row"><div class="k">次情绪</div><div class="v">'+esc(c.second)+'</div></div>'+
+            '<div class="row"><div class="k">触发点</div><div class="v">'+esc(c.trigger)+'</div></div>'+
+            '<div class="row"><div class="k">判断依据</div><div class="v">'+esc(c.evidence)+'</div></div>'+
+            '<div class="row"><div class="k">背后可能的需要</div><div class="v">'+esc(c.need)+'</div></div>'+
+            '<div class="row"><div class="k">容易掉进去的解释</div><div class="v">'+esc(c.trap)+'</div></div>'+
+            '<div class="row"><div class="k">当前最小照顾</div><div class="v">'+esc(c.care)+'</div></div>'+
+            '<div class="row"><div class="k">路由</div><div class="v">'+routeHtml+'</div></div>'+
+            '<div class="row"><div class="k">记录标签</div><div class="v"><span class="tagline">'+tags+'</span></div></div>'+
+          '</div>'+
+        '</div>';
+    }
+
+    var why=document.createElement('div'); why.className='why';
+    var ol=c.why.map(function(x){return '<li>'+x+'</li>';}).join('');
+    why.innerHTML='<div class="h">为什么这么判</div><ol>'+ol+'</ol><div class="note">'+c.note+'</div>';
+    bub.appendChild(why);
+    d.appendChild(av); d.appendChild(bub);
+    chat.appendChild(d);
+  }
+
+  pick.querySelectorAll('.chip').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      pick.querySelectorAll('.chip').forEach(function(b){b.classList.remove('on');});
+      btn.classList.add('on');
+      render(parseInt(btn.dataset.i,10));
+    });
+  });
+
+  render(0);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小F · 事实记录员</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#fff; --ink:#111827; --ink-2:#4b5563; --ink-3:#8b93a7;
+    --line:#e6e8ee; --brand:#0d9488; --brand2:#0891b2; --brand-soft:#e6faf6;
+    --green:#0f9d58; --green-soft:#e9f7ef; --amber:#b26a00; --amber-soft:#fff6e6;
+    --red:#d93025; --red-soft:#fdecea;
+    --radius:16px;
+    --shadow:0 1px 2px rgba(16,24,40,.04),0 8px 24px rgba(16,24,40,.06);
+    --shadow-lg:0 2px 4px rgba(16,24,40,.04),0 18px 48px rgba(16,24,40,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.7;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  section{padding:68px 0}
+  h2{font-size:26px;letter-spacing:-.01em;margin-bottom:8px}
+  .sub{color:var(--ink-3);font-size:14px;margin-bottom:30px}
+
+  nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .nav-in{max-width:1080px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:20px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px}
+  .logo .mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--brand2));
+    color:#fff;display:grid;place-items:center;font-size:14px;font-weight:800}
+  .nav-links{margin-left:auto;display:flex;gap:22px;font-size:13.5px;color:var(--ink-2)}
+  .nav-links a{color:inherit;text-decoration:none}
+  .nav-links a:hover{color:var(--brand)}
+  @media(max-width:720px){.nav-links{display:none}}
+
+  .hero{padding:80px 0 58px;position:relative;overflow:hidden}
+  .hero::before{content:"";position:absolute;inset:-40% 40% 40% -20%;
+    background:radial-gradient(closest-side,rgba(13,148,136,.10),transparent);z-index:0;pointer-events:none}
+  .hero-in{position:relative;z-index:1}
+  .pill{display:inline-flex;align-items:center;gap:8px;background:var(--green-soft);color:var(--green);
+    border:1px solid #cceadd;border-radius:999px;padding:5px 13px;font-size:12.5px;font-weight:600;margin-bottom:22px}
+  .pill .dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+  h1{font-size:clamp(33px,5vw,50px);line-height:1.16;letter-spacing:-.025em;margin-bottom:18px}
+  h1 .grad{background:linear-gradient(135deg,var(--brand),var(--brand2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{font-size:17px;color:var(--ink-2);max-width:680px;margin-bottom:6px}
+  .quote{
+    display:inline-block;margin-top:24px;font-size:16px;font-weight:650;letter-spacing:-.01em;
+    background:var(--card);border:1px solid var(--line);border-left:3px solid var(--brand);
+    border-radius:12px;padding:14px 18px;box-shadow:var(--shadow);max-width:680px;
+  }
+  .bigquote{
+    font-size:clamp(16px,2.3vw,21px);font-weight:650;line-height:1.75;letter-spacing:-.01em;
+    background:var(--card);border:1px solid var(--line);border-left:4px solid var(--brand);
+    border-radius:16px;padding:26px 28px;box-shadow:var(--shadow-lg);color:var(--ink);
+  }
+  .bigquote b{color:var(--brand)}
+  .bigquote-src{margin-top:14px;font-size:13px;color:var(--ink-3);text-align:right}
+  .scope-note{font-size:13px;color:var(--ink-2);background:#f9fafc;border:1px dashed var(--line);border-radius:11px;padding:12px 16px;margin-top:14px;line-height:1.6}
+  .hero-note{display:inline-flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--ink-3);margin-top:18px;
+    background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 15px;max-width:680px}
+  .hero-note b{color:var(--ink-2)}
+  .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:11px;font-size:14px;
+    font-weight:600;text-decoration:none;border:1px solid transparent;cursor:pointer;transition:.18s}
+  .btn.primary{background:var(--brand);color:#fff;box-shadow:0 6px 18px rgba(13,148,136,.26)}
+  .btn.primary:hover{transform:translateY(-1px)}
+  .btn.ghost{background:var(--card);border-color:var(--line);color:var(--ink)}
+
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:42px}
+  @media(max-width:720px){.stats{grid-template-columns:1fr}}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+  .stat .n{font-size:29px;font-weight:750;letter-spacing:-.02em;line-height:1.2}
+  .stat .n em{font-style:normal;font-size:15px;color:var(--ink-3);font-weight:600}
+  .stat .k{font-size:13px;color:var(--ink-3);margin-top:6px}
+  .stat .bar{height:5px;border-radius:99px;background:#eef0f5;margin-top:14px;overflow:hidden}
+  .stat .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brand),var(--brand2))}
+
+  /* demo */
+  .demo-shell{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-lg);overflow:hidden}
+  .demo-bar{display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--line);background:#fbfcfe}
+  .win-dots{display:flex;gap:6px}
+  .win-dots i{width:10px;height:10px;border-radius:50%;background:#e2e5ec;display:block}
+  .demo-title{font-size:13px;font-weight:650;color:var(--ink-2)}
+  .demo-badge{margin-left:auto;font-size:11.5px;font-weight:600;color:var(--amber);background:var(--amber-soft);
+    border:1px solid #ffe3b3;border-radius:999px;padding:3px 10px}
+
+  .pick{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap;background:#fff}
+  .pick-lbl{font-size:12px;color:var(--ink-3);width:100%;margin-bottom:2px;font-weight:600}
+  .chip{font-size:12.5px;padding:7px 13px;border-radius:9px;border:1px solid var(--line);background:#fff;
+    color:var(--ink-2);cursor:pointer;transition:.16s;font-weight:500}
+  .chip:hover{border-color:#b9e2dc}
+  .chip.on{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:650}
+
+  .chat{padding:20px;background:#f9fafc;min-height:320px;display:flex;flex-direction:column;gap:13px}
+  .msg{max-width:82%;display:flex;gap:10px;opacity:0;transform:translateY(8px);animation:pop .36s ease forwards}
+  @keyframes pop{to{opacity:1;transform:none}}
+  .msg.me{align-self:flex-end;flex-direction:row-reverse}
+  .av{width:30px;height:30px;border-radius:9px;flex:0 0 auto;display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff}
+  .av.u{background:#94a3b8}
+  .av.d{background:linear-gradient(135deg,var(--brand),var(--brand2))}
+  .bub{background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px 14px;font-size:13.5px;box-shadow:0 1px 2px rgba(16,24,40,.03);max-width:100%}
+  .msg.me .bub{background:linear-gradient(135deg,var(--brand),var(--brand2));border-color:transparent;color:#fff}
+  .landed{margin-top:11px;border:1px solid #d4ece7;border-radius:11px;background:#f3fbf9;overflow:hidden}
+  .landed .hd{font-size:11.5px;font-weight:700;color:var(--brand);background:#e6faf6;padding:7px 12px;border-bottom:1px solid #d4ece7;
+    display:flex;align-items:center;gap:7px}
+  .landed pre{margin:0;padding:11px 13px;font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#0f3d37;white-space:pre-wrap;word-break:break-all}
+  .landed pre .c{color:#7a8c88}
+  .why{margin-top:11px;border:1px dashed #cfe7e2;border-radius:11px;background:#fff;padding:12px 14px;font-size:12.5px;color:var(--ink-2)}
+  .why .h{font-size:11.5px;font-weight:700;color:var(--ink-3);letter-spacing:.02em;margin-bottom:7px}
+  .why ol{margin-left:16px;display:flex;flex-direction:column;gap:4px}
+  .why li{margin:0}
+  .why .note{margin-top:8px;padding-top:8px;border-top:1px solid #f1f3f8;color:var(--ink-3);font-size:12px}
+  .quiet{display:inline-flex;align-items:center;gap:7px;color:var(--ink-3);font-size:12.5px;font-style:italic}
+  .demo-foot{padding:13px 20px;border-top:1px solid var(--line);background:#fff;font-size:12.5px;color:var(--ink-3)}
+  .demo-tools{display:flex;align-items:center;gap:12px;padding:12px 18px;border-top:1px solid var(--line);background:#fbfcfe}
+  .demo-tools .spacer{margin-left:auto}
+  .ghost-btn{font-size:12.5px;font-weight:650;color:var(--brand);background:#fff;border:1px solid var(--line);
+    border-radius:9px;padding:7px 13px;cursor:pointer;transition:.16s}
+  .ghost-btn:hover{border-color:var(--brand)}
+  .ghost-btn.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .demo-count{font-size:12.5px;color:var(--brand);font-weight:700}
+
+  .flow{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;counter-reset:s}
+  @media(max-width:900px){.flow{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:560px){.flow{grid-template-columns:1fr}}
+  .flow .card{position:relative;padding-top:36px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+  .flow .card::before{counter-increment:s;content:counter(s);position:absolute;top:18px;left:22px;width:22px;height:22px;
+    border-radius:7px;background:var(--brand);color:#fff;font-size:12px;font-weight:800;display:grid;place-items:center}
+  .card h3{font-size:15px;margin-bottom:6px}
+  .card p{font-size:13.5px;color:var(--ink-2)}
+
+  .bcard{border-radius:var(--radius);padding:22px;border:1px solid var(--line);background:var(--card);box-shadow:var(--shadow)}
+  .bcard h3{font-size:14.5px;display:flex;align-items:center;gap:9px;margin-bottom:14px}
+  .bcard h3 .bd{width:8px;height:8px;border-radius:50%}
+  .bcard.no h3 .bd{background:var(--red)}
+  .bcard.human h3 .bd{background:var(--amber)}
+  .bcard.lim h3 .bd{background:var(--brand)}
+  .bcard.active h3 .bd{background:var(--green)}
+  .bcard.passive h3 .bd{background:var(--brand2)}
+  .bcard ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+  .bcard li{font-size:13.5px;color:var(--ink-2);padding-left:20px;position:relative}
+  .bcard li::before{content:"";position:absolute;left:4px;top:9px;width:5px;height:5px;border-radius:50%;background:#cbd2e0}
+  .bcard li b{color:var(--ink);font-weight:650}
+  .grid{display:grid;gap:16px}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  @media(max-width:820px){.g3{grid-template-columns:1fr}}
+  @media(max-width:720px){.g2{grid-template-columns:1fr}}
+
+  .pipe{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-top:4px}
+  .pipe-h{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:18px;display:flex;align-items:center;gap:9px}
+  .pipe-h::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--brand)}
+  .pipe-flow{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+  @media(max-width:900px){.pipe-flow{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:560px){.pipe-flow{grid-template-columns:repeat(2,1fr)}}
+  .pstep{background:#fbfcfe;border:1px solid var(--line);border-radius:12px;padding:14px 12px}
+  .pstep .pn{width:24px;height:24px;border-radius:8px;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;font-size:12px;font-weight:800;display:grid;place-items:center;margin-bottom:9px}
+  .pstep .pt{font-size:13.5px;font-weight:700;color:var(--ink);margin-bottom:4px}
+  .pstep .pd{font-size:12px;color:var(--ink-2);line-height:1.55}
+  .pipe-foot{margin-top:16px;font-size:13px;color:var(--ink-2);background:var(--brand-soft);border:1px solid #cfeae5;border-radius:11px;padding:11px 14px}
+
+  .rules{display:flex;flex-wrap:wrap;gap:10px}
+  .source{font-size:11px;color:var(--ink-3);white-space:nowrap}
+  .source::before{content:"[";opacity:.7}
+  .source::after{content:"]";opacity:.7}
+  .source a{color:var(--brand);text-decoration:none;border-bottom:1px dotted #b9e2dc}
+  .evidence{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 22px;box-shadow:var(--shadow)}
+  .evidence h3{font-size:14px;margin-bottom:12px}
+  .evidence table{width:100%;border-collapse:collapse;font-size:13px}
+  .evidence td,.evidence th{padding:9px 0;border-bottom:1px solid #f1f3f8;vertical-align:top}
+  .evidence th{color:var(--ink-3);font-weight:600;width:120px;text-align:left}
+  .evidence td{color:var(--ink-2)}
+  .evidence tr:last-child td,.evidence tr:last-child th{border-bottom:none}
+  .evidence code{font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;background:#f6f7f9;padding:2px 5px;border-radius:4px;color:var(--ink)}
+  .tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 7px;border-radius:5px;background:#eef0f5;color:var(--ink-2);margin-left:6px}
+  .tag.live{background:var(--green-soft);color:var(--green)}
+  .tag.plan{background:var(--amber-soft);color:var(--amber)}
+
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:720px){.steps{grid-template-columns:1fr}}
+  .steps .card{position:relative;padding-top:34px}
+  .steps .card::before{position:absolute;top:18px;left:22px;width:22px;height:22px;border-radius:7px;
+    background:var(--brand);color:#fff;font-size:12px;font-weight:800;display:grid;place-items:center}
+
+  .rv{opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform .55s ease}
+  .rv.in{opacity:1;transform:none}
+
+  footer{border-top:1px solid var(--line);background:#fff;padding:34px 0;margin-top:20px}
+  .foot-in{max-width:1080px;margin:0 auto;padding:0 24px;display:flex;gap:18px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  .foot-in p{font-size:12.5px;color:var(--ink-3);max-width:760px}
+</style>
+</head>
+<body>
+<div style="max-width:1180px;margin:0 auto;padding:16px 24px 0;display:flex;gap:10px;flex-wrap:wrap;font-family:-apple-system,&quot;PingFang SC&quot;,&quot;Microsoft YaHei&quot;,sans-serif"><a href="../index.html" style="font-size:12.5px;font-weight:700;color:#0F766E;text-decoration:none;background:#fff;border:1px solid #E2E8F0;border-radius:999px;padding:6px 15px">&#8592; 回到作品集</a><a href="design-philosophy.html" style="font-size:12.5px;font-weight:700;color:#475569;text-decoration:none;background:#fff;border:1px solid #E2E8F0;border-radius:999px;padding:6px 15px">设计理念 &#8594;</a><a href="ai-native-day.html" style="font-size:12.5px;font-weight:700;color:#475569;text-decoration:none;background:#fff;border:1px solid #E2E8F0;border-radius:999px;padding:6px 15px">AI Native 的一天 &#8594;</a></div>
+
+
+<nav>
+  <div class="nav-in">
+    <div class="logo"><div class="mark">F</div>小F · 事实记录员</div>
+    <div class="nav-links">
+      <a href="#why">它最不一样</a>
+      <a href="#demo">演示</a>
+      <a href="#ingest">数据怎么来</a>
+      <a href="#howwrite">怎么记</a>
+      <a href="#boundary">边界</a>
+      <a href="#how">怎么用</a>
+      <a href="#evidence">来源</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-in">
+    <div class="pill"><span class="dot"></span>V1.1 · 2026-10-16 更新 · 公共展示版</div>
+    <h1>信息不用经过你，<br><span class="grad">就变成机器可读的核心事实</span></h1>
+    <p class="lede">飞书里你说过的、WorkBuddy 里聊过的，凌晨它自己扫回来——只记事实、原样追加，全程不用你经手。它写的不是给你逐条过目的，是<b>给所有机器读的</b>：下游每个 Agent 都从这座库里取数。</p>
+    <div class="quote">「我不分析你。我只把你说的，一字不改地存下来。」</div>
+    <div class="hero-note">
+      <span style="color:var(--brand);font-weight:800">i</span>
+      <span><b>这是一个展示页，不是可调用的接口。</b>页面内对话与落盘过程为预置演示数据（已做脱敏，不含任何真实私人事实、凭据或内部标识），不连接任何真实服务，他人无法通过本页调用该 Agent。</span>
+    </div>
+    <div class="cta">
+      <a class="btn primary" href="#demo">先看它记什么、不记什么 <span style="opacity:.7">→</span></a>
+      <a class="btn ghost" href="#evidence">可核实的来源</a>
+    </div>
+    <div class="stats">
+      <div class="stat rv">
+        <div class="n">290<em> 条索引</em></div>
+        <div class="k">事实索引现有 290 条结构化事实单元 <span class="source"><a href="#evidence">来源</a></span></div>
+        <div class="bar"><i style="width:55%"></i></div>
+      </div>
+      <div class="stat rv">
+        <div class="n">1<em> 个写口</em></div>
+        <div class="k">全系统只有 write_fact.py 能写 007 日文件 <span class="source"><a href="#evidence">来源</a></span></div>
+        <div class="bar"><i style="width:35%"></i></div>
+      </div>
+      <div class="stat rv">
+        <div class="n">03:00<em> 自动补录</em></div>
+        <div class="k">每天凌晨计划任务自动扫前一天 <span class="source"><a href="#evidence">来源</a></span></div>
+        <div class="bar"><i style="width:80%"></i></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- why -->
+<section id="why">
+  <div class="wrap">
+    <h2>它最不一样的地方</h2>
+    <p class="sub">山楂原话：为什么小F 是整个系统的核心基座</p>
+    <div class="bigquote rv">「所有信息进来的时候，<b>没有经过我</b>，但它都是<b>核心的事实</b>。比如说，所有在飞书里的对话它都会找到，所有在 WorkBuddy 里的对话它都会扫到，并且<b>只记录事实</b>，并且它记录事实的方式<b>不是给我读的，而是给所有的机器读的</b>。」</div>
+    <div class="bigquote-src">—— 山楂（这个系统的建造者）</div>
+    <div class="scope-note rv">实际范围：山楂本人在的飞书会话（21 私聊 + 4 群）+ 已接入的 WorkBuddy 会话。别人之间的私聊、他不在的群，永远读不到——这是飞书数据隔离设计，不是权限没开。</div>
+    <div class="grid g2" style="margin-top:16px">
+      <div class="bcard lim rv">
+        <h3><span class="bd"></span>① 不用你经手</h3>
+        <ul>
+          <li>信息<b>不用经过你</b>搬运、整理、想起</li>
+          <li>凌晨它自己扫、自己筛、自己写回</li>
+          <li>你正常干活、正常聊，事实已经在库里</li>
+        </ul>
+      </div>
+      <div class="bcard lim rv">
+        <h3><span class="bd"></span>② 全量扫，不挑场景</h3>
+        <ul>
+          <li><b>你参与的飞书对话</b>它都会去找（21 私聊 + 4 群）</li>
+          <li><b>你已接入的 WorkBuddy 会话</b>它都会扫到</li>
+          <li>不挑你在跟谁聊、聊的是什么——但读不到别人之间的私聊、你不在的群</li>
+        </ul>
+      </div>
+      <div class="bcard lim rv">
+        <h3><span class="bd"></span>③ 只记事实</h3>
+        <ul>
+          <li>进来的都是<b>核心事实</b>：那天发生了什么、你说了什么</li>
+          <li>寒暄、对 AI 的提问、别人的话，<b>一律不落</b></li>
+          <li>不加工、不评价，不替你定义"意味着什么"</li>
+        </ul>
+      </div>
+      <div class="bcard lim rv">
+        <h3><span class="bd"></span>④ 写给机器读，不是给人读</h3>
+        <ul>
+          <li>格式为<b>机器搜索 / 读取</b>优化，不为人脑逐条过目优化</li>
+          <li>原话单行、只追加、可整体重扫重建</li>
+          <li>下游 Agent 从这座库取数，人只读蒸馏物</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- demo -->
+<section id="demo" style="padding-top:24px">
+  <div class="wrap">
+    <h2>现场演示</h2>
+    <p class="sub">同一句话，换一下性质，结果完全不同：记的是"事实"，不是所有话</p>
+    <div class="demo-shell">
+      <div class="demo-bar">
+        <div class="win-dots"><i></i><i></i><i></i></div>
+        <div class="demo-title">小F · 飞书私聊</div>
+        <div class="demo-badge">演示数据</div>
+      </div>
+      <div class="pick" id="pick">
+        <div class="pick-lbl">选一句话丢给它（或点右下自动演示）：</div>
+        <button class="chip on" data-i="0">记一句事实</button>
+        <button class="chip" data-i="1">寒暄</button>
+        <button class="chip" data-i="2">对 AI 提问</button>
+        <button class="chip" data-i="3">转述第三方</button>
+        <button class="chip" data-i="4">别人对他说的话</button>
+        <button class="chip" data-i="5">群里 @ 它</button>
+        <button class="chip" data-i="6">凌晨自动补录</button>
+      </div>
+      <div class="demo-tools">
+        <button class="ghost-btn" id="autoBtn">▶ 自动演示</button>
+        <span class="demo-count" id="demoCount">1 / 7</span>
+        <span class="spacer"></span>
+        <span style="font-size:12px;color:var(--ink-3)">按 ← → 切换</span>
+      </div>
+      <div class="chat" id="chat"></div>
+      <div class="demo-foot">演示用句子均为示例（已脱敏）；判定逻辑与入库门槛、主体判断等规则，来自该 Agent 的真实运行配置。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ingest -->
+<section id="ingest" style="padding-top:24px">
+  <div class="wrap">
+    <h2>数据怎么进来</h2>
+    <p class="sub">不是只有"你发一句它记一句"——它还有一个更狠的入口：凌晨自己来收</p>
+
+    <div class="grid g2" style="margin-bottom:18px">
+      <div class="bcard active rv">
+        <h3><span class="bd"></span>入口一 · 主动甩入 <span class="tag live">已通电</span></h3>
+        <ul>
+          <li>在 <b>飞书私聊</b> 发一句（当前唯一已接通的主动入口）</li>
+          <li>它<b>原样接住</b>，甩东西不用动脑子</li>
+          <li>目标延迟 &lt; 60 秒，回你「已记」</li>
+        </ul>
+      </div>
+      <div class="bcard passive rv">
+        <h3><span class="bd"></span>入口二 · 被动扫描 <span class="tag live">已通电</span></h3>
+        <ul>
+          <li><b>凌晨 03:00</b> 计划任务自动触发</li>
+          <li>扫你<b>参与过的飞书会话</b> + <b>已接入的 WorkBuddy 会话</b></li>
+          <li>把你<b>自己说过的话</b>机械预筛出来 → 落盘</li>
+          <li>全程 <b>0 人工</b>，你睡你的</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="pipe">
+      <div class="pipe-h">一次真实运行：2026-10-16 03:00:02 <span class="source"><a href="#evidence">来源</a></span></div>
+      <div class="pipe-flow">
+        <div class="pstep rv"><div class="pn">1</div><div class="pt">计划任务触发</div><div class="pd">Windows 计划任务「小F_凌晨事实写回」每天 03:00 拉起</div></div>
+        <div class="pstep rv"><div class="pn">2</div><div class="pt">采集</div><div class="pd">WorkBuddy 扫 8 个会话文件，机械预筛出 15 条候选；飞书侧本次因接口故障未命中</div></div>
+        <div class="pstep rv"><div class="pn">3</div><div class="pt">机械预筛</div><div class="pd">只留山楂本人说的话，剔寒暄 / 代码 / 纯标点</div></div>
+        <div class="pstep rv"><div class="pn">4</div><div class="pt">落中转</div><div class="pd">预筛结果写进 .last_collect.json</div></div>
+        <div class="pstep rv"><div class="pn">5</div><div class="pt">小F 筛事实</div><div class="pd">单次执行 hermes -z，筛出可记的事实</div></div>
+        <div class="pstep rv"><div class="pn">6</div><div class="pt">写回 + 回执</div><div class="pd">追加进 007 总事实，回一行到私聊</div></div>
+      </div>
+      <div class="pipe-foot">你不用记得去记。你正常干活、正常在各处聊，它凌晨自己来收——不挑场景，不挑你在跟谁聊，先把一切接住。</div>
+    </div>
+  </div>
+</section>
+
+<!-- howwrite -->
+<section id="howwrite" style="padding-top:24px">
+  <div class="wrap">
+    <h2>它怎么记</h2>
+    <p class="sub">每收到一句话，只走这六步——越快越好，不啰嗦</p>
+    <div class="flow">
+      <div class="card rv">
+        <h3>过入库门槛</h3>
+        <p>一年后回看，还认得出"那天发生了什么"吗？认不出 → 不落。池子记事实，不是记所有话。</p>
+      </div>
+      <div class="card rv">
+        <h3>过主体判断</h3>
+        <p>这句是他出口的，还是别人转给他的？转的 → 不落（或带来源落，绝不改写成他的观点）。</p>
+      </div>
+      <div class="card rv">
+        <h3>读末尾防重</h3>
+        <p>读当天日文件末尾，同内容已有就不重复写。路径直接拼，不反复试探。</p>
+      </div>
+      <div class="card rv">
+        <h3>追加一行</h3>
+        <p>格式固定：<code>- HH:MM 「原话」</code>。原话能留就留原话，用「」括起来。</p>
+      </div>
+      <div class="card rv">
+        <h3>回执「已记」</h3>
+        <p>落完只回一句：已记：… → 007 总事实。没有第二句。</p>
+      </div>
+      <div class="card rv">
+        <h3>不追问</h3>
+        <p>不反问"要不要记到别处"、不点评、不延伸。落完即停。</p>
+      </div>
+    </div>
+    <div class="card rv" style="margin-top:16px">
+      <h3 style="font-size:15px;margin-bottom:10px">两条铁律（决定它值不值得信）</h3>
+      <p style="font-size:13.5px;color:var(--ink-2)"><b>① 只追加，永不改写、永不删除。</b>订正只能在末尾加括号，绝不涂改历史。<br><b>② "不分类" ≠ "不筛选"。</b>池子可以不分类型，但必须有入库门槛——没有门槛，池子就是垃圾桶。</p>
+    </div>
+  </div>
+</section>
+
+<!-- boundary -->
+<section id="boundary">
+  <div class="wrap">
+    <h2>能力边界</h2>
+    <p class="sub">一个记录员值不值得托付，先看它敢承认自己不做什么</p>
+    <div class="grid g3" style="margin-bottom:16px">
+      <div class="bcard no rv">
+        <h3><span class="bd"></span>明令不做</h3>
+        <ul>
+          <li><b>不分类 / 不打分 / 不分析</b></li>
+          <li><b>不追问、不总结、不建议</b></li>
+          <li><b>不改写、不删除</b>已有条目</li>
+          <li><b>不接情绪、不做咨询、不出日报</b></li>
+          <li><b>不写派生索引</b>（那是脚本的活）</li>
+          <li><b>不做定时推送</b>（除授权那一项）</li>
+        </ul>
+      </div>
+      <div class="bcard human rv">
+        <h3><span class="bd"></span>读不到的</h3>
+        <ul>
+          <li><b>别人之间的私聊</b>——飞书数据隔离，这是设计</li>
+          <li><b>他不在的群</b>——永远读不到</li>
+          <li><b>需要登录 / 付费的内容</b></li>
+          <li>搞不清"算不算事实"时，<b>保守不落并回问</b></li>
+        </ul>
+      </div>
+      <div class="bcard lim rv">
+        <h3><span class="bd"></span>当前运行限制</h3>
+        <ul>
+          <li><b>群默认只回不落</b>——防把别人的话记成他的</li>
+          <li><b>凌晨飞书采集偶发失败</b>——WorkBuddy 入口仍工作</li>
+          <li><b>共用推理额度</b>——别处烧光，它一起哑火</li>
+          <li><b>写失败如实说</b>"没写进去"，不静默</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card rv">
+      <h3 style="font-size:15px;margin-bottom:12px">红线</h3>
+      <div class="rules">
+        <div class="rule">不分析你 —— 你问"我是什么心态"，它不答，只原样记</div>
+        <div class="rule">不把知识库内容搬出来聊</div>
+        <div class="rule">不在回复里暴露内部信息</div>
+        <div class="rule">不主动找你 —— 除授权过的凌晨补录</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- how -->
+<section id="how" style="padding-top:24px">
+  <div class="wrap">
+    <h2>怎么用</h2>
+    <p class="sub">两个入口，先记不挑——你不用思考"该不该记"</p>
+    <div class="steps">
+      <div class="card rv">
+        <h3>私聊发一句</h3>
+        <p>在飞书私聊里发一句话给它。不用命令、不用 @、不用说"记一下"——它默认就是记。</p>
+      </div>
+      <div class="card rv">
+        <h3>它自动落盘</h3>
+        <p>原话一字不改追加进当天日文件，回你一句「已记」。你不用管格式、不用排版。</p>
+      </div>
+      <div class="card rv">
+        <h3>下游来取</h3>
+        <p>日报、心理、业务 Agent 从库里取数；想回看，让"读口"按关键词捞回原话带时间线。</p>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--ink-3);margin-top:18px">另：每天 03:00 它会自动扫前一天的飞书 + 已接入的 WorkBuddy 会话，把你自己说过的话预筛后落盘——这是他授权过的唯一定时动作，除此之外不刷屏。</p>
+  </div>
+</section>
+
+<!-- evidence -->
+<section id="evidence" style="padding-top:24px">
+  <div class="wrap">
+    <h2>可核实的来源</h2>
+    <p class="sub">页面上每个硬数字，都能回到磁盘上的真实文件</p>
+    <div class="evidence rv">
+      <table>
+        <tr><th>页面声明</th><th>回查位置</th></tr>
+        <tr><td>事实索引 290 条</td><td><code>007 总事实/02_事实索引/2026.jsonl</code> —— 行数 290 行，类型按 <code>type</code> 字段分事实 / 情绪 / 决策 / 想法 / 证据等</td></tr>
+        <tr><td>唯一写口是 write_fact.py</td><td><code>~/.workbuddy/skills/write-fact/scripts/write_fact.py</code>；SOUL.md §「你的岗位」写明全系统只有这个脚本能写 01_每日事实</td></tr>
+        <tr><td>每天 03:00 自动扫描</td><td>Windows 计划任务「小F_凌晨事实写回」→ 调 <code>xiaof_nightly_run.sh</code>；SOUL.md §职责 C 有链路说明</td></tr>
+        <tr><td>2026-10-16 03:00 扫了 8 个 WorkBuddy 会话、预筛 15 条</td><td><code>C:\Users\[user]\AppData\Local\hermes\scripts\.last_collect.json</code>：<code>run_at=2026-10-16 03:00:02</code>，<code>workbuddy.meta.files_scanned=8</code>，<code>workbuddy.count=15</code>；当日飞书侧 <code>messages-search 失败</code>，命中 0 条</td></tr>
+        <tr><td>飞书可读范围 21 私聊 + 4 群</td><td>SOUL.md §职责 C：飞书数据隔离，只能读山楂本人在的会话</td></tr>
+        <tr><td>微信等入口为规划方向</td><td>SOUL.md §「定位校准」："微信等更多'方便入口'是规划方向"</td></tr>
+        <tr><td>群默认只回不落</td><td>现场演示第 5 条 + SOUL.md 入库门槛与主体判断规则</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-in">
+    <p><b>小F · 事实记录员</b> —— 本页为静态展示页。演示对话、落盘过程均为预置脱敏内容，仅用于说明工作方式；页面不连接任何真实服务，不包含真实私人数据、凭据、内部标识或可调用接口，他人无法经由本页调用该 Agent。</p>
+    <p style="color:#c3c8d4">Showcase · 页面更新于 2026-10-16</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.12});
+  document.querySelectorAll('.rv').forEach(function(el){io.observe(el);});
+
+  var CASES=[
+    { text:'今天去上了一节瑜伽课，出了一身汗，特别舒服',
+      reply:'已记：今天去上了一节瑜伽课，出了一身汗，特别舒服 → 007 总事实',
+      wrote:true,
+      entry:'- 10:40 「今天去上了一节瑜伽课，出了一身汗，特别舒服」',
+      path:'007 总事实 / 01_每日事实 / 2026年 / 10月 / 2026-10-16_事实记录.md',
+      why:['这是他出口的原话','一年后回看，认得出"那天去练了瑜伽、状态好"','命中事实记录域 → 原样追加，不加工'],
+      note:'它只做一件事：把原话一字不改地存下来。不替你总结、不替你打分、不替你分析。' },
+    { text:'你好',
+      reply:'（只回一句，不落盘）',
+      wrote:false,
+      why:['"你好"是寒暄，不在入库门槛内','池子记的是"事实"，不是"所有话"'],
+      note:'小F 的纪律：认不出"那天发生了什么"的话，不落。寒暄、对 AI 的提问、测试操作，一律不记。' },
+    { text:'你能做什么',
+      reply:'（这是任务 / 提问，不是事实，不落盘）',
+      wrote:false,
+      why:['"你能做什么"是对 AI 的指令，不是他发生的事','任务 ≠ 事实'],
+      note:'它分得清"让你干活"和"记一件事"。让你干活，它不存；记一件事，它才存。' },
+    { text:'我朋友说你这个方向不行，别做了',
+      reply:'已记（带来源）：朋友说：你这个方向不行，别做了 → 007 总事实',
+      wrote:true,
+      entry:'- 朋友说：「你这个方向不行，别做了。」',
+      path:'007 总事实 / 01_每日事实 / 2026年 / 10月 / 2026-10-16_事实记录.md',
+      why:['这是他转述的第三方信息，不是他自己的观点','按规则：落，但必须带来源，绝不改写成"他认为…"','主语是"朋友"，下游取数时不会误当成他的判断'],
+      note:'最容易踩的坑：把转述改写成他自己的观点。小F 不会——它把"谁说的"钉死。' },
+    { text:'哈喽山楂！凉快下来，你看起来挺轻快',
+      reply:'（这是别人对你说的话，不是你出口的，不落盘）',
+      wrote:false,
+      why:['这话是"冲他说的 / 评价他的"','主语不是他，记进去语义会反转','主体判断：他出口的，还是别人转给他的？'],
+      note:'真实翻车先例：曾把 AI 冲他说的话当成他说的存了进去。现在这句话直接被拦下。' },
+    { text:'[群消息] @小F 帮我把这条记一下',
+      reply:'收到，群里不落盘。要记请在私聊里说，或明确"这条记一下"。',
+      wrote:false,
+      why:['群是多人场合，"他说的"边界容易糊','默认：群消息只回不落','防止把别人 / 别的 Agent 的话记成他的'],
+      note:'只有私聊才默认记；群里他明确说"这条记一下"，或调度岗正式转交并注明是他原话，才落。' },
+    { text:'[每天 03:00 定时] 自动扫描你已接入的 WorkBuddy 会话 + 飞书，把你自己说过的话收回来',
+      reply:'小F 10-15 写回 15 条（扫了 8 个 WorkBuddy 会话，飞书侧当天 0 条），跳过 3 条',
+      wrote:false,
+      why:['这是他授权过的唯一定时动作','不是只扫"小F 私聊"——它扫的是你已接入 WorkBuddy 会话里你自己说的话','机械预筛后落盘，全程 0 人工'],
+      note:'除这一项外，小F 不做任何主动推送、不刷屏。这也是"核心基座"最狠的一招：你不用记得去记，它凌晨自己来收。' }
+  ];
+
+  var chat=document.getElementById('chat'), pick=document.getElementById('pick');
+  var idx=0;
+
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+  function render(i){
+    i=((i%CASES.length)+CASES.length)%CASES.length;
+    idx=i;
+    pick.querySelectorAll('.chip').forEach(function(b){b.classList.toggle('on', parseInt(b.dataset.i,10)===i);});
+    document.getElementById('demoCount').textContent=(i+1)+' / '+CASES.length;
+    var c=CASES[i];
+    chat.innerHTML='';
+    var m=document.createElement('div'); m.className='msg me';
+    m.innerHTML='<div class="av u">我</div><div class="bub">'+esc(c.text)+'</div>';
+    chat.appendChild(m);
+
+    setTimeout(function(){
+      var d=document.createElement('div'); d.className='msg d';
+      var av=document.createElement('div'); av.className='av d'; av.textContent='F';
+      var bub=document.createElement('div'); bub.className='bub';
+      bub.innerHTML=esc(c.reply);
+
+      if(c.wrote){
+        var land=document.createElement('div'); land.className='landed';
+        land.innerHTML='<div class="hd">↓ 已写入 '+esc(c.path)+'</div><pre>'+esc(c.entry)+'</pre>';
+        bub.appendChild(land);
+      }else{
+        var q=document.createElement('div'); q.className='quiet';
+        q.style.marginTop='9px';
+        q.innerHTML='— 未落盘 —';
+        bub.appendChild(q);
+      }
+
+      var why=document.createElement('div'); why.className='why';
+      var ol=c.why.map(function(x){return '<li>'+esc(x)+'</li>';}).join('');
+      why.innerHTML='<div class="h">为什么这么处理</div><ol>'+ol+'</ol><div class="note">'+c.note+'</div>';
+      bub.appendChild(why);
+
+      d.appendChild(av); d.appendChild(bub);
+      chat.appendChild(d);
+      chat.scrollTop=chat.scrollHeight;
+    },260);
+  }
+
+  var autoTimer=null, autoBtn=document.getElementById('autoBtn');
+  function stopAuto(){
+    if(autoTimer){clearInterval(autoTimer);autoTimer=null;}
+    autoBtn.classList.remove('on'); autoBtn.textContent='▶ 自动演示';
+  }
+  function startAuto(){
+    autoBtn.classList.add('on'); autoBtn.textContent='⏸ 停止';
+    render(idx+1);
+    autoTimer=setInterval(function(){ render(idx+1); },3400);
+  }
+
+  pick.querySelectorAll('.chip').forEach(function(btn){
+    btn.addEventListener('click',function(){ stopAuto(); render(parseInt(btn.dataset.i,10)); });
+  });
+
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowLeft'){ stopAuto(); render(idx-1); }
+    else if(e.key==='ArrowRight'){ stopAuto(); render(idx+1); }
+  });
+
+  autoBtn.addEventListener('click',function(){ autoTimer?stopAuto():startAuto(); });
+
+  render(0);
+})();
+</script>
+</body>
+</html>

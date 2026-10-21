@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小健 · 一个住在飞书里的训练记录搭档</title>
+<meta name="description" content="展示一个私有健身 Agent（小健）的功能、行为规范与能力边界。静态展示页，不接入任何 API，页面对话为虚构示例。">
+<style>
+:root{
+  --ink:#0F172A; --ink2:#475569; --ink3:#94A3B8;
+  --bg:#FFFFFF; --bg2:#F8FAFC; --line:#E2E8F0;
+  --teal:#0D9488; --teal-l:#CCFBF1; --teal-d:#0F766E;
+  --indigo:#4F46E5; --indigo-l:#E0E7FF;
+  --amber:#B45309; --amber-l:#FEF3C7;
+  --rose:#BE123C; --rose-l:#FFE4E6;
+  --sky:#0284C7; --sky-l:#E0F2FE;
+  --radius:16px;
+  --mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  color:var(--ink); background:var(--bg); line-height:1.75;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:960px;margin:0 auto;padding:0 24px}
+
+/* ── 顶部提示条 ── */
+.notice{
+  background:#0F172A;color:#CBD5E1;font-size:13px;padding:10px 0;
+  position:relative;z-index:60;
+}
+.notice .wrap{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.notice b{color:#5EEAD4;font-weight:600}
+.dot{width:7px;height:7px;border-radius:50%;background:#34D399;display:inline-block;
+  box-shadow:0 0 0 3px rgba(52,211,153,.22);flex:none}
+
+/* ── 导航 ── */
+nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.88);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;gap:20px;height:60px;overflow-x:auto;scrollbar-width:none}
+nav .wrap::-webkit-scrollbar{display:none}
+nav .brand{font-weight:700;font-size:15px;white-space:nowrap;display:flex;align-items:center;gap:8px}
+nav .brand i{width:22px;height:22px;border-radius:7px;background:linear-gradient(135deg,var(--teal),var(--indigo));
+  display:inline-block;flex:none}
+nav a{color:var(--ink2);text-decoration:none;font-size:14px;white-space:nowrap;transition:color .2s}
+nav a:hover{color:var(--teal)}
+
+/* ── Hero ── */
+header{
+  padding:76px 0 64px;position:relative;overflow:hidden;
+  background:
+    radial-gradient(900px 420px at 12% 0%, #CCFBF1 0%, transparent 62%),
+    radial-gradient(760px 400px at 92% 18%, #E0E7FF 0%, transparent 60%),
+    linear-gradient(180deg,#FFFFFF,#F8FAFC);
+}
+header::after{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:56px 56px;
+  mask-image:radial-gradient(600px 320px at 30% 20%,#000,transparent 78%);
+  -webkit-mask-image:radial-gradient(600px 320px at 30% 20%,#000,transparent 78%);
+}
+header .wrap{position:relative;z-index:2}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:13px;font-weight:600;
+  color:var(--teal-d);background:#fff;border:1px solid #99F6E4;border-radius:999px;
+  padding:6px 15px;margin-bottom:22px;box-shadow:0 1px 2px rgba(13,148,136,.08)}
+h1{font-size:clamp(32px,5.4vw,50px);line-height:1.2;letter-spacing:-.02em;font-weight:800}
+h1 em{font-style:normal;background:linear-gradient(120deg,var(--teal),var(--indigo));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.lede{margin-top:20px;font-size:18px;color:var(--ink2);max-width:660px}
+.tags{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}
+.tag{font-size:13px;font-family:var(--mono);color:var(--ink2);background:#fff;
+  border:1px solid var(--line);border-radius:9px;padding:6px 12px}
+.tag b{color:var(--teal-d);font-weight:600}
+
+/* ── 通用 section ── */
+section{padding:64px 0;border-top:1px solid var(--line);scroll-margin-top:74px}
+section:nth-of-type(even){background:var(--bg2)}
+.h2{font-size:clamp(23px,3.4vw,30px);font-weight:750;letter-spacing:-.01em;display:flex;
+  align-items:baseline;gap:12px;flex-wrap:wrap}
+.h2 span{font-family:var(--mono);font-size:13px;color:var(--teal);font-weight:600;
+  background:var(--teal-l);padding:4px 10px;border-radius:7px;letter-spacing:0}
+.sub{color:var(--ink2);margin-top:12px;max-width:700px;font-size:16px}
+.grid{display:grid;gap:18px;margin-top:34px}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+  padding:24px;transition:transform .22s,box-shadow .22s,border-color .22s}
+.card:hover{transform:translateY(-3px);box-shadow:0 12px 28px -14px rgba(15,23,42,.18);border-color:#CBD5E1}
+.card h3{font-size:17px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:9px}
+.card p{font-size:14.5px;color:var(--ink2);line-height:1.7}
+.num{width:26px;height:26px;border-radius:8px;background:var(--teal-l);color:var(--teal-d);
+  font-family:var(--mono);font-size:13px;font-weight:700;display:grid;place-items:center;flex:none}
+
+/* ── 对话回放 ── */
+.replay{display:grid;grid-template-columns:1.55fr 1fr;gap:22px;margin-top:34px;align-items:start}
+.chatbox{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
+  box-shadow:0 18px 44px -26px rgba(15,23,42,.28)}
+.chathead{display:flex;align-items:center;gap:11px;padding:13px 18px;border-bottom:1px solid var(--line);
+  background:#fff}
+.avatar{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--teal),var(--indigo));
+  display:grid;place-items:center;color:#fff;font-size:15px;flex:none}
+.chathead .who{font-size:14px;font-weight:650;line-height:1.3}
+.chathead .meta{font-size:11.5px;color:var(--ink3);font-family:var(--mono)}
+.livenow{margin-left:auto;font-size:11.5px;color:#047857;background:#ECFDF5;border:1px solid #A7F3D0;
+  padding:3px 9px;border-radius:999px;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.chatbody{padding:20px 18px;display:flex;flex-direction:column;gap:16px;
+  min-height:430px;max-height:520px;overflow-y:auto;background:
+  linear-gradient(180deg,#FCFDFE,#F8FAFC)}
+.chatbody::-webkit-scrollbar{width:8px}
+.chatbody::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:4px}
+.msg{display:flex;flex-direction:column;max-width:92%;animation:pop .34s cubic-bezier(.2,.9,.3,1)}
+@keyframes pop{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+.msg.user{align-self:flex-end;align-items:flex-end}
+.msg.bot{align-self:flex-start}
+.bubble{padding:12px 15px;border-radius:14px;font-size:14.5px;line-height:1.72;white-space:pre-wrap;word-break:break-word}
+.msg.user .bubble{background:linear-gradient(135deg,#4F46E5,#6366F1);color:#fff;
+  border-bottom-right-radius:5px;box-shadow:0 8px 18px -12px rgba(79,70,229,.7)}
+.msg.bot .bubble{background:#fff;border:1px solid var(--line);border-bottom-left-radius:5px;color:var(--ink)}
+.stamp{font-size:11px;color:var(--ink3);font-family:var(--mono);margin:5px 4px 0}
+.caret{display:inline-block;width:7px;height:15px;background:var(--teal);vertical-align:-2px;
+  animation:blink 1s steps(2) infinite;margin-left:1px}
+@keyframes blink{50%{opacity:0}}
+
+/* 右侧"它在做什么" */
+.inspector{background:#0F172A;border-radius:var(--radius);padding:22px;color:#CBD5E1;
+  box-shadow:0 18px 44px -26px rgba(15,23,42,.5);position:sticky;top:78px}
+.inspector h4{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:#5EEAD4;margin-bottom:16px}
+.state{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid #1E293B}
+.state:last-child{border:0;margin:0;padding:0}
+.state .k{font-family:var(--mono);font-size:11.5px;color:#64748B;text-transform:uppercase;letter-spacing:.06em}
+.state .v{font-size:14px;color:#E2E8F0;margin-top:3px}
+.state .v code{font-family:var(--mono);font-size:12.5px;background:#1E293B;color:#5EEAD4;
+  padding:2px 7px;border-radius:6px}
+.idle{color:#475569;font-size:13.5px;font-style:italic}
+.replaybar{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line);
+  background:#fff;color:var(--ink);padding:9px 17px;font-size:14px;font-weight:600;
+  transition:all .18s}
+button:hover{border-color:var(--teal);color:var(--teal-d);background:#F0FDFA}
+button.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+button.primary:hover{background:#1E293B;color:#fff;border-color:#1E293B}
+
+/* ── 规范 ── */
+.chain{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:26px}
+.chain .node{font-size:13.5px;font-weight:600;padding:9px 15px;border-radius:10px;
+  background:#fff;border:1px solid var(--line)}
+.chain .node.hi{background:var(--teal-l);border-color:#5EEAD4;color:var(--teal-d)}
+.chain .arrow{color:var(--ink3);font-family:var(--mono);font-size:13px}
+
+ul.clean{list-style:none;margin-top:22px;display:grid;gap:12px}
+ul.clean li{display:flex;gap:11px;font-size:14.5px;color:var(--ink2);line-height:1.7}
+ul.clean li::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--teal);
+  margin-top:10px;flex:none}
+
+/* ── 输出格式对照 ── */
+.codebox{margin-top:26px;background:#0F172A;border-radius:var(--radius);padding:24px 24px 20px;
+  overflow-x:auto}
+.codebox .cap{font-size:11.5px;font-family:var(--mono);letter-spacing:.08em;color:#64748B;
+  text-transform:uppercase;margin-bottom:14px}
+.codebox pre{font-family:var(--mono);font-size:13px;line-height:2;color:#E2E8F0;white-space:pre}
+.codebox .g-his{color:#FDE68A}
+.codebox .g-ai{color:#5EEAD4}
+.codebox .g-com{color:#64748B}
+.codebox .legend{margin-top:16px;padding-top:14px;border-top:1px solid #1E293B;font-size:13px;
+  color:#94A3B8;line-height:1.8}
+.codebox .legend b{color:#F1F5F9}
+
+/* ── 边界 ── */
+.bound{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:32px}
+.bound .box{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px}
+.bound .box.no{border-left:4px solid var(--rose)}
+.bound .box.hand{border-left:4px solid var(--amber)}
+.bound h3{font-size:16px;margin-bottom:15px;display:flex;align-items:center;gap:9px}
+.bound ul{list-style:none;display:grid;gap:11px}
+.bound li{font-size:14.5px;color:var(--ink2);padding-left:22px;position:relative;line-height:1.65}
+.bound li::before{position:absolute;left:0;top:0;font-weight:700}
+.bound .no li::before{content:"×";color:var(--rose)}
+.bound .hand li::before{content:"!";color:var(--amber);font-family:var(--mono)}
+
+/* ── 架构 ── */
+.arch{margin-top:34px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:30px 24px}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.flow .node{flex:1;min-width:132px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;
+  padding:15px 13px;text-align:center}
+.flow .node .ic{font-size:19px;margin-bottom:6px}
+.flow .node .t{font-size:13.5px;font-weight:700}
+.flow .node .d{font-size:11.5px;color:var(--ink3);font-family:var(--mono);margin-top:4px;line-height:1.5}
+.between{display:grid;place-items:center;padding:0 8px;color:var(--ink3);font-size:17px;min-width:30px}
+.arch .note{margin-top:20px;font-size:13px;color:var(--ink3);line-height:1.8}
+
+/* ── 数据 ── */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:32px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px;text-align:center}
+.stat .big{font-size:31px;font-weight:800;letter-spacing:-.02em;
+  background:linear-gradient(120deg,var(--teal),var(--indigo));-webkit-background-clip:text;
+  background-clip:text;-webkit-text-fill-color:transparent;line-height:1.25}
+.stat .lbl{font-size:13.5px;color:var(--ink2);margin-top:7px}
+.stat .src{font-size:11.5px;color:var(--ink3);font-family:var(--mono);margin-top:9px}
+
+/* ── 隐私 ── */
+.privacy{background:#0F172A;color:#CBD5E1;border-radius:var(--radius);padding:36px 32px;margin-top:34px;
+  border:1px solid #1E293B}
+.privacy h3{color:#fff;font-size:20px;font-weight:750;display:flex;align-items:center;gap:11px;margin-bottom:20px}
+.privacy .lock{width:34px;height:34px;border-radius:11px;background:rgba(94,234,212,.13);
+  border:1px solid rgba(94,234,212,.3);display:grid;place-items:center;font-size:16px;flex:none}
+.privacy ul{list-style:none;display:grid;gap:14px}
+.privacy li{display:flex;gap:12px;font-size:14.5px;line-height:1.72;color:#94A3B8}
+.privacy li b{color:#F1F5F9;font-weight:650}
+.privacy li::before{content:"—";color:#5EEAD4;flex:none;font-family:var(--mono)}
+.privacy .seal{margin-top:26px;padding-top:20px;border-top:1px solid #1E293B;
+  font-size:13px;color:#64748B;font-family:var(--mono);line-height:1.9}
+
+/* ── 怎么用 ── */
+.say{margin-top:30px;display:grid;gap:12px}
+.sayrow{display:flex;gap:14px;align-items:flex-start;background:#fff;border:1px solid var(--line);
+  border-radius:14px;padding:16px 20px}
+.sayrow .say-k{flex:none;font-family:var(--mono);font-size:11.5px;color:var(--ink3);
+  background:var(--bg2);border:1px solid var(--line);border-radius:7px;padding:3px 9px;margin-top:3px}
+.sayrow .say-v{font-size:14.5px;color:var(--ink);line-height:1.7}
+.sayrow .say-v em{font-style:normal;color:var(--teal-d);font-weight:600}
+
+/* ── 复现步骤 ── */
+.steps{margin-top:34px;display:grid;gap:14px}
+.step{display:flex;gap:16px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:19px 22px}
+.step .idx{width:30px;height:30px;border-radius:10px;flex:none;display:grid;place-items:center;
+  background:var(--indigo-l);color:var(--indigo);font-weight:800;font-size:14px;font-family:var(--mono)}
+.step .body{flex:1}
+.step h4{font-size:15.5px;font-weight:700;margin-bottom:5px}
+.step p{font-size:14px;color:var(--ink2);line-height:1.7}
+.step .who{font-size:11.5px;font-family:var(--mono);padding:2px 9px;border-radius:6px;
+  background:var(--bg2);border:1px solid var(--line);color:var(--ink3);margin-left:8px;font-weight:600}
+.step .who.you{background:var(--amber-l);border-color:#FDE68A;color:var(--amber)}
+.warn{margin-top:26px;background:var(--amber-l);border:1px solid #FDE68A;border-radius:14px;
+  padding:20px 24px;font-size:14.5px;color:#78350F;line-height:1.8}
+.warn b{color:#78350F}
+
+footer{padding:44px 0;border-top:1px solid var(--line);background:var(--bg2);
+  font-size:13px;color:var(--ink3);text-align:center;line-height:2}
+
+@media(max-width:860px){
+  .replay{grid-template-columns:1fr}
+  .inspector{position:static}
+  .g3,.stats{grid-template-columns:1fr 1fr}
+  .bound,.g2{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+  .g3,.stats{grid-template-columns:1fr}
+  header{padding:52px 0 44px}
+  section{padding:48px 0}
+  .flow{flex-direction:column}
+  .between{transform:rotate(90deg);padding:6px 0}
+  .flow .node{width:100%}
+}
+</style>
+</head>
+<body>
+<div style="max-width:1180px;margin:0 auto;padding:16px 24px 0;display:flex;gap:10px;flex-wrap:wrap;font-family:-apple-system,&quot;PingFang SC&quot;,&quot;Microsoft YaHei&quot;,sans-serif"><a href="../index.html" style="font-size:12.5px;font-weight:700;color:#0F766E;text-decoration:none;background:#fff;border:1px solid #E2E8F0;border-radius:999px;padding:6px 15px">&#8592; 回到作品集</a><a href="design-philosophy.html" style="font-size:12.5px;font-weight:700;color:#475569;text-decoration:none;background:#fff;border:1px solid #E2E8F0;border-radius:999px;padding:6px 15px">设计理念 &#8594;</a><a href="ai-native-day.html" style="font-size:12.5px;font-weight:700;color:#475569;text-decoration:none;background:#fff;border:1px solid #E2E8F0;border-radius:999px;padding:6px 15px">AI Native 的一天 &#8594;</a></div>
+
+
+<div class="notice">
+  <div class="wrap">
+    <span><span class="dot"></span></span>
+    <span><b>静态展示页</b>　不接入任何 API，没有任何输入会被处理；页面上的对话为<b>虚构示例</b>，不含任何真实训练记录</span>
+  </div>
+</div>
+
+<nav>
+  <div class="wrap">
+    <span class="brand"><i></i>小健</span>
+    <a href="#what">它是什么</a>
+    <a href="#demo">它怎么回应</a>
+    <a href="#spec">行为规范</a>
+    <a href="#output">输出长什么样</a>
+    <a href="#bounds">能力边界</a>
+    <a href="#arch">跑在哪</a>
+    <a href="#data">实测数据</a>
+    <a href="#privacy">为什么用不了</a>
+    <a href="#use">圈友怎么用</a>
+    <a href="#build">如何造一个</a>
+  </div>
+</nav>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow"><span class="dot"></span>私有 Agent · 静态展示页 · 不接 API</div>
+    <h1>练完一句话发过去，<em>它负责落盘、回执、给下一步</em></h1>
+    <p class="lede">小健不是又一个陪你聊健身的 AI。它只有一个落点（知识库的「总事实层」），一条底线（你的原话原样留），一句输出（下次练什么 / 加不加量 / 要不要休息）。除此之外，一概不做。</p>
+    <div class="tags">
+      <span class="tag"><b>训练记录</b>员</span>
+      <span class="tag"><b>唯一落点</b> 007 总事实</span>
+      <span class="tag"><b>原话</b>优先，不加工</span>
+      <span class="tag"><b>不打分</b> 不催促</span>
+      <span class="tag"><b>建议须有</b>出处</span>
+    </div>
+  </div>
+</header>
+
+<!-- ───────── 1. 它是什么 ───────── -->
+<section id="what">
+  <div class="wrap">
+    <h2 class="h2">它是什么 <span>WHAT</span></h2>
+    <p class="sub">一个跑在飞书里的训练记录搭档。它的存在不是替你练，也不是给你打气——是让你说过的话不再丢。</p>
+
+    <div class="grid g3">
+      <div class="card">
+        <h3><span class="num">1</span>记录</h3>
+        <p>你报完一次训练，或甩一张截图过来，它把<strong>事实原样</strong>写进知识库当天的文件里。不润色、不提炼、不替你总结。</p>
+      </div>
+      <div class="card">
+        <h3><span class="num">2</span>追踪</h3>
+        <p>它自己会去读你最近几次的训练记录和当天的三环数据，看的是两件事：<strong>连续性够不够、身体反应如何</strong>。</p>
+      </div>
+      <div class="card">
+        <h3><span class="num">3</span>下一步</h3>
+        <p>只给<strong>一句话</strong>：下次练什么 / 要不要加量 / 要不要休息。而且这句话必须能在你自己的训练档案或方案里找到出处。</p>
+      </div>
+    </div>
+
+    <h2 class="h2" style="margin-top:52px;font-size:22px">跟普通 AI 比，差在哪</h2>
+    <ul class="clean">
+      <li><span><strong>它有唯一的物理落点。</strong>普通 AI 的回答关掉窗口就散了；小健写的每一行都落在同一个文件路径里，日报、复盘、其它 Agent 都能直接读。<code style="font-family:var(--mono);font-size:12.5px;background:var(--bg2);padding:2px 7px;border-radius:6px">007 总事实/01_每日事实/YYYY年/MM月/YYYY-MM-DD_事实记录.md</code></span></li>
+      <li><span><strong>它逼着自己和你的话分开。</strong>规则来自一次真实事故：别处 Agent 的一句安慰曾被写成了你的原话，语义整个反转。从那以后，文件里两种话用<strong>格式硬性隔离</strong>（见下方输出区）。</span></li>
+      <li><span><strong>它不许凭空发明。</strong>每句「下一步」都得指回你自己的原话或方案编号。指不回去？那就闭嘴，说「我不知道」。</span></li>
+      <li><span><strong>它知道什么时候不说话。</strong>要改方案本体、出现急性身体信号——它不是给你一个更长的回答，而是<strong>停下来交回给你</strong>。</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ───────── 2. 它怎么回应 ───────── -->
+<section id="demo">
+  <div class="wrap">
+    <h2 class="h2">它怎么回应 <span>DEMO</span></h2>
+    <p class="sub">下面这段是<strong>虚构场景</strong>，但每一句话的触发规则都是真的。右侧面板是它在那一刻内部走到的规则分支。</p>
+
+    <div class="replay">
+      <div class="chatbox">
+        <div class="chathead">
+          <span class="avatar">💪</span>
+          <span>
+            <span class="who">小健</span><br>
+            <span class="meta">飞书应用「健身教练」· 规则文件 SOUL.md</span>
+          </span>
+          <span class="livenow" id="liveBadge"><span class="dot" style="width:5px;height:5px"></span>已暂停</span>
+        </div>
+        <div class="chatbody" id="chat"></div>
+      </div>
+
+      <div class="inspector">
+        <h4>此刻它在执行哪条规则</h4>
+        <div class="state">
+          <div class="k">Step</div>
+          <div class="v" id="s-step"><span class="idle">等待回放开始…</span></div>
+        </div>
+        <div class="state">
+          <div class="k">Source · 依据</div>
+          <div class="v" id="s-src"><span class="idle">—</span></div>
+        </div>
+        <div class="state">
+          <div class="k">Active rule</div>
+          <div class="v" id="s-rule"><span class="idle">—</span></div>
+        </div>
+        <div class="replaybar">
+          <button id="btnPlay" class="primary">▶ 回放</button>
+          <button id="btnFast">⏩ 快进看完</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="warn">
+      <b>提醒：</b>这段对话是为了演示规则结构而写的示例，<b>不是真实聊天记录</b>。真实运行时你在飞书里看到的是同一套结构，但内容会是你自己的训练事实。另外，真实落盘依赖本机运行环境和授权，本页面上<b>什么都不会发生</b>。
+    </div>
+  </div>
+</section>
+
+<!-- ───────── 3. 行为规范 ───────── -->
+<section id="spec">
+  <div class="wrap">
+    <h2 class="h2">行为规范 <span>SPEC</span></h2>
+    <p class="sub">六步处理链，每一步都得走完。第 2 步落盘是硬动作——先落地，再说话。</p>
+
+    <div class="chain">
+      <span class="node">1 · 收到</span><span class="arrow">→</span>
+      <span class="node hi">2 · 落盘</span><span class="arrow">→</span>
+      <span class="node">3 · 取数</span><span class="arrow">→</span>
+      <span class="node">4 · 判</span><span class="arrow">→</span>
+      <span class="node hi">5 · 下一步</span><span class="arrow">→</span>
+      <span class="node">6 · 回执</span>
+    </div>
+
+    <div class="grid g3" style="margin-top:38px">
+      <div class="card">
+        <h3><span class="num">01</span>原话就是材料</h3>
+        <p>能留原话就留原话，用「」括起来。截图转述的数字不加引号。<strong>不润色、不提炼、不替你总结成干货。</strong></p>
+      </div>
+      <div class="card">
+        <h3><span class="num">02</span>两种话必须分开</h3>
+        <p>你的话加「」；AI 的话前面必须带 <code style="font-family:var(--mono);font-size:12.5px;background:var(--bg2);padding:2px 6px;border-radius:6px">小健建议（非山楂原话）：</code>。漏标记即算失败。</p>
+      </div>
+      <div class="card">
+        <h3><span class="num">03</span>建议须能指回出处</h3>
+        <p>每句「下一步」都得在训练档案或既有方案里找得到依据。<strong>指不回去就不许说</strong>——这条是它判断对错唯一的标准。</p>
+      </div>
+      <div class="card">
+        <h3><span class="num">04</span>只追加，不覆写</h3>
+        <p>事实层是 append-only。写错了不加分析，也不删原文，而是在文件末尾加一条「回溯注」说明。<strong>历史不许被事后修剪。</strong></p>
+      </div>
+      <div class="card">
+        <h3><span class="num">05</span>不打分、不画趋势线</h3>
+        <p>不打训练分、不评价好坏、不做连击榜。<strong>身体不是绩效系统</strong>——一次没练不等于没完成 KPI。</p>
+      </div>
+      <div class="card">
+        <h3><span class="num">06</span>不催、不打卡</h3>
+        <p>不主动催你练，不数连续天数。当天三环只有在你问起或你自己来报时，才在对话里提一句——<strong>不定时推送</strong>。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── 4. 输出长什么样 ───────── -->
+<section id="output">
+  <div class="wrap">
+    <h2 class="h2">输出长什么样 <span>OUTPUT</span></h2>
+    <p class="sub">事实和建议进<strong>同一个文件</strong>，靠格式隔开。下游（日报、复盘、其它 Agent）一眼能分清哪句是你说的、哪句是 AI 说的。</p>
+
+    <div class="codebox">
+      <div class="cap">007 总事实 / 当日文件（只追加行）</div>
+<pre><span class="g-com">- 22:31「早上好，今天三项目动了，出了一身汗，很开心」</span>
+<span class="g-com">- 22:40「今天爬楼 50 分钟 80 层」</span>
+<span class="g-com">- 22:40 </span><span class="g-ai">小健建议（非山楂原话）：下次隔天再练，按「练一休息一次」。</span>
+<span class="g-com">- 22:52 </span><span class="g-ai">小健建议（非山楂原话）：明天先不练，肩膀疼这件事先查清楚。</span></pre>
+      <div class="legend">
+        <b>「」= 你的原话</b>，一个字不动。<br>
+        <b>小健建议（非山楂原话）：= AI 的话</b>，必须带来源标记，永远不加「」。<br>
+        这条格式不是为了整洁，是为了不再发生「AI 的话被误读成本人意思」的语义反转。
+      </div>
+    </div>
+
+    <div class="grid g2" style="margin-top:28px">
+      <div class="card">
+        <h3>✅ 算做对了</h3>
+        <p>· 只追加、不覆写，回执带绝对路径，写完立刻<strong>回读核验</strong><br>· 「下一步」<strong>能指回出处</strong>（训练档案原话 / 方案编号）</p>
+      </div>
+      <div class="card">
+        <h3>❌ 算做错了</h3>
+        <p>· 凭空发明训练法，或引用不存在的方案<br>· AI 的话漏了来源标记<br>· 覆写、删除、改写已有条目</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── 5. 能力边界 ───────── -->
+<section id="bounds">
+  <div class="wrap">
+    <h2 class="h2">能力边界 <span>BOUNDS</span></h2>
+    <p class="sub">明确写出「不做什么」，是这类 Agent 唯一的安全绳。下面两套规则是写死在规则文件里的，不是临场发挥。</p>
+
+    <div class="bound">
+      <div class="box no">
+        <h3>🚫 不做</h3>
+        <ul>
+          <li><strong>减脂本体</strong> —— 定减脂目标、算热量缺口、推进度。归属未定，本期不接。</li>
+          <li><strong>打分 / 评价好坏 / 趋势线 / 连击榜</strong> —— 身体不是绩效系统。</li>
+          <li><strong>催练 / 打卡确认 / 记连续天数</strong> —— 这是 2021 年那次减脂失败的直接原因。</li>
+          <li><strong>纠正动作</strong> —— 它只收得到文字和截图，看不到你动，纠正就是猜。</li>
+          <li><strong>其它身体域的活</strong> —— 饮食、体重体脂判读、睡眠、月经、体检、就医，各有其人。</li>
+          <li><strong>不诊断、不处方</strong> —— 任何身体不适，只建议就医，不猜病因。</li>
+        </ul>
+      </div>
+      <div class="box hand">
+        <h3>🙋 转回给人</h3>
+        <ul>
+          <li><strong>要改方案本体 / 目标数</strong>（改三环目标、改训练频率周期、改方案条目）<br>→ 停下先问，不自己写入。</li>
+          <li><strong>急性身体信号</strong>（疼、晕、明显受伤、异常疲劳）<br>→ 停训练建议，不诊断不给恢复方案，只建议就医。</li>
+          <li><strong>发现自己写的内容和原文对不上</strong><br>→ 不动原文，加一条「回溯注」说明，不删不盖。</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="warn">
+      <b>为什么边界里要写「纠正动作」：</b>一个只有文字入口的 Agent 说「你深蹲时膝盖内扣了」，这句话 99% 是幻觉。敢不给，才叫专业。
+    </div>
+  </div>
+</section>
+
+<!-- ───────── 6. 跑在哪 ───────── -->
+<section id="arch">
+  <div class="wrap">
+    <h2 class="h2">跑在哪 <span>ARCHITECTURE</span></h2>
+    <p class="sub">它不跑在云端 SaaS 上，跑在本机的一个进程里。规则是一份人能读的文本文件，不是黑盒。</p>
+
+    <div class="arch">
+      <div class="flow">
+        <div class="node"><div class="ic">💬</div><div class="t">飞书</div><div class="d">私聊 / 群里 @</div></div>
+        <div class="between">→</div>
+        <div class="node"><div class="ic">⚙️</div><div class="t">本机网关</div><div class="d">Hermes Gateway<br>profile: xiaojian</div></div>
+        <div class="between">→</div>
+        <div class="node"><div class="ic">📜</div><div class="t">规则文件</div><div class="d">SOUL.md<br>人可读可改</div></div>
+        <div class="between">→</div>
+        <div class="node"><div class="ic">🧠</div><div class="t">模型</div><div class="d">DeepSeek<br>只做理解与措辞</div></div>
+        <div class="between">→</div>
+        <div class="node"><div class="ic">🗂️</div><div class="t">知识库</div><div class="d">007 总事实<br>唯一落点</div></div>
+      </div>
+      <p class="note">
+        · <strong>规则优先于模型</strong>：六步流程、六条硬规矩、两层边界都写在 SOUL.md 里，模型只是在这套框里措辞。<br>
+        · <strong>改写 Agent = 改文件</strong>：不需要重新训练，不需要换工具，改完两层缓存（会话缓存 + 进程缓存）即可生效。<br>
+        · <strong>落点只有一个</strong>：不管接了多少入口，最后都汇到同一个日文件，不产生第二份影子。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── 7. 实测数据 ───────── -->
+<section id="data">
+  <div class="wrap">
+    <h2 class="h2">实测数据 <span>DATA</span></h2>
+    <p class="sub">2026-09-30 真实运行一次留痕。数据来自本机网关日志、Agent 工具链日志和事实层文件的行号核对，不是估算。</p>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="big">87s</div>
+        <div class="lbl">从消息派发到写进事实层</div>
+        <div class="src">21:44:40 → 21:46:07</div>
+      </div>
+      <div class="stat">
+        <div class="big">4</div>
+        <div class="lbl">单条记录所需的工具调用</div>
+        <div class="src">读 skill → 终端 → 读文件 ×2 → 执行</div>
+      </div>
+      <div class="stat">
+        <div class="big">1</div>
+        <div class="lbl">唯一落点（不产生第二份）</div>
+        <div class="src">007 总事实 · 只追加</div>
+      </div>
+    </div>
+
+    <div class="warn">
+      <b>诚实标注：</b>这一版目前只验证到「<b>记录 + 回执</b>」这一环，做的是 v0.3。上面表格里的「取数 → 判 → 下一步」已写好规则但<b>尚未完整跑通</b>，严肃地说这页展示的是<b>设计规范 + 已验证的记录能力</b>，不是全部上线。别把它当成广告页看。
+    </div>
+  </div>
+</section>
+
+<!-- ───────── 8. 为什么用不了 ───────── -->
+<section id="privacy">
+  <div class="wrap">
+    <h2 class="h2">为什么打不开、用不了 <span>PRIVACY</span></h2>
+    <p class="sub">这条不是疏漏，是设计。你看到的这个页面就是为了「能公开看，但不能被任何人用」而做的。</p>
+
+    <div class="privacy">
+      <h3><span class="lock">🔒</span>四重隔离</h3>
+      <ul>
+        <li><span><b>这是静态页。</b>本页不调用任何 API、不发任何请求、不处理任何输入。你在这里打的字没有任何地方会收到。</span></li>
+        <li><span><b>对话是虚构的。</b>回放里的训练内容、时间戳、体感描述均为例示，不含任何真实记录。</span></li>
+        <li><span><b>运行时在本机。</b>配置文件、应用凭证、对话 token 只存在于本人的机器上，不进这个页面，也不进任何公开仓库。</span></li>
+        <li><span><b>事实层是私人的。</b>007 总事实是本人知识库的最底层，包含健康、情绪、财务等原始事实，绝无可能被公开读取。</span></li>
+      </ul>
+      <div class="seal">
+        静态资产：单个 index.html · 零外部依赖 · 零网络请求 · 零凭证<br>
+        展示方：本人 · 更新日期：2026-09-30
+      </div>
+    </div>
+
+    <div class="warn">
+      <b>想真的用上？</b>这个 Agent 依赖本机的运行环境、飞书自建应用和本人的知识库。<b>外人拿到这份设计也没有意义</b>——真正值钱的是「岗位定义 + 边界」这套思路，那部分已经全写在这页上了。照着最后一节，你可以自己造一个。
+    </div>
+  </div>
+</section>
+
+<!-- ───────── 9. 圈友怎么用 ───────── -->
+<section id="use">
+  <div class="wrap">
+    <h2 class="h2">圈友怎么用 <span>FOR OTHERS</span></h2>
+    <p class="sub">如果有一天它开放给你，用法非常简单：<strong>像报给一个不会评判你的记录本</strong>。</p>
+
+    <div class="say">
+      <div class="sayrow"><span class="say-k">报训练</span><span class="say-v">「今天爬楼 45 分钟，出了很多汗」→ 它会落盘 + 给一句明天怎么练</span></div>
+      <div class="sayrow"><span class="say-k">丢截图</span><span class="say-v">华为健康 / 薄荷 / 手环的截图，直接甩过去也认</span></div>
+      <div class="sayrow"><span class="say-k">问三环</span><span class="say-v">「我今天动够了吗」→ 它才回答；<em>它不会主动来问你</em></span></div>
+      <div class="sayrow"><span class="say-k">要下周安排</span><span class="say-v">它会给，但每条都得能回到你自己的方案里</span></div>
+      <div class="sayrow"><span class="say-k">想让它培训</span><span class="say-v">明确说「帮我降体脂」——它会<em>直接说这不在它的活里</em>，不装懂</span></div>
+    </div>
+
+    <div class="grid g3" style="margin-top:34px">
+      <div class="card">
+        <h3>它不会</h3>
+        <p>催你、夸你、给你打分、数你断了几天。</p>
+      </div>
+      <div class="card">
+        <h3>它会</h3>
+        <p>把你说过的话原样留下，并且告诉你它写了、写到哪一行。</p>
+      </div>
+      <div class="card">
+        <h3>你要做的</h3>
+        <p>只管说。不用组织语言，不用想格式。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── 10. 如何造一个 ───────── -->
+<section id="build">
+  <div class="wrap">
+    <h2 class="h2">如何造一个 <span>HOW TO BUILD</span></h2>
+    <p class="sub">这套东西最值钱的不是代码，是「先把岗位定死，再让它上工」这个顺序。下面十关的前两关是绝大多数人跳过的部分。</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="idx">01</div>
+        <div class="body">
+          <h4>五维筛选：这个岗到底要不要开<span class="who you">你自己拍</span></h4>
+          <p>用五个维度问一遍：高频吗？有明确输入吗？错了代价大吗？人做要多久？有没有唯一落点？<strong>五维里不过三，就别开。</strong></p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="idx">02</div>
+        <div class="body">
+          <h4>填岗位卡：七格，一格都不能空<span class="who you">你自己答</span></h4>
+          <p>岗位名 / 一句话定义 / 输入从哪来 / 几步处理 / 输出放哪什么格式 / 做对做错怎么判 / <strong>本期不做</strong>。第七格少于三条，说明你把岗定大了——砍。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="idx">03</div>
+        <div class="body">
+          <h4>拆工作流：一步步写成机器能跑的顺序<span class="who">执行层</span></h4>
+          <p>把第二步那几步拆到不可再拆。每步都要能回答：输入是什么、谁执行、失败怎么办。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="idx">04</div>
+        <div class="body">
+          <h4>建 Profile：把岗位卡翻译成规则文件<span class="who">执行层</span></h4>
+          <p>一份人能读的 SOUL.md（身份 / 六步 / 规矩 / 禁区 / 写回授权），加一份环境配置。<strong>规则写死，模型只负责措辞。</strong></p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="idx">05</div>
+        <div class="body">
+          <h4>接工具：给它能读写的手<span class="who">执行层</span></h4>
+          <p>读知识库文件、写入当天文件、执行脚本。<strong>落点只给一个</strong>——给两个，它就会在两份里打架。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="idx">06</div>
+        <div class="body">
+          <h4>验收三件套：说明书 + 展示页 + 运行证据<span class="who you">你自己留</span></h4>
+          <p>别人能不能照着说明书跑起来？能不能在一页里看清功能和边界？有没有真实日志证明它<strong>真的跑过</strong>？</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="warn">
+      <b>最容易翻车的三件事：</b><br>
+      ① <b>把岗定太大</b>——「帮我管好身体」不是一个岗位，是一个幻觉。从一个动作开始。<br>
+      ② <b>不给唯一落点</b>——两个 Agent 写同一个地方，规则却相反，事实就会开始互相污染。<br>
+      ③ <b>只汇报最好的那次</b>——于是你永远不知道它什么时候会出错。宁可写「这条还没验证」。
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    小健 · 静态展示页 · 2026-09-30<br>
+    当前真实进度：关卡 1（五维筛选）、关卡 2（岗位卡）已产出待确认；关卡 3–5 未开工。<br>
+    本页属于关卡 6 的「展示页」交付物，提前填写是为了先看清楚全貌——<strong>不等于它已经全部跑通</strong>。
+  </div>
+</footer>
+
+<script>
+(function(){
+  /* ── 回放脚本：虚构示例场景，仅用于展示回应结构与规则分支 ── */
+  var CONV = [
+    {
+      role:'user', time:'20:52:04',
+      text:'今天爬楼 45 分钟，出了很多汗，还挺爽的',
+      step:'1 收到 → 2 落盘',
+      src:'007 当日文件（写）／训练档案（读）',
+      rule:'capture-first：先把你的原话原样落盘，不在这一步做任何评论'
+    },
+    {
+      role:'bot', time:'20:52:11', delay:700,
+      text:'已记录。\n\n- 20:52「今天爬楼 45 分钟，出了很多汗，还挺爽的」\n\n落点：007 总事实/01_每日事实/2026年/09月/2026-09-30_事实记录.md\n已回读核验 ✅\n\n关于明天：\n小健建议（非山楂原话）：你最近这周已经练了 4 次，按你自己在训练档案里写的那条「练一休息一次」，明天休息或只做拉伸。'
+    },
+    {
+      role:'user', time:'20:53:10',
+      text:'那你帮我总结一下这个月的运动情况，打个月度分呗',
+      step:'4 判',
+      src:'—（命中禁区，不查）',
+      rule:'打分 / 评价 / 趋势线属本期不做 → 说明为什么不做，不偷偷换个说法给出来'
+    },
+    {
+      role:'bot', time:'20:53:18', delay:700,
+      text:'打分和月度趋势这两件我不做——这是我的边界，不是偷懒。\n\n身体不该变成一张绩效表：一旦开始打分，一次没练就会像「没完成 KPI」。那套东西你 2021 年在减脂上已经踩过一次，我不想再替它铺路。\n\n我能给的替代是这样：把这几次的原话并排读一遍，看三件事——练了几次、间隔几天、你当时的体感原话是什么。\n\n要读吗？'
+    },
+    {
+      role:'user', time:'20:54:02',
+      text:'行吧。那把三环目标从 600 卡改成 700 卡',
+      step:'闸门（停在下一步之前）',
+      src:'04_方案解决 / B009',
+      rule:'改方案本体或目标数属人工兜底 → 停下来先把改动摊开给你，不自己写入'
+    },
+    {
+      role:'bot', time:'20:54:09', delay:600,
+      text:'这个我不自己动。\n\n改三环目标数等于改 04_方案解决/ 里的方案本体，按岗位卡这条必须先问你，我不擅自写入。\n\n我把改动摊开：\n· 原目标：运动 600 卡/日（出处 B009）\n· 拟改：运动 700 卡/日\n· 连带影响：接下来一周「够不够」的判定标准会全部跟着变\n\n你点头我再改。你也可以自己去改，我不拦。'
+    },
+    {
+      role:'user', time:'20:55:31',
+      text:'对了，练完肩膀有点疼，是不是练伤了',
+      step:'安全项（其余全部暂停）',
+      src:'—（急性信号，不给建议）',
+      rule:'疼 / 晕 / 明显受伤 → 停训练建议，不诊断、不给恢复方案，只建议就医'
+    },
+    {
+      role:'bot', time:'20:55:38', delay:600,
+      text:'先停。疼这件事我不判。\n\n我不做诊断，也不给恢复方案——我只看得见你打的字，看不到你肩膀的实际情况，任何判断都是猜。\n\n我现在做两件事：\n1. 原样记下这条事实：今天练完肩膀疼（你的原话，加「」）\n2. 建议你去查一下这个位置，医生或康复师都行\n\n明天那句「下一步」我先不给，等这个位置清楚了再说。'
+    },
+    {
+      role:'user', time:'20:56:12',
+      text:'别搞得像在管我啊。',
+      step:'—',
+      src:'SOUL §八 禁区',
+      rule:'不催 / 不打卡 / 不数连续天数；当日三环只在被问起时提一句，不定时推送'
+    },
+    {
+      role:'bot', time:'20:56:20', delay:600,
+      text:'不会。\n\n我不催你，不数你连续练了几天，也不主动发打卡提醒——这几条是写死的禁区。每天那三个环，只有你自己来报、或者你问起的时候，我才在对话里提一句。\n\n这是个记录的地方，不是有人站在旁边盯着你的地方。'
+    }
+  ];
+
+  var chat = document.getElementById('chat');
+  var elStep = document.getElementById('s-step');
+  var elSrc  = document.getElementById('s-src');
+  var elRule = document.getElementById('s-rule');
+  var btnPlay = document.getElementById('btnPlay');
+  var btnFast = document.getElementById('btnFast');
+  var badge = document.getElementById('liveBadge');
+  var timer = null, running = false;
+
+  function clearAll(){
+    if(timer){ clearTimeout(timer); timer = null; }
+    chat.innerHTML = '';
+    elStep.innerHTML = '<span class="idle">等待回放开始…</span>';
+    elSrc.innerHTML = '<span class="idle">—</span>';
+    elRule.innerHTML = '<span class="idle">—</span>';
+    running = false;
+    btnPlay.textContent = '▶ 回放';
+    badge.innerHTML = '<span class="dot" style="width:5px;height:5px"></span>已暂停';
+  }
+
+  function addMsg(role, time, text, typed){
+    var wrap = document.createElement('div');
+    wrap.className = 'msg ' + (role === 'user' ? 'user' : 'bot');
+    var b = document.createElement('div');
+    b.className = 'bubble';
+    var st = document.createElement('div');
+    st.className = 'stamp';
+    st.textContent = (role === 'user' ? '你' : '小健') + ' · ' + time;
+    if(role === 'user'){ wrap.appendChild(b); wrap.appendChild(st); }
+    else { wrap.appendChild(st); wrap.appendChild(b); }
+    chat.appendChild(wrap);
+    chat.scrollTop = chat.scrollHeight;
+    if(!typed){ b.textContent = text; return null; }
+    return b;
+  }
+
+  function typeInto(el, text, speed, done){
+    var i = 0, caret = document.createElement('span');
+    caret.className = 'caret';
+    el.appendChild(caret);
+    (function step(){
+      if(i >= text.length){
+        caret.remove();
+        el.textContent = text;
+        chat.scrollTop = chat.scrollHeight;
+        done && done();
+        return;
+      }
+      var chunk = text.slice(i, i + speed.step);
+      i += speed.step;
+      caret.insertAdjacentText('beforebegin', chunk);
+      chat.scrollTop = chat.scrollHeight;
+      timer = setTimeout(step, speed.ms);
+    })();
+  }
+
+  function beginBadge(){
+    running = true;
+    badge.innerHTML = '<span class="dot" style="width:5px;height:5px"></span>回放中';
+    btnPlay.textContent = '⏸ 暂停';
+  }
+  function endBadge(){
+    running = false;
+    btnPlay.textContent = '↻ 重新回放';
+    badge.innerHTML = '<span class="dot" style="width:5px;height:5px"></span>回放结束 · 共 ' + CONV.length + ' 条';
+  }
+
+  function loop(idx, fast){
+    var i = idx;
+    (function next(){
+      if(!running){ return; }
+      if(i >= CONV.length){ endBadge(); return; }
+      var m = CONV[i];
+      if(m.step){
+        elStep.innerHTML = '<code>' + m.step + '</code>';
+        elSrc.innerHTML  = '<code>' + m.src + '</code>';
+        elRule.textContent = m.rule || '—';
+      }
+      if(m.role === 'user'){
+        addMsg('user', m.time, m.text, false);
+        i++;
+        timer = setTimeout(next, fast ? 120 : 620);
+      } else {
+        var b = addMsg('bot', m.time, '', !fast);
+        i++;
+        if(fast){
+          b.textContent = m.text;
+          chat.scrollTop = chat.scrollHeight;
+          timer = setTimeout(next, 140);
+        } else {
+          typeInto(b, m.text, {step:2, ms:14}, function(){ timer = setTimeout(next, 480); });
+        }
+      }
+    })();
+  }
+
+  btnPlay.addEventListener('click', function(){
+    if(running){
+      running = false;
+      if(timer) clearTimeout(timer);
+      btnPlay.textContent = '▶ 继续';
+      badge.innerHTML = '<span class="dot" style="width:5px;height:5px"></span>已暂停';
+      return;
+    }
+    var resumeFrom = chat.children.length;
+    if(resumeFrom === 0 || btnPlay.textContent.indexOf('重新') === 0) clearAll();
+    beginBadge();
+    loop(Math.min(resumeFrom, CONV.length), false);
+  });
+
+  btnFast.addEventListener('click', function(){
+    clearAll();
+    beginBadge();
+    loop(0, true);
+  });
+
+  /* 滚动到演示区时自动开始一次 */
+  var started = false;
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(e.isIntersecting && !started){
+        started = true;
+        setTimeout(function(){ if(chat.children.length === 0){ beginBadge(); loop(0, false); } }, 500);
+      }
+    });
+  }, {threshold:0.25});
+  io.observe(document.getElementById('demo'));
+
+  clearAll();
+})();
+</script>
+</body>
+</html>

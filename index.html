@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>山楂的 Agent 系统 · 作品集</title>
+<style>
+  /* 配色沿用内页（心理咨询 / 小健 那套）：石板灰 + 青绿 */
+  :root{
+    --ink:#0F172A; --ink2:#475569; --ink3:#94A3B8;
+    --bg:#F8FAFC; --card:#FFFFFF; --line:#E2E8F0; --line2:#CBD5E1;
+    --teal:#0D9488; --teal-l:#CCFBF1; --teal-d:#0F766E;
+    --indigo:#4F46E5; --indigo-l:#E0E7FF;
+    --amber:#B45309; --amber-l:#FEF3C7;
+    --sky:#0284C7; --sky-l:#E0F2FE;
+    --rose:#BE123C; --rose-l:#FFE4E6;
+    --radius:16px;
+    --shadow:0 1px 2px rgba(16,24,40,.04),0 8px 24px rgba(16,24,40,.06);
+    --shadow-lg:0 2px 4px rgba(16,24,40,.04),0 18px 48px rgba(16,24,40,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;
+    background:
+      radial-gradient(1100px 620px at 6% -10%,rgba(13,148,136,.10) 0%,transparent 60%),
+      radial-gradient(820px 520px at 98% 2%,rgba(79,70,229,.09) 0%,transparent 55%),
+      radial-gradient(900px 560px at 50% 108%,rgba(2,132,199,.07) 0%,transparent 60%),
+      linear-gradient(165deg,
+        #ECFDF5 0%,
+        #F0F9FF 22%,
+        #F8FAFC 44%,
+        #EEF2FF 72%,
+        #F5F3FF 100%);
+    background-attachment:fixed;
+    color:var(--ink); -webkit-font-smoothing:antialiased; min-height:100vh;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px 90px}
+
+  .hero{padding:78px 0 40px}
+  .kicker{font-size:12.5px;letter-spacing:3.5px;color:var(--teal);font-weight:700;margin-bottom:16px}
+  .hero h1{font-size:44px;font-weight:800;letter-spacing:-.5px;line-height:1.2;color:var(--ink)}
+  .hero h1 em{font-style:normal;background:linear-gradient(92deg,var(--teal-d),var(--teal) 45%,var(--indigo));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .hero p.lead{font-size:16px;color:var(--ink2);line-height:1.85;margin-top:20px;max-width:780px}
+  .hero p.lead b{color:var(--teal-d);font-weight:700}
+  .stats{display:flex;gap:14px;margin-top:34px;flex-wrap:wrap}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px 22px;min-width:170px;box-shadow:var(--shadow)}
+  .stat b{display:block;font-size:30px;font-weight:800;color:var(--teal);letter-spacing:-.5px}
+  .stat b.i{color:var(--indigo)}
+  .stat b.a{color:var(--amber)}
+  .stat span{font-size:12px;color:var(--ink3);display:block;margin-top:4px;letter-spacing:.4px}
+  .hero-claim{font-size:24px;font-weight:800;line-height:1.5;color:var(--ink);
+    margin-top:24px;max-width:840px;letter-spacing:.2px}
+  .hero-claim b{color:var(--teal-d)}
+
+  section{margin-top:58px}
+  .sec-h{display:flex;align-items:baseline;gap:14px;margin-bottom:20px;flex-wrap:wrap}
+  .sec-h h2{font-size:22px;font-weight:800;letter-spacing:.2px;color:var(--ink)}
+  .sec-h em{font-size:13px;color:var(--ink3);font-style:normal}
+  .sec-h i{flex:1;height:1px;background:linear-gradient(90deg,var(--line2),transparent)}
+
+  /* ============ 关系图 ============ */
+  .flow{background:var(--card);border:1px solid var(--line);border-radius:20px;
+    padding:38px 26px 34px;display:flex;flex-direction:column;align-items:center;box-shadow:var(--shadow)}
+  .node{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:13px 20px;
+    text-align:center;min-width:186px;position:relative;z-index:2;box-shadow:var(--shadow)}
+  .node .nt{font-size:15px;font-weight:800;letter-spacing:.2px;color:var(--ink)}
+  .node .nr{font-size:11px;color:var(--ink3);font-weight:700;margin-top:3px;letter-spacing:.6px}
+  .node .ns{font-size:11.5px;color:var(--ink2);margin-top:7px;line-height:1.6;max-width:230px}
+  .node.click{cursor:pointer;transition:.15s}
+  .node.click:hover{border-color:var(--teal);box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+  .node.click .nt:after{content:" ↗";color:var(--teal);font-size:12px}
+  .node.click:hover .nt{color:var(--teal-d)}
+  .node.terminal{background:var(--teal-l);border-color:#99F6E4}
+  .node.terminal .nt{color:var(--teal-d)}
+  .node .badge{position:absolute;top:-9px;right:12px;font-size:10px;font-weight:700;
+    background:#fff;color:var(--teal-d);border:1px solid #99F6E4;border-radius:20px;padding:2px 9px}
+  .node.accent-rose .badge{background:#FFE4E6;color:#9F1239;border-color:#FECDD3}
+  .node.accent-rose:hover{border-color:#9F1239}
+  .node.accent-rose:hover .nt{color:#9F1239}
+  .node.accent-rose.click .nt:after{color:#9F1239}
+
+  .vline{width:2px;height:28px;background:var(--line2)}
+  .vline.tall{height:40px}
+  .fork,.merge{position:relative;width:100%;display:flex;flex-direction:column;align-items:center}
+  .fork .hline,.merge .hline{width:75%;height:2px;background:var(--line2)}
+  .fork .cols,.merge .cols{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:16px;width:100%}
+  .fork .col,.merge .col{display:flex;flex-direction:column;align-items:center}
+
+  .flow-note{margin-top:26px;font-size:12.5px;color:var(--ink3);text-align:center;line-height:1.9;max-width:820px}
+  .flow-note b{color:var(--teal-d);font-weight:700}
+  .allagents{margin-top:20px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center}
+  .allagents .aa-lbl{font-size:12px;color:var(--ink3);font-weight:600}
+  .allagents a{font-size:12.5px;font-weight:650;color:var(--teal-d);text-decoration:none;
+    background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 14px;transition:.15s}
+  .allagents a:hover{border-color:var(--teal);transform:translateY(-1px)}
+
+  /* ============ 设计理念（首页仅门面：一句话 + 跳转独立页） ============ */
+  .dplink{display:inline-flex;align-items:center;gap:7px;margin-top:22px;
+    font-size:13px;font-weight:700;color:var(--teal-d);text-decoration:none;
+    background:var(--card);border:1px solid var(--line);border-radius:999px;padding:9px 18px;
+    box-shadow:var(--shadow);transition:.15s}
+  .dplink:hover{border-color:var(--teal);transform:translateY(-1px)}
+
+  /* ============ 它解决了什么问题 ============ */
+  .claim{font-size:27px;font-weight:800;line-height:1.55;color:var(--ink);
+    margin:-2px 0 26px;letter-spacing:.2px}
+  .claim b{color:var(--teal-d)}
+  .pains{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+  .pain{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:22px 22px 20px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .pain:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+    background:linear-gradient(180deg,var(--rose),var(--amber))}
+  .pain .no{font-size:10.5px;font-weight:800;letter-spacing:1.6px;color:var(--rose);margin-bottom:10px}
+  .pain .q{font-size:15.5px;font-weight:700;color:var(--ink);line-height:1.55}
+  .pain .a{margin-top:14px;padding-top:13px;border-top:1px dashed var(--line);
+    font-size:13.5px;color:var(--ink2);line-height:1.8;display:flex;gap:9px}
+  .pain .a:before{content:"→";color:var(--teal);font-weight:800;flex:0 0 auto}
+
+  /* ============ 演示卡 ============ */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+  .card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:24px 22px 20px;cursor:pointer;transition:.18s;overflow:hidden;
+    display:flex;flex-direction:column;min-height:206px;box-shadow:var(--shadow)}
+  .card:hover{transform:translateY(-3px);border-color:var(--line2);box-shadow:var(--shadow-lg)}
+  .card .glow{position:absolute;width:220px;height:220px;border-radius:50%;
+    background:radial-gradient(circle,rgba(13,148,136,.07),transparent 70%);
+    top:-110px;right:-80px;pointer-events:none;transition:.25s}
+  .card:hover .glow{background:radial-gradient(circle,rgba(13,148,136,.14),transparent 70%)}
+  .card .code{font-size:11px;font-weight:700;letter-spacing:2px;color:var(--teal);margin-bottom:12px}
+  .card .name{font-size:20px;font-weight:800;letter-spacing:.2px;color:var(--ink)}
+  .card .role{font-size:12.5px;color:var(--ink3);margin-top:6px;font-weight:700}
+  .card .desc{font-size:13.5px;color:var(--ink2);line-height:1.75;margin-top:14px;flex:1}
+  .card .foot{display:flex;align-items:center;justify-content:space-between;margin-top:16px;
+    padding-top:14px;border-top:1px solid var(--line)}
+  .card .live{font-size:11.5px;color:#0F766E;font-weight:700;display:flex;align-items:center;gap:6px}
+  .card .live:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--teal)}
+  .card .go{font-size:13px;font-weight:700;color:var(--teal)}
+  .card:hover .go{color:var(--teal-d)}
+
+  /* 每张卡按对应内页的主色着色 */
+  .card[data-accent="teal"] .code,.card[data-accent="teal"] .go{color:var(--teal)}
+  .card[data-accent="indigo"] .code,.card[data-accent="indigo"] .go{color:var(--indigo)}
+  .card[data-accent="amber"] .code,.card[data-accent="amber"] .go{color:var(--amber)}
+  .card[data-accent="sky"] .code,.card[data-accent="sky"] .go{color:var(--sky)}
+
+  /* ============ 群里接力演示 ============ */
+  .demo-shell{background:var(--card);border:1px solid var(--line);border-radius:20px;
+    box-shadow:var(--shadow-lg);overflow:hidden;margin-top:20px}
+  .demo-bar{display:flex;align-items:center;gap:10px;padding:13px 18px;
+    border-bottom:1px solid var(--line);background:#fbfcfe}
+  .win-dots{display:flex;gap:6px}
+  .win-dots i{width:10px;height:10px;border-radius:50%;background:#e2e5ec;display:block}
+  .demo-title{font-size:13px;font-weight:650;color:var(--ink2)}
+  .demo-badge{margin-left:auto;font-size:11.5px;font-weight:600;color:var(--amber);
+    background:var(--amber-l);border:1px solid #ffe3b3;border-radius:999px;padding:3px 10px}
+  .pick{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;gap:8px;
+    flex-wrap:wrap;background:#fff}
+  .pick-lbl{font-size:12px;color:var(--ink3);width:100%;margin-bottom:2px;font-weight:600}
+  .chip{font-size:12.5px;padding:7px 13px;border-radius:9px;border:1px solid var(--line);
+    background:#fff;color:var(--ink2);cursor:pointer;transition:.16s;font-weight:500}
+  .chip:hover{border-color:#b9e2dc}
+  .chip.on{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:650}
+  .chat{padding:20px;background:#f9fafc;min-height:400px;display:flex;flex-direction:column;gap:13px}
+  .msg{max-width:82%;display:flex;gap:10px;opacity:0;transform:translateY(8px);animation:pop .36s ease forwards}
+  @keyframes pop{to{opacity:1;transform:none}}
+  .msg.me{align-self:flex-end;flex-direction:row-reverse}
+  .av{width:30px;height:30px;border-radius:9px;flex:0 0 auto;display:grid;place-items:center;
+    font-size:11px;font-weight:800;color:#fff}
+  .bwrap{max-width:calc(100% - 40px)}
+  .who{font-size:10.5px;font-weight:800;letter-spacing:1px;color:var(--ink3);margin-bottom:5px}
+  .bub{background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px 14px;
+    font-size:13.5px;box-shadow:0 1px 2px rgba(16,24,40,.03);line-height:1.7}
+  .msg.me .bub{background:var(--teal-l);border-color:#99f6e4;color:var(--teal-d)}
+  .msg.me .bwrap{display:flex;flex-direction:column;align-items:flex-end}
+  .nar{max-width:100%;font-size:12px;color:var(--ink3);font-style:italic;line-height:1.7;
+    padding:3px 4px 3px 14px;border-left:2px dashed var(--line2);margin:2px 0}
+  .demo-tools{display:flex;align-items:center;gap:12px;padding:12px 18px;
+    border-top:1px solid var(--line);background:#fbfcfe}
+  .demo-tools .spacer{margin-left:auto}
+  .ghost-btn{font-family:inherit;font-size:12.5px;font-weight:650;color:var(--teal-d);
+    background:#fff;border:1px solid var(--line);border-radius:9px;padding:7px 13px;
+    cursor:pointer;transition:.16s}
+  .ghost-btn:hover{border-color:var(--teal)}
+  .demo-foot{padding:13px 20px;border-top:1px solid var(--line);background:#fff;
+    font-size:12.5px;color:var(--ink3)}
+
+  /* ============ AI Native 的一天（首页仅门面：一句 + 跳转独立页） ============ */
+
+  footer{margin-top:70px;padding-top:26px;border-top:1px solid var(--line);
+    font-size:12px;color:var(--ink3);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+
+  .ov{position:fixed;inset:0;background:rgba(248,250,252,.97);z-index:9999;display:none;flex-direction:column}
+  .ov.on{display:flex}
+  .ovbar{height:56px;flex:0 0 56px;display:flex;align-items:center;justify-content:space-between;
+    padding:0 20px;border-bottom:1px solid var(--line);background:#fff}
+  .ovbar .t{font-size:14.5px;font-weight:700;color:var(--ink)}
+  .ovbar .t small{color:var(--ink3);font-weight:500;margin-left:9px;font-size:12px}
+  .ovbar .b{display:flex;gap:9px}
+  .ovbar button{font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;
+    background:#fff;color:var(--ink2);border:1px solid var(--line2);padding:8px 15px;border-radius:10px;transition:.13s}
+  .ovbar button:hover{background:var(--teal-l);border-color:#99F6E4;color:var(--teal-d)}
+  .ov iframe{flex:1;width:100%;border:0;background:#fff}
+
+  @media(max-width:820px){
+    .principles{grid-template-columns:1fr}
+    .pains{grid-template-columns:1fr}
+    .claim{font-size:21px}
+    .hero-claim{font-size:19px}
+    .fork .cols,.merge .cols{grid-template-columns:1fr;gap:0}
+    .fork .hline,.merge .hline{display:none}
+    .fork .vline,.merge .vline{height:22px}
+    .node{min-width:auto;width:100%}
+    .hero h1{font-size:30px}.wrap{padding:0 18px 60px}.hero{padding:44px 0 24px}
+    .msg{max-width:94%}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="kicker">P E R S O N A L &nbsp; A G E N T &nbsp; S Y S T E M</div>
+    <h1>山楂的 <em>Agent 系统</em></h1>
+    <p class="hero-claim">别人做 Agent 是玩技术。我做它，是因为我<b>一个人经营</b>。</p>
+    <p class="lead">
+      这不是一堆聊天机器人，是一套<b>有落点的岗位网络</b>。每个 Agent 只管一件事：接住你随口说的一句话，按固定规则判断、落到固定位置、再把结果还给你。它们不猜、不编、不催——<b>找不到出处就闭嘴</b>。
+    </p>
+    <div class="stats">
+      <div class="stat"><b>9</b><span>本集展示岗位</span></div>
+      <div class="stat"><b class="i">3</b><span>层协作 · 分派 / 执行 / 汇总</span></div>
+      <div class="stat"><b class="a">100%</b><span>本地运行 · 数据不出机器</span></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-h"><h2>AI Native 的一天</h2><em>从凌晨到深夜，这套系统自己醒着</em><i></i></div>
+
+    <div class="claim">它不是一个"我点开才动"的东西——<b>它有自己的作息。</b></div>
+    <a class="dplink" href="pages/ai-native-day.html" target="_blank">查看「AI Native 的一天」完整时间表 →</a>
+  </section>
+
+  <section>
+    <div class="sec-h"><h2>设计理念</h2><em>我做这套系统，不是玩技术，是因为我一个人经营</em><i></i></div>
+
+    <div class="claim">方法我早就有了。我缺的是<b>不让我散、不让我断、不让我一个人扛</b>的结构。</div>
+    <a class="dplink" href="pages/design-philosophy.html" target="_blank">查看「设计理念」独立页 →</a>
+  </section>
+
+  <section>
+    <div class="sec-h"><h2>我的一队 Agent</h2><em>用「地球Online」的方式，把每个岗位当一个角色来读</em><i></i></div>
+
+    <div class="claim">它们不是功能列表里的条目——<b>每个都有编号、有岗位、有履历。</b></div>
+    <a class="dplink" href="pages/earth-online-cover.html" target="_blank">先看「队伍封面」· 地球Online Agent 版 →</a>
+    <a class="dplink" href="pages/earth-online.html" target="_blank">进入「Agent 队伍图鉴」· 11 个角色 →</a>
+  </section>
+
+  <section>
+    <div class="sec-h"><h2>它解决了我什么问题</h2><em>为什么值得为它写一套系统</em><i></i></div>
+
+    <div class="claim">「我说过的话、做过的事、想过的东西——<b>不再散了。</b>」</div>
+
+    <div class="pains">
+      <div class="pain">
+        <div class="no">问题 01</div>
+        <div class="q">说过的话，三天就找不着了</div>
+        <div class="a">一天里冒出来的想法、决定、身体的感觉，散在飞书、对话、录音各处，事后谁也拼不起来。→ 每个岗位写进同一个位置，一句话也能被找回来，还带出处。</div>
+      </div>
+      <div class="pain">
+        <div class="no">问题 02</div>
+        <div class="q">事情总卡在最后一步</div>
+        <div class="a">稿子写完了、方案做完了，就是不发、不记数据、不复盘——每次断在收口那一下。→ 固定时间自动收口，把「发 → 记 → 复盘」变成系统动作，不靠意志力。</div>
+      </div>
+      <div class="pain">
+        <div class="no">问题 03</div>
+        <div class="q">重复的杂活吃掉大块时间</div>
+        <div class="a">写日报、整理录音、记账、归档，全是手工，做完还留不下东西。→ 交给固定岗位按规则跑，你只说一句话，剩下的它自己走完。</div>
+      </div>
+      <div class="pain">
+        <div class="no">问题 04</div>
+        <div class="q">一个人扛所有事，没有第二双手</div>
+        <div class="a">记、判、收尾全靠自己，最累的时候恰恰最容易全断。→ 每个岗位只盯一件事、互不越界；状态差的时候，也有一个只承接、不评判、不催的入口。</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-h"><h2>它们怎么协作</h2><em>入口分派 → 各管一摊 → 出口汇总 → 还给你</em><i></i></div>
+
+    <div class="flow">
+      <div class="node terminal">
+        <div class="nt">你</div>
+        <div class="ns">一句话 / 一段语音 / 一张截图</div>
+      </div>
+
+      <div class="vline tall"></div>
+
+      <div class="node click" data-f="agent-dispatcher.html">
+        <div class="badge">调度层</div>
+        <div class="nt">小管家</div>
+        <div class="nr">分派</div>
+        <div class="ns">要不要管 → 归谁 → 派最少的人 → 派出即停</div>
+      </div>
+
+      <div class="vline"></div>
+
+      <div class="fork">
+        <div class="hline"></div>
+        <div class="cols">
+          <div class="col"><div class="vline"></div>
+            <div class="node click" data-f="agent-sensing.html">
+              <div class="nt">小察</div><div class="nr">情绪识别</div>
+              <div class="ns">先识别再解释 → 判需要 → 只给路由，不接手</div>
+            </div>
+          </div>
+          <div class="col"><div class="vline"></div>
+            <div class="node click" data-f="agent-psych.html">
+              <div class="nt">心理咨询</div><div class="nr">情绪与关系</div>
+              <div class="ns">接住 → 判当下需要 → 选最轻有效的那条路</div>
+            </div>
+          </div>
+          <div class="col"><div class="vline"></div>
+            <div class="node click" data-f="agent-fitness.html">
+              <div class="nt">小健</div><div class="nr">训练记录</div>
+              <div class="ns">原话落盘 → 回执 → 一句有出处的下一步</div>
+            </div>
+          </div>
+          <div class="col"><div class="vline"></div>
+            <div class="node click" data-f="agent-transcribe.html">
+              <div class="nt">小D</div><div class="nr">音视频转录</div>
+              <div class="ns">下载 → 转录 → 去重校对 → 出干净稿</div>
+            </div>
+          </div>
+          <div class="col"><div class="vline"></div>
+            <div class="node click" data-f="agent-anomaly.html">
+              <div class="nt">异常值</div><div class="nr">生活雷达</div>
+              <div class="ns">挂基线比一遍 → 只说「不一样了」→ 没异常就闭嘴</div>
+            </div>
+          </div>
+          <div class="col"><div class="vline"></div>
+            <div class="node click accent-rose" data-f="agent-heart.html">
+              <div class="badge">心力域</div>
+              <div class="nt">新力</div><div class="nr">心力运营官</div>
+              <div class="ns">分诊 → 同时叫几个专科 → 结论打架不合并 → 汇总回你</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="merge">
+        <div class="cols">
+          <div class="col"><div class="vline"></div></div>
+          <div class="col"><div class="vline"></div></div>
+          <div class="col"><div class="vline"></div></div>
+          <div class="col"><div class="vline"></div></div>
+          <div class="col"><div class="vline"></div></div>
+          <div class="col"><div class="vline"></div></div>
+        </div>
+        <div class="hline"></div>
+      </div>
+
+      <div class="vline tall"></div>
+
+      <div class="node click" data-f="agent-daily.html">
+        <div class="badge">闭环层</div>
+        <div class="nt">小日</div>
+        <div class="nr">日闭环</div>
+        <div class="ns">中午巡检进度 → 晚上收拢一天 → 查缺失 → 生成日报 → 送回给你</div>
+      </div>
+
+      <div class="vline tall"></div>
+
+      <div class="node terminal">
+        <div class="nt">回到你</div>
+        <div class="ns">一份可追溯的日报 · 每句话都能找到出处</div>
+      </div>
+    </div>
+
+    <div class="flow-note">
+      <b>小管家</b>在入口判断这条消息归谁，<b>小日</b>在出口把一天的碎片收成一个闭环。<br>
+      中间六个各管一摊、互不越界——它们写下的每一行都落在同一个位置，所以日报读得到。<br>
+      其中<b>新力</b>是心力域的主管：它自己不下判断，只分诊、同时叫几个专科、把结论收回来；两边打架时它不强行合并。<br>
+      <b>点上面任意节点 ↗</b>，打开对应 Agent 的完整展示页。
+    </div>
+
+    <div class="allagents">
+      <span class="aa-lbl">直达单个 Agent 页：</span>
+      <a href="pages/agent-fact.html">小F 事实记录员</a>
+      <a href="pages/agent-sensing.html">小察</a>
+      <a href="pages/agent-psych.html">心理咨询</a>
+      <a href="pages/agent-fitness.html">小健</a>
+      <a href="pages/agent-transcribe.html">小D</a>
+      <a href="pages/agent-dispatcher.html">小管家</a>
+      <a href="pages/agent-daily.html">小日</a>
+      <a href="pages/agent-anomaly.html">异常值 生活雷达</a>
+      <a href="pages/agent-heart.html" style="color:#9F1239;border-color:#FECDD3">新力 心力运营官</a>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-h"><h2>可交互演示 · 群里接力</h2><em>只演你在群里看到的；旁白解释背后发生了什么</em><i></i></div>
+
+    <div class="demo-shell">
+      <div class="demo-bar">
+        <div class="win-dots"><i></i><i></i><i></i></div>
+        <div class="demo-title">山楂的 Agent 群 · 脱敏演示</div>
+        <div class="demo-badge">机制来自真实配置</div>
+      </div>
+      <div class="pick">
+        <div class="pick-lbl">选一个场景，看群里实际发生什么：</div>
+        <span class="chip on" data-s="fact">① 一句决定 → 交给小F</span>
+        <span class="chip" data-s="mood">② 一句情绪 → 转心理咨询</span>
+        <span class="chip" data-s="safe">③ 安全信号 → 铁律优先</span>
+        <span class="chip" data-s="silent">④ 无需处理 → 完全沉默</span>
+        <span class="chip" data-s="degraded">⑤ 未验收岗位 → 只报状态</span>
+      </div>
+      <div class="chat" id="chat"></div>
+      <div class="demo-tools">
+        <button class="ghost-btn" id="btnPlay">▶ 播放</button>
+        <button class="ghost-btn" id="btnNext">下一步 ▸</button>
+        <div class="spacer"></div>
+        <button class="ghost-btn" id="btnReset">↻ 重播</button>
+      </div>
+      <div class="demo-foot">演示句子为示例；机制来自真实配置——小管家 SOUL.md + router_dispatch.py V0.2 + agent-registry.json。</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-h"><h2>全部合集</h2><em>这台机器上所有能拿出来的页，一处就找得到</em><i></i></div>
+
+    <div class="grid">
+      <div class="card" data-accent="teal" style="cursor:default">
+        <div class="glow"></div>
+        <div class="code">合集 01</div>
+        <div class="name">Agent 展示合集</div>
+        <div class="role">就是这一页 · 共 11 页</div>
+        <div class="desc">首页 +「AI Native 的一天」+「设计理念」+ 9 个岗位页：小F / 小察 / 心理咨询 / 小健 / 小D / 小管家 / 小日 / 异常值 / 新力。（小月、小运两个在册岗位暂未单独做页；在册运行时岗位共 18 个）</div>
+        <div class="foot"><span class="live">最新版 · 2026-10-17</span><span class="go">你正在看</span></div>
+      </div>
+
+      <div class="card" data-accent="sky"
+        onclick="localOnly('网页合集')">
+        <div class="glow"></div>
+        <div class="code">合集 02</div>
+        <div class="name">网页合集</div>
+        <div class="role">工作台 / 设计稿 / 项目页</div>
+        <div class="desc">生活工作台、OPC 经营工作台、花园式工作台设计稿、驾驶舱设计稿等页面的本地副本合集。</div>
+        <div class="foot"><span class="live">更新 · 2026-10-12</span><span class="go">打开 ↗</span></div>
+      </div>
+
+      <div class="card" data-accent="amber"
+        onclick="localOnly('展示页总入口')">
+        <div class="glow"></div>
+        <div class="code">合集 03</div>
+        <div class="name">展示页总入口</div>
+        <div class="role">全量索引 · A–G 七类</div>
+        <div class="desc">把库里所有"自己做出来、可展示"的 HTML 页按类汇总：报告 / 时间线 / 内容方法 / 心理工具 / 品牌 / 项目站点。</div>
+        <div class="foot"><span class="live">更新 · 2026-10-16</span><span class="go">打开 ↗</span></div>
+      </div>
+    </div>
+
+    <script>
+      // 本机副本合集不公开发布：本页不再保存任何本地路径（含用户名与目录结构）。
+      function localOnly(name){
+        alert('「' + name + '」只保存在山楂的本机副本里，尚未公开发布。\n请继续浏览本页的 Agent 展示合集。');
+      }
+    </script>
+  </section>
+
+  <footer>
+    <span>山楂 · 个人 Agent 系统 · 2026</span>
+    <span>更新于 2026-10-17</span>
+  </footer>
+</div>
+
+<script>
+/* ========= 群里接力演示（只演「你在群里看到的」） =========
+   机制来源：小管家 SOUL.md + router_dispatch.py V0.2 + agent-registry.json
+   —— 判定过程不发出来；Agent 之间不互相 @；小F/小察 不在群里说话（小管家转述）；
+      小日异步；无需处理时零输出；degraded/trial 岗位只能报状态。            */
+const AV = {
+  me:   {t:"山", c:"#94a3b8"},
+  guan: {t:"管", c:"#4f46e5"},
+  zi:   {t:"咨", c:"#be123c"},
+  jian: {t:"健", c:"#0d9488"},
+  D:    {t:"D",  c:"#0284c7"},
+};
+
+const SCENES = {
+  fact: [
+    {w:"me", txt:"我决定先不继续拆心理 Agent 了，先跑一个月。"},
+    {w:"guan", txt:"这条已经交给小F记下了。"},
+    {nar:"群里看不到小F——它只记录，从不在群里说话。"},
+  ],
+  mood: [
+    {w:"me", txt:"今天特别烦，感觉自己又白忙了。"},
+    {nar:"带情绪的话，第一站默认是小察。"},
+    {w:"guan", txt:"小察说：失落 + 憋闷，强度中高；背后是需要被看见成果。已交给心理咨询。"},
+    {w:"zi", who:"心理咨询", txt:"在。先不分析——「白忙」是你对自己的判断，还是今天真实发生的事？"},
+  ],
+  safe: [
+    {w:"me", txt:"有时候真觉得撑不下去，消失了算了。"},
+    {nar:"安全信号触发 → V0.2 铁律：先派小察，小管家不自己接话。"},
+    {w:"guan", txt:"这条我先交给小察——它先陪你把这关过了。"},
+    {w:"guan", txt:"小察说：全国心理援助热线 12356；你现在身边有谁能马上到吗？"},
+    {w:"me", txt:"……知道了，我还在。"},
+  ],
+  silent: [
+    {w:"me", txt:"今天天气不错啊。"},
+    {nar:"群里什么都没发生。小管家看见了，但判定「无需处理」——零输出。"},
+    {nar:"连「（无需处理）」这种解释自己沉默的话都不发，因为它本身也是一次打扰。"},
+  ],
+  degraded: [
+    {w:"me", txt:"今天练了腿，酸胀感可以接受。"},
+    {nar:"注册表里 小健 = 降级待验收（10-02 起无端到端证据）。"},
+    {w:"guan", txt:"这条归健身教练。但它现在标着「降级待验收」，我先报状态，不替你确认它已接手。"},
+    {nar:"规则：degraded / trial 的岗位不得说成「已经接手」——只能报状态、请你人工决定。（小D 同样是 trial，10-04 起无验收证据。）"},
+  ],
+};
+
+const chat = document.getElementById('chat');
+const btnPlay = document.getElementById('btnPlay');
+const btnNext = document.getElementById('btnNext');
+const btnReset = document.getElementById('btnReset');
+let cur = 'fact', idx = 0, timer = null, playing = false;
+
+function bubble(s){
+  if (s.nar){
+    const n = document.createElement('div');
+    n.className = 'nar';
+    n.textContent = s.nar;
+    chat.appendChild(n);
+    chat.scrollTop = chat.scrollHeight;
+    return;
+  }
+  const isMe = s.w === 'me';
+  const av = AV[s.w] || AV.guan;
+  const el = document.createElement('div');
+  el.className = 'msg' + (isMe ? ' me' : '');
+  let inner = '<div class="av" style="background:' + av.c + '">' + av.t + '</div><div class="bwrap">';
+  if (!isMe) inner += '<div class="who">' + (s.who || '小管家') + '</div>';
+  inner += '<div class="bub">' + s.txt + '</div></div>';
+  el.innerHTML = inner;
+  chat.appendChild(el);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function step(){
+  const sc = SCENES[cur];
+  if (idx >= sc.length) { stopPlay(); btnPlay.textContent = '▶ 播放'; return; }
+  bubble(sc[idx]); idx++;
+  if (playing && idx < sc.length) timer = setTimeout(step, 1200);
+  else if (idx >= sc.length) { playing = false; btnPlay.textContent = '▶ 播放'; }
+}
+function startPlay(){
+  if (idx >= SCENES[cur].length) reset();
+  playing = true; btnPlay.textContent = '⏸ 暂停';
+  step();
+}
+function stopPlay(){ playing = false; clearTimeout(timer); }
+function reset(){ stopPlay(); idx = 0; chat.innerHTML = ''; btnPlay.textContent = '▶ 播放'; }
+btnPlay.onclick = () => { if (playing) { stopPlay(); btnPlay.textContent = '▶ 播放'; } else startPlay(); };
+btnNext.onclick = () => { stopPlay(); btnPlay.textContent = '▶ 播放'; step(); };
+btnReset.onclick = reset;
+
+document.querySelectorAll('.chip[data-s]').forEach(c => {
+  c.onclick = () => {
+    document.querySelectorAll('.chip[data-s]').forEach(x => x.classList.remove('on'));
+    c.classList.add('on');
+    cur = c.dataset.s; reset();
+  };
+});
+
+reset(); step();
+
+/* ===== 流程图节点：点开对应 Agent 完整展示页（新标签） ===== */
+document.querySelectorAll('.node.click').forEach(n=>{
+  n.onclick=()=>{ const f=n.dataset.f; if(f) window.open('pages/'+f,'_blank'); };
+});
+</script>
+
+</body>
+</html>

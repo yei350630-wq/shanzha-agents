@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>异常值 Agent · 生活雷达</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#fff; --ink:#111827; --ink-2:#4b5563; --ink-3:#8b93a7;
+    --line:#e6e8ee;
+    --teal:#0f766e; --teal-soft:#e6f5f2;
+    --amber:#b26a00; --amber-soft:#fff6e6;
+    --red:#d93025; --red-soft:#fdecea;
+    --gray-s:#8a8f98; --gray-soft:#f2f3f5;
+    --radius:16px;
+    --shadow:0 1px 2px rgba(16,24,40,.04),0 8px 24px rgba(16,24,40,.06);
+    --shadow-lg:0 2px 4px rgba(16,24,40,.04),0 18px 48px rgba(16,24,40,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.75;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 24px}
+  section{padding:64px 0}
+  h2{font-size:25px;letter-spacing:-.01em;margin-bottom:8px}
+  .sub{color:var(--ink-3);font-size:14px;margin-bottom:30px;max-width:680px}
+  section + section{border-top:1px solid var(--line)}
+
+  nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.86);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .nav-in{max-width:1040px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:20px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px}
+  .logo .mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#0f766e,#d93025);
+    color:#fff;display:grid;place-items:center;font-size:13px;font-weight:800}
+  .nav-links{margin-left:auto;display:flex;gap:22px;font-size:13.5px;color:var(--ink-2)}
+  .nav-links a{color:inherit;text-decoration:none}
+  .nav-links a:hover{color:var(--teal)}
+  @media(max-width:720px){.nav-links{display:none}}
+
+  .hero{padding:78px 0 56px;position:relative;overflow:hidden}
+  .hero::before{content:"";position:absolute;inset:-40% 40% 40% -20%;
+    background:radial-gradient(closest-side,rgba(15,118,110,.10),transparent);z-index:0;pointer-events:none}
+  .hero-in{position:relative;z-index:1}
+  .pill{display:inline-flex;align-items:center;gap:8px;background:var(--teal-soft);color:var(--teal);
+    font-size:12.5px;font-weight:700;padding:6px 14px;border-radius:999px;margin-bottom:22px}
+  .pill .dot{width:7px;height:7px;border-radius:50%;background:var(--teal)}
+  h1{font-size:44px;font-weight:800;line-height:1.25;letter-spacing:-.5px}
+  h1 .grad{background:linear-gradient(92deg,var(--teal),var(--red));-webkit-background-clip:text;
+    background-clip:text;-webkit-text-fill-color:transparent}
+  .lede{font-size:16px;color:var(--ink-2);margin-top:20px;max-width:720px}
+  .quote{border-left:3px solid var(--teal);padding:4px 0 4px 18px;margin:26px 0 0;
+    font-size:17px;font-weight:700;color:var(--ink);max-width:640px}
+  .hero-note{display:flex;gap:11px;margin-top:30px;padding:14px 16px;background:var(--card);
+    border:1px solid var(--line);border-radius:12px;max-width:760px}
+  .hero-note .k{color:var(--teal);font-weight:800;font-size:13px;flex:0 0 auto}
+  .hero-note .v{font-size:13px;color:var(--ink-2);line-height:1.7}
+  .cta{display:flex;gap:12px;margin-top:28px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:700;
+    text-decoration:none;padding:11px 20px;border-radius:11px;transition:.15s;border:1px solid transparent}
+  .btn.primary{background:var(--teal);color:#fff}
+  .btn.primary:hover{filter:brightness(1.07)}
+  .btn.ghost{background:var(--card);color:var(--ink-2);border-color:var(--line)}
+  .btn.ghost:hover{border-color:var(--teal);color:var(--teal)}
+  .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:38px}
+  @media(max-width:860px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px 20px;box-shadow:var(--shadow)}
+  .stat .n{font-size:26px;font-weight:800;letter-spacing:-.4px;color:var(--teal)}
+  .stat .n.r{color:var(--red)} .stat .n.a{color:var(--amber)} .stat .n.g{color:var(--gray-s)}
+  .stat .k{font-size:12.5px;color:var(--ink-3);margin-top:5px;line-height:1.6}
+
+  .rv{opacity:0;transform:translateY(16px)}
+  .rv.in{opacity:1;transform:none;transition:opacity .5s ease,transform .5s ease}
+  @media(prefers-reduced-motion:reduce){.rv{opacity:1;transform:none}}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:22px 22px 20px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gray-soft)}
+  .card.a:before{background:var(--red)} .card.b:before{background:var(--amber)}
+  .card.g:before{background:var(--gray-s)}
+  .card .tag{font-size:11px;font-weight:800;letter-spacing:1.4px;color:var(--gray-s)}
+  .card.a .tag{color:var(--red)} .card.b .tag{color:var(--amber)}
+  .card h3{font-size:18px;font-weight:800;margin:8px 0 4px}
+  .card .who{font-size:12.5px;color:var(--ink-3);font-weight:600}
+  .card p{font-size:13.5px;color:var(--ink-2);margin-top:12px;line-height:1.75}
+  .card .eg{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);
+    font-size:12.5px;color:var(--ink-3);line-height:1.7}
+
+  .tbl{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    overflow:hidden;box-shadow:var(--shadow)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th{text-align:left;font-size:11.5px;font-weight:800;letter-spacing:.6px;color:var(--ink-3);
+    padding:13px 18px;background:#fbfcfe;border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.7}
+  tr:last-child td{border-bottom:none}
+  td b{font-weight:700}
+  .pill-s{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;
+    background:var(--gray-soft);color:var(--gray-s);white-space:nowrap}
+  .pill-s.no{background:var(--red-soft);color:var(--red)}
+  .pill-s.yes{background:var(--teal-soft);color:var(--teal)}
+
+  .rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+  .rule{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;box-shadow:var(--shadow)}
+  .rule .no{font-size:11px;font-weight:800;letter-spacing:1.4px;color:var(--teal)}
+  .rule .t{font-size:16px;font-weight:800;margin:8px 0 8px}
+  .rule .d{font-size:13.5px;color:var(--ink-2);line-height:1.75}
+
+  .said,.dont{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px 26px;box-shadow:var(--shadow)}
+  .said{border-left:4px solid var(--teal)}
+  .dont{border-left:4px solid var(--red)}
+  .said .lbl{font-size:11.5px;font-weight:800;letter-spacing:1.4px;color:var(--teal);margin-bottom:12px}
+  .dont .lbl{font-size:11.5px;font-weight:800;letter-spacing:1.4px;color:var(--red);margin-bottom:12px}
+  .said ul,.dont ul{list-style:none}
+  .said li,.dont li{font-size:14.5px;color:var(--ink);padding:7px 0 7px 20px;position:relative;line-height:1.7}
+  .said li:before{content:"";position:absolute;left:2px;top:16px;width:6px;height:6px;border-radius:50%;background:var(--teal)}
+  .dont li:before{content:"×";position:absolute;left:2px;top:7px;color:var(--red);font-weight:800;font-size:15px}
+  .said li em{font-style:normal;color:var(--ink-3);font-size:13px;display:block;margin-top:2px}
+
+  .run{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:22px 24px;box-shadow:var(--shadow)}
+  .run .hd{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+  .run .hd .t{font-size:17px;font-weight:800}
+  .run .hd .s{font-size:12.5px;color:var(--ink-3);font-family:ui-monospace,Menlo,Consolas,monospace}
+  .run .sum{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+  .run .chip{font-size:12.5px;font-weight:700;padding:6px 13px;border-radius:999px;background:var(--gray-soft);color:var(--gray-s)}
+  .run .chip.r{background:var(--red-soft);color:var(--red)}
+  .run .chip.a{background:var(--amber-soft);color:var(--amber)}
+  .item{border:1px solid var(--line);border-left:4px solid var(--amber);border-radius:11px;padding:16px 18px;background:#fbfcfe}
+  .item + .item{margin-top:12px}
+  .item .n{font-size:15.5px;font-weight:800;margin-bottom:4px}
+  .item .tags{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0 12px}
+  .item .tags span{font-size:11px;background:var(--card);border:1px solid var(--line);border-radius:5px;padding:2px 8px;color:var(--ink-3)}
+  .mets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:12px}
+  @media(max-width:720px){.mets{grid-template-columns:1fr}}
+  .met{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:10px 12px}
+  .met .l{font-size:11px;color:var(--ink-3)}
+  .met .v{font-size:14.5px;font-weight:800;margin-top:3px}
+  .item .kv{font-size:13.5px;color:var(--ink-2);padding:3px 0}
+  .item .kv b{color:var(--ink-3);font-weight:700;display:inline-block;min-width:66px}
+  .item .ev{font-size:12.5px;color:var(--ink-3);margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);line-height:1.75}
+
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:0}
+  .step{position:relative;padding:20px 22px 20px 26px}
+  .step:before{content:"";position:absolute;left:0;top:20px;bottom:20px;width:3px;background:var(--line)}
+  .step:first-child:before{background:var(--teal)}
+  .step .n{font-size:11px;font-weight:800;letter-spacing:1.4px;color:var(--ink-3)}
+  .step .t{font-size:16px;font-weight:800;margin:6px 0 6px}
+  .step .d{font-size:13px;color:var(--ink-2);line-height:1.7}
+
+  footer{background:#fbfcfe;border-top:1px solid var(--line);padding:30px 0;font-size:12.5px;color:var(--ink-3)}
+  .foot-in{max-width:1040px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  footer p{max-width:660px;line-height:1.75}
+  footer b{color:var(--ink-2)}
+</style>
+</head>
+<body>
+
+<div style="max-width:1180px;margin:0 auto;padding:16px 24px 0;display:flex;gap:10px;flex-wrap:wrap;font-family:-apple-system,&quot;PingFang SC&quot;,&quot;Microsoft YaHei&quot;,sans-serif"><a href="../index.html" style="font-size:12.5px;font-weight:700;color:#0F766E;text-decoration:none;background:#fff;border:1px solid #E2E8F0;border-radius:999px;padding:6px 15px">&#8592; 回到作品集</a><a href="design-philosophy.html" style="font-size:12.5px;font-weight:700;color:#475569;text-decoration:none;background:#fff;border:1px solid #E2E8F0;border-radius:999px;padding:6px 15px">设计理念 &#8594;</a><a href="ai-native-day.html" style="font-size:12.5px;font-weight:700;color:#475569;text-decoration:none;background:#fff;border:1px solid #E2E8F0;border-radius:999px;padding:6px 15px">AI Native 的一天 &#8594;</a></div>
+
+<nav>
+  <div class="nav-in">
+    <div class="logo"><div class="mark">雷</div>异常值 Agent · 生活雷达</div>
+    <div class="nav-links">
+      <a href="#what">它是什么</a>
+      <a href="#run">今天跑出了什么</a>
+      <a href="#how">怎么工作</a>
+      <a href="#bounds">边界</a>
+      <a href="#wire">与其他 Agent 的关系</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-in">
+    <div class="pill"><span class="dot"></span>V1.1 独立岗位 · 2026-10-16 上岗 · 22:30 每日巡检</div>
+    <h1>发现<span class="grad">「和以前不一样」</span>的地方</h1>
+    <p class="lede">它是 Life OS 的生活雷达。每晚读一遍当天的事实，跟你平时的基线比一遍，把偏离了的变化摆到你面前——然后闭嘴。它不判断对错，不解释原因，不替你做决定。</p>
+    <div class="quote">「异常不等于出了问题。睡眠增加、运动减少、情绪波动——这些都可能只是『和以前不一样了』。」</div>
+    <div class="hero-note">
+      <div class="k">i</div>
+      <div class="v"><b>这是一个展示页，不是可调用的接口。</b>页面内「今天跑出了什么」一节的数据来自该 Agent 2026-10-16 20:44 的真实一次巡检产出，用于说明它的判定格式；页面本身不连接任何服务，不含凭据与内部标识，他人无法通过本页调用该 Agent。</div>
+    </div>
+    <div class="cta">
+      <a class="btn primary" href="#run">看今天它报了什么 <span style="opacity:.75">→</span></a>
+      <a class="btn ghost" href="#what">它不做什么</a>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="n">4</div><div class="k">变化形态<br>突变 / 趋势 / 中断 / 持续</div></div>
+      <div class="stat"><div class="n">5</div><div class="k">检测维度<br>生活 · 行为 · 情绪 · 目标 · 跨域</div></div>
+      <div class="stat"><div class="n a">3</div><div class="k">分级<br>A 明显 / B 观察 / C 轻微</div></div>
+      <div class="stat"><div class="n g">0</div><div class="k">没异常时的输出<br>静默，一条不发</div></div>
+    </div>
+  </div>
+</header>
+
+<section id="what">
+  <div class="wrap">
+    <h2>它只说一句话</h2>
+    <p class="sub">这个岗位的全部职责，可以压缩成一句原话。判定过程不是它的活——发现变化才是。</p>
+
+    <div class="said">
+      <div class="lbl">它说的</div>
+      <ul>
+        <li>「这个地方和你平时不一样了。」<em>只描述偏离，不给结论</em></li>
+      </ul>
+    </div>
+
+    <div class="dont" style="margin-top:16px">
+      <div class="lbl">它绝不说的</div>
+      <ul>
+        <li>「你出问题了。」</li>
+        <li>「你拖延了。」</li>
+        <li>「你抑郁了。」</li>
+        <li>「你失败了。」</li>
+      </ul>
+    </div>
+
+    <h3 style="font-size:19px;font-weight:800;margin:38px 0 6px">五条核心原则：宁可少报，不乱报</h3>
+    <p class="sub" style="margin-bottom:18px">这五条是它的自检清单。每条都对应一类最容易犯的错。</p>
+    <div class="rules">
+      <div class="rule"><div class="no">原则 01</div><div class="t">每个异常必须挂基线</div><div class="d">必须回答「它相对于什么，异常」。基线按优先级取：近 7 天 → 近 30 天 → 近 90 天 → 长期习惯 → 已定目标 → 连续趋势。挂不上基线，就不判。</div></div>
+      <div class="rule"><div class="no">原则 02</div><div class="t">证据不足就输出「暂无明显异常」</div><div class="d">不为了每天有报告而强行制造异常。没东西报是合法输出，而且是大多数晚上的输出。</div></div>
+      <div class="rule"><div class="no">原则 03</div><div class="t">禁止诊断原因</div><div class="d">跨域异常只说「多个维度同时变化」，不说「你可能抑郁了」。发现和解释是两件事，它只做第一件。</div></div>
+      <div class="rule"><div class="no">原则 04</div><div class="t">不替用户做决定</div><div class="d">建议只到「关注 / 继续观察 / 无需处理」这一层。再往前一步就越权了。</div></div>
+      <div class="rule"><div class="no">原则 05</div><div class="t">禁止误判</div><div class="d">单日数据不判、无基线不判、情绪不诊断、工作量下降不判懒惰。</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="shapes">
+  <div class="wrap">
+    <h2>四类变化形态，三级严重度</h2>
+    <p class="sub">形态回答「怎么变的」，分级回答「多值得关注」。两个维度独立，最后合成一条卡片。</p>
+
+    <h3 style="font-size:17px;font-weight:800;margin:0 0 14px">变化形态</h3>
+    <div class="tbl" style="margin-bottom:34px">
+      <table>
+        <thead><tr><th style="width:130px">形态</th><th>怎么认</th><th style="width:230px">真实例子</th></tr></thead>
+        <tbody>
+          <tr><td><b>突变</b></td><td>一天之内明显偏离</td><td>昨天睡 7h，今天 10h</td></tr>
+          <tr><td><b>趋势</b></td><td>连续多天单向移动</td><td>7h → 8h → 9h → 10h</td></tr>
+          <tr><td><b>中断</b></td><td>原本每天有的事突然消失</td><td>每天运动，连续 7 天无</td></tr>
+          <tr><td><b>持续</b></td><td>偏离了但一直没回来</td><td>偏移维持多天，未见回归</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="font-size:17px;font-weight:800;margin:0 0 14px">分级</h3>
+    <div class="cards">
+      <div class="card a"><div class="tag">A 级</div><h3>明显异常</h3><div class="who">多维度同时变化，或长期中断</div><p>需要你决定要不要处理。它只负责把它摆到台面上。</p></div>
+      <div class="card b"><div class="tag">B 级</div><h3>值得观察</h3><div class="who">单一维度偏离，但在合理波动带内</div><p>不下结论。挂几天看看会不会自己回去。</p></div>
+      <div class="card g"><div class="tag">C 级</div><h3>轻微变化</h3><div class="who">可能只是正常波动</div><p>多数情况下这类直接被丢掉，不进你的消息。</p></div>
+    </div>
+
+    <h3 style="font-size:17px;font-weight:800;margin:38px 0 14px">五个检测维度</h3>
+    <div class="tbl">
+      <table>
+        <thead><tr><th style="width:120px">维度</th><th>看什么</th></tr></thead>
+        <tbody>
+          <tr><td><b>生活节奏</b></td><td>睡眠时长（突增/突减）、入睡与起床时间偏移、活动量与运动（突增/突减/中断）</td></tr>
+          <tr><td><b>行为</b></td><td>工作量突增或突减、内容产出中断、项目中断</td></tr>
+          <tr><td><b>情绪</b></td><td>只读小察产出的情绪数据看趋势，<b>不做情绪识别本身</b></td></tr>
+          <tr><td><b>工作与目标</b></td><td>目标停滞、工作过载、行为与目标脱节</td></tr>
+          <tr><td><b>跨域</b></td><td>多个变化同时发生 → 聚合提示，<b>禁止诊断原因</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="run">
+  <div class="wrap">
+    <h2>今天它跑出了什么</h2>
+    <p class="sub">下面是一次真实巡检的产出，格式与它每晚投递的飞书卡片一致。数据源是当天的事实索引，共 311 条。</p>
+
+    <div class="run">
+      <div class="hd"><div class="t">异常值 Agent · 生活雷达</div><div class="s">as_of 2026-10-16 · generated 20:44</div></div>
+      <div class="sum">
+        <div class="chip r">A 明显异常 0</div>
+        <div class="chip a">B 值得观察 2</div>
+        <div class="chip">C 轻微变化 0</div>
+      </div>
+
+      <div class="item">
+        <div class="n">1｜睡眠时长明显增加</div>
+        <div class="tags"><span>生活 · 睡眠</span><span>突变 / 持续</span></div>
+        <div class="mets">
+          <div class="met"><div class="l">过去 30 天 / 长期习惯</div><div class="v">8.0 小时</div></div>
+          <div class="met"><div class="l">最近 7 天</div><div class="v">10.2 小时</div></div>
+          <div class="met"><div class="l">最近 3 天</div><div class="v">10.7 小时</div></div>
+        </div>
+        <div class="kv"><b>变化</b>+32%</div>
+        <div class="kv"><b>持续</b>3 天</div>
+        <div class="kv"><b>判断</b>值得观察 · 需人工确认：否</div>
+        <div class="ev"><b>证据</b>　2026-10-14 9.98 小时 · 2026-10-15 9.32 小时 · 2026-10-16 12.67 小时</div>
+      </div>
+
+      <div class="item">
+        <div class="n">2｜连续 4 天无事实记录</div>
+        <div class="tags"><span>数据</span><span>中断</span></div>
+        <div class="mets">
+          <div class="met"><div class="l">过去 30 天</div><div class="v">正常应每日有记录</div></div>
+          <div class="met"><div class="l">最近 7 天</div><div class="v">部分缺失</div></div>
+          <div class="met"><div class="l">最近 3 天</div><div class="v">部分缺失</div></div>
+        </div>
+        <div class="kv"><b>变化</b>连续缺失 4 天</div>
+        <div class="kv"><b>持续</b>4 天</div>
+        <div class="kv"><b>判断</b>值得观察 · 需人工确认：是</div>
+        <div class="ev"><b>证据</b>　事实索引 2026-10-06 ~ 2026-10-10 无 date 条目</div>
+      </div>
+    </div>
+
+    <div class="said" style="margin-top:22px">
+      <div class="lbl">注意它没有说的话</div>
+      <ul>
+        <li>它没有说「你睡太多了」。<em>睡眠增加被明确写进「可能只是和以前不一样」的清单，不是问题</em></li>
+        <li>它没有说「你这几天太废了」。<em>数据缺口报成「数据」类异常，而不是「你的行为」异常</em></li>
+        <li>它没有把这两条连起来解释。<em>关联变化一栏写的是「待跨域聚合判断」，不是「因为你压力大所以睡多了」</em></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <h2>它怎么工作</h2>
+    <p class="sub">四步，每晚 22:30 自动跑一遍。判断这一步交给模型，数据抽取和基线计算交给脚本——分工写死在设计里。</p>
+    <div class="steps">
+      <div class="step"><div class="n">STEP 01</div><div class="t">取数</div><div class="d">采集脚本只读事实索引，把睡眠、运动、情绪、工作量按天归拢。永不抛异常，退出码恒 0，不写任何知识库文件。</div></div>
+      <div class="step"><div class="n">STEP 02</div><div class="t">算基线</div><div class="d">脚本按 7 天 / 30 天 / 90 天窗口算均值与趋势，产出结构化候选，附原始值作为证据。</div></div>
+      <div class="step"><div class="n">STEP 03</div><div class="t">判与分级</div><div class="d">这一步是模型的活：这条到底算不算异常、算几级、怎么跟你说。脚本不做判断，也不写结论。</div></div>
+      <div class="step"><div class="n">STEP 04</div><div class="t">投递或沉默</div><div class="d">有异常 → 按卡片格式投递飞书，每条带基线、偏离、变化%、持续天数、证据。没异常 → 一条不发。</div></div>
+    </div>
+    <div class="tbl" style="margin-top:26px">
+      <table>
+        <thead><tr><th style="width:210px">有异常时，每条卡片带</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>现象 / 基线</td><td>发生了什么，相对什么</td></tr>
+          <tr><td>偏离 / 变化%</td><td>数值差了多少，方向是什么</td></tr>
+          <tr><td>持续天数</td><td>不是一次性的，还是一直没回</td></tr>
+          <tr><td>关联变化</td><td>同时间段还有什么别的在动（不解释因果）</td></tr>
+          <tr><td>判断 / 证据</td><td>分级结论 + 可回溯到原始事实的证据行</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="bounds">
+  <div class="wrap">
+    <h2>它的硬红线</h2>
+    <p class="sub">这六条是从 SOUL 里抄出来的原话，不是概括。检测结果是派生结果，随时可以重生成。</p>
+    <div class="dont">
+      <div class="lbl">越界即停</div>
+      <ul>
+        <li>不写进知识库 —— 只读，检测结果是派生结果，可随时重生成</li>
+        <li>不修改 / 删除任何源文件</li>
+        <li>不做医疗 / 心理诊断</li>
+        <li>不自动解释原因、不自动改目标、不自动干预</li>
+        <li>不 @ 任何人</li>
+        <li>证据必须能回溯到原始事实 —— 带 id、日期、原值</li>
+      </ul>
+    </div>
+    <div class="said" style="margin-top:16px">
+      <div class="lbl">它也不是这些</div>
+      <ul>
+        <li>不是找错误数据的质检员</li>
+        <li>不是心理医生，也不是诊断工具</li>
+        <li>不是替你做决定的人</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="wire">
+  <div class="wrap">
+    <h2>与其他 Agent 的关系</h2>
+    <p class="sub">它在这张网里的位置是「读别人写下的东西，找出里面的变化」，然后把需要处理的交出去。它自己不下场。</p>
+    <div class="tbl">
+      <table>
+        <thead><tr><th style="width:130px">对方</th><th>对方的活</th><th style="width:230px">它对对方做的事</th></tr></thead>
+        <tbody>
+          <tr><td><b>小F</b></td><td>记事实</td><td>读它记下的东西，找异常</td></tr>
+          <tr><td><b>小日</b></td><td>生成日报</td><td>查日报与事实是否一致</td></tr>
+          <tr><td><b>小月</b></td><td>管月目标</td><td>发现目标推进异常</td></tr>
+          <tr><td><b>小察</b></td><td>做情绪识别</td><td>只读情绪趋势，不重复识别</td></tr>
+          <tr><td><b>小管家</b></td><td>调度通知</td><td>发现异常后，把需要处理的交出去</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-in">
+    <p><b>异常值 Agent · 生活雷达</b> —— 本页为静态展示页。页面内引用的巡检结果为该 Agent 一次真实产出的格式示例，用于说明判定结构；页面本身不连接任何真实服务，不含凭据、内部标识或可调用接口。</p>
+    <p style="color:#c3c8d4">Showcase · 页面更新于 2026-10-16 · 对齐 V1.1 独立岗位</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.06});
+  document.querySelectorAll('.rv').forEach(function(n){io.observe(n)});
+})();
+</script>
+
+</body>
+</html>

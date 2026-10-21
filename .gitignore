@@ -1,0 +1,14 @@
+# ===== 本地专用 / 内部文件：不进公开仓库，也不发布 =====
+index-v2.html
+serve.js
+start-打开展示合集.bat
+_任务书_AI Native的一天_夯实_V1.md
+t1.png
+
+# ===== 部署中间产物（CI 里生成，勿提交）=====
+_site/
+
+# ===== 系统垃圾 =====
+Thumbs.db
+desktop.ini
+.DS_Store

@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>地球Online · 我的 Agent 队伍 · 山楂的 Life OS</title>
+<style>
+  :root{
+    --ink:#2B2419; --ink2:#5C4F3D; --ink3:#9A8C74;
+    --bg:#F8FAFC; --card:#FFFFFF; --line:#E2E8F0; --line2:#CBD5E1;
+    --teal:#0D9488; --teal-l:#CCFBF1; --teal-d:#0F766E;
+    --indigo:#4F46E5; --indigo-l:#E0E7FF;
+    --amber:#B45309; --amber-l:#FEF3C7;
+    --sky:#0284C7; --sky-l:#E0F2FE;
+    --rose:#BE123C; --rose-l:#FFE4E6;
+    --radius:16px;
+    --shadow:0 1px 2px rgba(16,24,40,.04),0 8px 24px rgba(16,24,40,.06);
+    --shadow-lg:0 2px 4px rgba(16,24,40,.04),0 18px 48px rgba(16,24,40,.10);
+    /* 游戏层：奶油纸 + 硬阴影（像素感） */
+    --cream:#FFFDF8; --cream2:#FFF9EE; --cream-line:#EADFCB; --cream-sh:#EFE6D6;
+    --outline:#3A2E22;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;
+    background:
+      radial-gradient(1100px 620px at 6% -10%,rgba(13,148,136,.10) 0%,transparent 60%),
+      radial-gradient(820px 520px at 98% 2%,rgba(79,70,229,.09) 0%,transparent 55%),
+      radial-gradient(900px 560px at 50% 108%,rgba(2,132,199,.07) 0%,transparent 60%),
+      linear-gradient(165deg,#FFFBF2 0%,#F0F9FF 24%,#F8FAFC 46%,#EEF2FF 74%,#F5F3FF 100%);
+    background-attachment:fixed;
+    color:var(--ink); -webkit-font-smoothing:antialiased; min-height:100vh;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px 90px}
+
+  .backrow{display:flex;gap:10px;flex-wrap:wrap;margin:30px 0 0}
+  .back{display:inline-flex;align-items:center;gap:7px;
+    font-size:13px;font-weight:700;color:var(--teal-d);text-decoration:none;
+    background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 16px;
+    box-shadow:var(--shadow);transition:.15s}
+  .back:hover{border-color:var(--teal);transform:translateY(-1px)}
+
+  .hero{padding:46px 0 20px}
+  .kicker{font-size:11.5px;letter-spacing:3.5px;color:var(--amber);font-weight:800;margin-bottom:16px}
+  .hero h1{font-size:38px;font-weight:800;letter-spacing:-.5px;line-height:1.22}
+  .hero h1 em{font-style:normal;background:linear-gradient(92deg,var(--teal-d),var(--teal) 45%,var(--indigo));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .hero-claim{font-size:19px;font-weight:800;line-height:1.6;margin-top:16px;color:var(--ink)}
+  .hero-claim b{color:var(--amber)}
+  .hero p.lead{font-size:15px;color:var(--ink2);line-height:1.9;margin-top:14px;max-width:780px}
+  .hero p.lead b{color:var(--teal-d);font-weight:700}
+
+  .stats{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
+  .stat{background:var(--cream);border:2px solid var(--cream-line);border-radius:14px;
+    padding:15px 20px;min-width:132px;box-shadow:4px 4px 0 var(--cream-sh)}
+  .stat b{display:block;font-size:27px;font-weight:800;letter-spacing:-.5px;color:var(--teal-d);
+    font-variant-numeric:tabular-nums}
+  .stat b.i{color:var(--indigo)}
+  .stat b.a{color:var(--amber)}
+  .stat span{display:block;font-size:12px;color:var(--ink3);margin-top:4px;font-weight:600}
+
+  section{margin-top:46px}
+  .sec-h{display:flex;align-items:baseline;gap:14px;margin-bottom:10px;flex-wrap:wrap}
+  .sec-h h2{font-size:21px;font-weight:800;letter-spacing:.2px}
+  .sec-h em{font-size:13px;color:var(--ink3);font-style:normal}
+  .sec-h i{flex:1;height:1px;background:linear-gradient(90deg,var(--line2),transparent)}
+  .sec-lead{font-size:13.5px;color:var(--ink2);line-height:1.85;margin:4px 0 20px;max-width:800px}
+
+  /* ===== 角色卡 ===== */
+  .roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(392px,1fr));gap:18px}
+  .char{background:linear-gradient(180deg,var(--cream),var(--cream2));
+    border:2px solid var(--cream-line);border-radius:18px;padding:20px 20px 18px;
+    box-shadow:5px 5px 0 var(--cream-sh);transition:.16s;position:relative}
+  .char:hover{transform:translate(-2px,-2px);box-shadow:8px 8px 0 var(--cream-sh);border-color:#DCCEAF}
+
+  .char-h{display:flex;gap:14px;align-items:flex-start}
+  .sprite-wrap{flex:0 0 auto;background:#FFFFFF;border:2px solid var(--cream-line);
+    border-radius:12px;padding:6px;line-height:0;box-shadow:2px 2px 0 var(--cream-sh)}
+  .sprite{display:block;image-rendering:pixelated}
+  .char-id{flex:1;min-width:0}
+  .char-name{font-size:17px;font-weight:800;letter-spacing:.2px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .char-role{font-size:12.5px;color:var(--ink2);line-height:1.65;margin-top:5px}
+
+  .lv{font-size:10.5px;font-weight:800;letter-spacing:.6px;padding:4px 8px;border-radius:7px;
+    background:#EFFAF7;border:1.5px solid #A7E5DA;color:var(--teal-d);
+    font-family:ui-monospace,"Cascadia Mono",Consolas,monospace}
+  .lv.trial{background:#FFF7E6;border-color:#F5D08A;color:#9A5B00}
+
+  .badge{flex:0 0 auto;font-size:11px;font-weight:800;padding:5px 10px;border-radius:999px;
+    border:1.5px solid;white-space:nowrap}
+  .badge.on{background:#E8FBF3;border-color:#8FE3C6;color:#07785A}
+  .badge.trial{background:#FFF7E6;border-color:#F5D08A;color:#9A5B00}
+
+  .char-meta{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;
+    margin-top:15px;padding-top:14px;border-top:1px dashed #EDE3D2;font-size:12.5px}
+  .meta-k{color:var(--ink3);font-weight:700;white-space:nowrap}
+  .meta-v{color:var(--ink2);word-break:break-word}
+
+  .char-sec{margin-top:13px}
+  .sec-t{font-size:11.5px;font-weight:800;color:var(--ink3);letter-spacing:.6px;margin-bottom:7px}
+  .scope{list-style:none;display:flex;flex-direction:column;gap:5px}
+  .scope li{font-size:12.5px;color:var(--ink2);line-height:1.6;padding-left:15px;position:relative;
+    word-break:break-word}
+  .scope li::before{content:"";position:absolute;left:0;top:7px;width:5px;height:5px;
+    background:var(--teal);border-radius:1px}
+
+  .pips{display:flex;gap:6px;flex-wrap:wrap}
+  .pip{font-size:11.5px;font-weight:700;background:#F6F1E6;border:1px solid #E6DBC6;
+    color:#7A6A52;padding:4px 9px;border-radius:7px}
+  .pip.none{background:#F2F4F7;border-color:#E2E8F0;color:#94A3B8;font-weight:600}
+  .pip.ghost{background:#F4F1FA;border-color:#E0D8F3;color:#7460A8}
+
+  .note{margin-top:15px;padding:11px 13px;background:#FFF7E9;
+    border-left:3px solid #E8C98A;border-radius:0 9px 9px 0;
+    font-size:12.5px;line-height:1.8;color:#6B5B42;word-break:break-word}
+  .note b{color:var(--amber)}
+
+  /* ===== 交接关系 ===== */
+  .rel{border:2px solid var(--cream-line);border-radius:16px;background:var(--cream);
+    overflow:hidden;box-shadow:4px 4px 0 var(--cream-sh)}
+  .relrow{display:grid;grid-template-columns:190px 18px 1fr;gap:14px;padding:14px 20px;
+    border-top:1px dashed #EDE3D2;align-items:start}
+  .relrow:first-child{border-top:0}
+  .rel-from{font-size:13.5px;font-weight:800;color:var(--ink);padding-top:3px;line-height:1.55}
+  .rel-arrow{color:#C0AE90;font-weight:700;font-size:13.5px;padding-top:3px;text-align:center}
+  .rel-to{display:flex;gap:6px;flex-wrap:wrap}
+  .rel-foot{margin-top:14px;font-size:12.5px;color:var(--ink3);line-height:1.8}
+  .rel-foot b{color:var(--ink2)}
+
+  /* ===== 未上场 ===== */
+  .grps{display:flex;flex-direction:column;gap:16px}
+  .grp{border:2px solid var(--cream-line);border-radius:16px;background:var(--cream);
+    padding:18px 20px;box-shadow:4px 4px 0 var(--cream-sh)}
+  .grp.warn{border-color:#F0D9A8;background:linear-gradient(180deg,#FFFDF6,#FFF8EA)}
+  .grp-h{font-size:14.5px;font-weight:800;margin-bottom:5px}
+  .grp-d{font-size:12.5px;color:var(--ink3);line-height:1.8;margin-bottom:14px}
+  .grp .rel{border:0;box-shadow:none;background:transparent}
+  .grp .relrow{padding:13px 0;grid-template-columns:200px 18px 1fr}
+
+  footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);
+    display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;
+    font-size:12.5px;color:var(--ink3)}
+
+  @media(max-width:820px){
+    .wrap{padding:0 18px 60px}
+    .hero{padding:34px 0 18px}
+    .hero h1{font-size:28px}
+    .hero-claim{font-size:17px}
+    .roster{grid-template-columns:1fr}
+    .relrow{grid-template-columns:1fr;gap:8px;padding:13px 16px}
+    .rel-arrow{display:none}
+    .grp .relrow{grid-template-columns:1fr}
+    .stat{flex:1;min-width:104px;padding:13px 15px}
+    .stat b{font-size:23px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="backrow">
+    <a class="back" href="../index.html">← 回到作品集</a>
+    <a class="back" href="ai-native-day.html">AI Native 的一天 →</a>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">E A R T H &nbsp; O N L I N E &nbsp;·&nbsp; A G E N T &nbsp; R O S T E R</div>
+    <h1>我的 Agent，是一支<em>队伍</em></h1>
+    <p class="hero-claim">它们不是功能列表里的条目——<b>每个都有编号、有岗位、有履历。</b></p>
+    <p class="lead">
+      用「地球Online」的方式重新看这套系统：把每个 Agent 当成一个角色来读——它管什么、写哪儿、把活交给谁、以及<b>它现在到底跑没跑起来</b>。
+      下面这张图鉴全部取自 <b>agent-registry.json</b>，没有美化：没在跑的岗位会如实标出来。
+    </p>
+    <div class="stats">
+      <div class="stat"><b>11</b><span>图鉴收录角色</span></div>
+      <div class="stat"><b class="i">10</b><span>已上岗（production）</span></div>
+      <div class="stat"><b class="a">1</b><span>见习（trial）</span></div>
+      <div class="stat"><b style="color:#7C3AED">6</b><span>孵化层 · 未上场</span></div>
+    </div>
+    <p class="lead" style="font-size:13.5px;margin-top:14px;color:var(--ink2)">
+      <b>口径说明：</b>注册表在册共 <b>18</b> 个运行时岗位；本图鉴收录其中 11 个已接入飞书入口、有独立档案的角色，其余 7 个（小眠 / 小镜 / 小周 / 小食 / 小畅 / 小敢 / 小重）尚未制图鉴卡——<b>没画不等于没在跑，画了的也不代表已验收</b>。
+    </p>
+  </header>
+
+  <section>
+    <div class="sec-h"><h2>角色图鉴</h2><em>每个角色一枚像素徽章，徽章按它的岗位画</em><i></i></div>
+    <p class="sec-lead">
+      徽章不是随机生成的图标——是照着岗位画出来的：小F 是记事本、小日是一天的太阳、小月是月牙、小察是眼睛、小健是哑铃、小运是齿轮。
+      <b>LV.MAX = 在册生产岗；LV.1 = 还在见习。</b>「小传」那一栏是原始登记文字，含踩过的坑。
+    </p>
+
+    <div class="roster">
+    <article class="char" data-life="production">
+      <header class="char-h">
+        <div class="sprite-wrap"><svg class="sprite" viewBox="0 0 12 12" width="60" height="60" role="img" aria-hidden="true" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="0" width="4" height="1" fill="#3A2E22"/><rect x="7" y="0" width="4" height="1" fill="#3A2E22"/><rect x="0" y="1" width="2" height="1" fill="#3A2E22"/><rect x="4" y="1" width="4" height="1" fill="#3A2E22"/><rect x="10" y="1" width="2" height="1" fill="#3A2E22"/><rect x="0" y="2" width="1" height="1" fill="#3A2E22"/><rect x="5" y="2" width="2" height="1" fill="#3A2E22"/><rect x="11" y="2" width="1" height="1" fill="#3A2E22"/><rect x="0" y="6" width="1" height="1" fill="#3A2E22"/><rect x="11" y="6" width="1" height="1" fill="#3A2E22"/><rect x="0" y="7" width="2" height="1" fill="#3A2E22"/><rect x="10" y="7" width="2" height="1" fill="#3A2E22"/><rect x="1" y="8" width="2" height="1" fill="#3A2E22"/><rect x="9" y="8" width="2" height="1" fill="#3A2E22"/><rect x="2" y="9" width="2" height="1" fill="#3A2E22"/><rect x="8" y="9" width="2" height="1" fill="#3A2E22"/><rect x="3" y="10" width="2" height="1" fill="#3A2E22"/><rect x="7" y="10" width="2" height="1" fill="#3A2E22"/><rect x="4" y="11" width="4" height="1" fill="#3A2E22"/><rect x="2" y="1" width="2" height="1" fill="#BE123C"/><rect x="8" y="1" width="2" height="1" fill="#BE123C"/><rect x="1" y="2" width="4" height="1" fill="#BE123C"/><rect x="7" y="2" width="4" height="1" fill="#BE123C"/><rect x="0" y="3" width="12" height="1" fill="#BE123C"/><rect x="0" y="4" width="12" height="1" fill="#BE123C"/><rect x="0" y="5" width="12" height="1" fill="#BE123C"/><rect x="1" y="6" width="10" height="1" fill="#BE123C"/><rect x="2" y="7" width="8" height="1" fill="#BE123C"/><rect x="3" y="8" width="6" height="1" fill="#BE123C"/><rect x="4" y="9" width="4" height="1" fill="#BE123C"/><rect x="5" y="10" width="2" height="1" fill="#BE123C"/><rect x="2" y="3" width="2" height="1" fill="#FCA5A5"/></svg></div>
+        <div class="char-id">
+          <div class="char-name">新力<span class="lv">LV.MAX</span></div>
+          <div class="char-role">心力运营官 · 心理 / 情绪 / 睡眠 / 精力事项的跨岗协调</div>
+        </div>
+        <span class="badge on">在岗</span>
+      </header>
+
+      <div class="char-meta">
+        <span class="meta-k">运行方式</span><span class="meta-v">Hermes</span>
+        <span class="meta-k">入口</span><span class="meta-v">飞书群（群内显示名：新力）</span>
+      </div>
+
+      <div class="char-sec">
+        <div class="sec-t">落点 · 它负责写哪儿</div>
+        <ul class="scope"><li>交接单与事件流（不写事实主数据、不写心理正文）</li></ul>
+      </div>
+
+      <div class="char-sec">
+        <div class="sec-t">交接给</div>
+        <div class="pips"><span class="pip">小察</span><span class="pip">心理咨询</span><span class="pip">小镜</span><span class="pip">小眠</span><span class="pip">异常值</span><span class="pip">小运</span><span class="pip">小管家</span></div>
+      </div>
+
+      <div class="note"><b>小传 ·</b> 心力运营部主管，交接总线上唯一有出单与结算权的岗，群内唯一发言人。六个专科岗之间<b>没有任何通路</b>——只有它有调用权，专科岗只能被调。两边结论打架时它<b>不合并</b>，原样交出冲突并说明分歧来源。2026-10-17 接线验收通过：27 字输入 → 双岗并行 → 103.8 秒汇总回传。</div>
+      <div class="note"><b>完整展示页 ·</b> <a href="agent-heart.html" style="color:#0D9488;font-weight:700">新力 · 心力运营官 ↗</a></div>
+    </article>
+    <article class="char" data-life="production">
+      <header class="char-h">
+        <div class="sprite-wrap"><svg class="sprite" viewBox="0 0 12 12" width="60" height="60" role="img" aria-hidden="true" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="0" width="8" height="1" fill="#3A2E22"/><rect x="1" y="1" width="1" height="1" fill="#3A2E22"/><rect x="2" y="1" width="1" height="1" fill="#14B8A6"/><rect x="3" y="1" width="7" height="1" fill="#FFF8EC"/><rect x="10" y="1" width="1" height="1" fill="#3A2E22"/><rect x="1" y="2" width="1" height="1" fill="#3A2E22"/><rect x="2" y="2" width="1" height="1" fill="#14B8A6"/><rect x="3" y="2" width="7" height="1" fill="#FFF8EC"/><rect x="10" y="2" width="1" height="1" fill="#3A2E22"/><rect x="1" y="3" width="1" height="1" fill="#3A2E22"/><rect x="2" y="3" width="1" height="1" fill="#14B8A6"/><rect x="3" y="3" width="1" height="1" fill="#FFF8EC"/><rect x="4" y="3" width="4" height="1" fill="#14B8A6"/><rect x="8" y="3" width="2" height="1" fill="#FFF8EC"/><rect x="10" y="3" width="1" height="1" fill="#3A2E22"/><rect x="1" y="4" width="1" height="1" fill="#3A2E22"/><rect x="2" y="4" width="1" height="1" fill="#14B8A6"/><rect x="3" y="4" width="7" height="1" fill="#FFF8EC"/><rect x="10" y="4" width="1" height="1" fill="#3A2E22"/><rect x="1" y="5" width="1" height="1" fill="#3A2E22"/><rect x="2" y="5" width="1" height="1" fill="#14B8A6"/><rect x="3" y="5" width="1" height="1" fill="#FFF8EC"/><rect x="4" y="5" width="4" height="1" fill="#14B8A6"/><rect x="8" y="5" width="2" height="1" fill="#FFF8EC"/><rect x="10" y="5" width="1" height="1" fill="#3A2E22"/><rect x="1" y="6" width="1" height="1" fill="#3A2E22"/><rect x="2" y="6" width="1" height="1" fill="#14B8A6"/><rect x="3" y="6" width="7" height="1" fill="#FFF8EC"/><rect x="10" y="6" width="1" height="1" fill="#3A2E22"/><rect x="1" y="7" width="1" height="1" fill="#3A2E22"/><rect x="2" y="7" width="1" height="1" fill="#14B8A6"/><rect x="3" y="7" width="1" height="1" fill="#FFF8EC"/><rect x="4" y="7" width="4" height="1" fill="#14B8A6"/><rect x="8" y="7" width="2" height="1" fill="#FFF8EC"/><rect x="10" y="7" width="1" height="1" fill="#3A2E22"/><rect x="1" y="8" width="1" height="1" fill="#3A2E22"/><rect x="2" y="8" width="1" height="1" fill="#14B8A6"/><rect x="3" y="8" width="7" height="1" fill="#FFF8EC"/><rect x="10" y="8" width="1" height="1" fill="#3A2E22"/><rect x="1" y="9" width="1" height="1" fill="#3A2E22"/><rect x="2" y="9" width="1" height="1" fill="#14B8A6"/><rect x="3" y="9" width="1" height="1" fill="#FFF8EC"/><rect x="4" y="9" width="4" height="1" fill="#14B8A6"/><rect x="8" y="9" width="2" height="1" fill="#FFF8EC"/><rect x="10" y="9" width="1" height="1" fill="#3A2E22"/><rect x="1" y="10" width="1" height="1" fill="#3A2E22"/><rect x="2" y="10" width="1" height="1" fill="#14B8A6"/><rect x="3" y="10" width="7" height="1" fill="#FFF8EC"/><rect x="10" y="10" width="1" height="1" fill="#3A2E22"/><rect x="2" y="11" width="8" height="1" fill="#3A2E22"/></svg></div>
+        <div class="char-id">
+          <div class="char-name">小F<span class="lv">LV.MAX</span></div>
+          <div class="char-role">事实记录与007总事实主数据写入</div>
+        </div>
+        <span class="badge on">在岗</span>
+      </header>
+
+      <div class="char-meta">
+        <span class="meta-k">运行方式</span><span class="meta-v">Hermes</span>
+        <span class="meta-k">入口</span><span class="meta-v">飞书私聊</span>
+      </div>
+
+      <div class="char-sec">
+        <div class="sec-t">落点 · 它负责写哪儿</div>
+        <ul class="scope"><li>007 总事实/01_每日事实</li></ul>
+      </div>
+
+      <div class="char-sec">
+        <div class="sec-t">交接给</div>
+        <div class="pips"><span class="pip">小日</span><span class="pip">小月</span><span class="pip">小察</span><span class="pip">小健</span></div>
+      </div>
+
+      <div class="note"><b>小传 ·</b> 007主数据唯一写入口；其他Agent只能调用统一脚本，不能自行覆盖文件。</div>
+    </article>
+    <article class="char" data-life="production">
+      <header class="char-h">
+        <div class="sprite-wrap"><svg class="sprite" viewBox="0 0 12 12" width="60" height="60" role="img" aria-hidden="true" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="0" width="1" height="1" fill="#3A2E22"/><rect x="5" y="0" width="2" height="1" fill="#F59E0B"/><rect x="7" y="0" width="1" height="1" fill="#3A2E22"/><rect x="5" y="1" width="2" height="1" fill="#3A2E22"/><rect x="4" y="2" width="4" height="1" fill="#3A2E22"/><rect x="3" y="3" width="1" height="1" fill="#3A2E22"/><rect x="4" y="3" width="4" height="1" fill="#F59E0B"/><rect x="8" y="3" width="1" height="1" fill="#3A2E22"/><rect x="0" y="4" width="1" height="1" fill="#3A2E22"/><rect x="2" y="4" width="1" height="1" fill="#3A2E22"/><rect x="3" y="4" width="6" height="1" fill="#F59E0B"/><rect x="9" y="4" width="1" height="1" fill="#3A2E22"/><rect x="11" y="4" width="1" height="1" fill="#3A2E22"/><rect x="0" y="5" width="1" height="1" fill="#F59E0B"/><rect x="1" y="5" width="2" height="1" fill="#3A2E22"/><rect x="3" y="5" width="2" height="1" fill="#F59E0B"/><rect x="5" y="5" width="2" height="1" fill="#FFF8EC"/><rect x="7" y="5" width="2" height="1" fill="#F59E0B"/><rect x="9" y="5" width="2" height="1" fill="#3A2E22"/><rect x="11" y="5" width="1" height="1" fill="#F59E0B"/><rect x="0" y="6" width="1" height="1" fill="#F59E0B"/><rect x="1" y="6" width="2" height="1" fill="#3A2E22"/><rect x="3" y="6" width="2" height="1" fill="#F59E0B"/><rect x="5" y="6" width="2" height="1" fill="#FFF8EC"/><rect x="7" y="6" width="2" height="1" fill="#F59E0B"/><rect x="9" y="6" width="2" height="1" fill="#3A2E22"/><rect x="11" y="6" width="1" height="1" fill="#F59E0B"/><rect x="0" y="7" width="1" height="1" fill="#3A2E22"/><rect x="2" y="7" width="1" height="1" fill="#3A2E22"/><rect x="3" y="7" width="6" height="1" fill="#F59E0B"/><rect x="9" y="7" width="1" height="1" fill="#3A2E22"/><rect x="11" y="7" width="1" height="1" fill="#3A2E22"/><rect x="3" y="8" width="1" height="1" fill="#3A2E22"/><rect x="4" y="8" width="4" height="1" fill="#F59E0B"/><rect x="8" y="8" width="1" height="1" fill="#3A2E22"/><rect x="4" y="9" width="4" height="1" fill="#3A2E22"/><rect x="5" y="10" width="2" height="1" fill="#3A2E22"/><rect x="4" y="11" width="1" height="1" fill="#3A2E22"/><rect x="5" y="11" width="2" height="1" fill="#F59E0B"/><rect x="7" y="11" width="1" height="1" fill="#3A2E22"/></svg></div>
+        <div class="char-id">
+          <div class="char-name">小日<span class="lv">LV.MAX</span></div>
+          <div class="char-role">日常交流、日级推进与收口、日中巡检、日报生成与次日封版</div>
+        </div>
+        <span class="badge on">在岗</span>
+      </header>
+
+      <div class="char-meta">
+        <span class="meta-k">运行方式</span><span class="meta-v">PowerShell 编排 + DeepSeek + Hermes Worker</span>
+        <span class="meta-k">入口</span><span class="meta-v">飞书「xiaori」</span>
+      </div>
+
+      <div class="char-sec">
+        <div class="sec-t">落点 · 它负责写哪儿</div>
+        <ul class="scope"><li>005 报告/01日报</li></ul>
+      </div>
+
+      <div class="char-sec">
+        <div class="sec-t">交接给</div>
+        <div class="pips"><span class="pip">小月</span></div>
+      </div>
+
+      <div class="note"><b>小传 ·</b> V1.3：默认对话，明确执行才改文件，明确记录仅调用统一事实入口；小F管事实、小日管一天、小月管月度。PowerShell为唯一飞书入口，Hermes仅Worker；原有周期验收证据保留，新交互端到端待真实消息。 V1.4聊天支持主动调用只读事实索引检索与原文回读工具，不限预置两天；真实模型调用日志已验证。</div>
+    </article>
+    <article class="char" data-life="trial">
+      <header class="char-h">
+        <div class="sprite-wrap"><svg class="sprite" viewBox="0 0 12 12" width="60" height="60" role="img" aria-hidden="true" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="1" width="2" height="1" fill="#3A2E22"/><rect x="3" y="2" width="1" height="1" fill="#3A2E22"/><rect x="4" y="2" width="2" height="1" fill="#6366F1"/><rect x="6" y="2" width="1" height="1" fill="#3A2E22"/><rect x="2" y="3" width="1" height="1" fill="#3A2E22"/><rect x="3" y="3" width="2" height="1" fill="#6366F1"/><rect x="5" y="3" width="1" height="1" fill="#3A2E22"/><rect x="1" y="4" width="1" height="1" fill="#3A2E22"/><rect x="2" y="4" width="1" height="1" fill="#6366F1"/><rect x="3" y="4" width="1" height="1" fill="#FFF8EC"/><rect x="4" y="4" width="1" height="1" fill="#6366F1"/><rect x="5" y="4" width="1" height="1" fill="#3A2E22"/><rect x="1" y="5" width="1" height="1" fill="#3A2E22"/><rect x="2" y="5" width="3" height="1" fill="#6366F1"/><rect x="5" y="5" width="1" height="1" fill="#3A2E22"/><rect x="1" y="6" width="1" height="1" fill="#3A2E22"/><rect x="2" y="6" width="4" height="1" fill="#6366F1"/><rect x="6" y="6" width="1" height="1" fill="#3A2E22"/><rect x="1" y="7" width="1" height="1" fill="#3A2E22"/><rect x="2" y="7" width="2" height="1" fill="#6366F1"/><rect x="4" y="7" width="1" height="1" fill="#FFF8EC"/><rect x="5" y="7" width="1" height="1" fill="#6366F1"/><rect x="6" y="7" width="2" height="1" fill="#3A2E22"/><rect x="1" y="8" width="1" height="1" fill="#3A2E22"/><rect x="2" y="8" width="1" height="1" fill="#6366F1"/><rect x="3" y="8" width="1" height="1" fill="#FFF8EC"/><rect x="4" y="8" width="4" height="1" fill="#6366F1"/><rect x="8" y="8" width="1" height="1" fill="#3A2E22"/><rect x="2" y="9" width="1" height="1" fill="#3A2E22"/><rect x="3" y="9" width="6" height="1" fill="#6366F1"/><rect x="9" y="9" width="1" height="1" fill="#3A2E22"/><rect x="3" y="10" width="2" height="1" fill="#3A2E22"/><rect x="5" y="10" width="2" height="1" fill="#6366F1"/><rect x="7" y="10" width="2" height="1" fill="#3A2E22"/><rect x="5" y="11" width="2" height="1" fill="#3A2E22"/></svg></div>
+        <div class="char-id">
+          <div class="char-name">小月<span class="lv trial">LV.1</span></div>
+          <div class="char-role">月初目标、月度巡检、月底验收与月报</div>
+        </div>
+        <span class="badge trial">见习</span>
+      </header>
+
+      <div class="char-meta">
+        <span class="meta-k">运行方式</span><span class="meta-v">Hermes</span>
+        <span class="meta-k">入口</span><span class="meta-v">飞书私聊</span>
+      </div>
+
+      <div class="char-sec">
+        <div class="sec-t">落点 · 它负责写哪儿</div>
+        <ul class="scope"><li>monthly goal and report locations defined by its profile</li></ul>
+      </div>
+
+      <div class="char-sec">
+        <div class="sec-t">交接给</div>
+        <div class="pips"><span class="pip none">不往下派活</span></div>
+      </div>
+
+      <div class="note"><b>小传 ·</b> 2026-10-16 复核：MODE A 有硬证据——2026-10_月目标.md status=confirmed（山楂 10-01 15:04 拍板）；MODE C 有 9 月月报 V1~V3。**MODE B 每日巡检保持试运行**：03_每日巡检\2026-10\ 下只有 2026-10-01 示范样例，无真实巡检记录。19:22 接入 007 只读属临时诉求，不构成 MODE B 巡检。保持 trial，不因进程在线而升级。</div>
+    </article>
+    <article class="char" data-life="production">
+      <header class="char-h">
+        <div class="sprite-wrap"><svg class="sprite" viewBox="0 0 12 12" width="60" height="60" role="img" aria-hidden="true" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="1" width="2" height="1" fill="#3A2E22"/><rect x="7" y="1" width="2" height="1" fill="#3A2E22"/><rect x="2" y="2" width="1" height="1" fill="#3A2E22"/><rect x="3" y="2" width="2" height="1" fill="#F43F5E"/><rect x="5" y="2" width="2" height="1" fill="#3A2E22"/><rect x="7" y="2" width="2" height="1" fill="#F43F5E"/><rect x="9" y="2" width="1" height="1" fill="#3A2E22"/><rect x="1" y="3" width="1" height="1" fill="#3A2E22"/><rect x="2" y="3" width="8" height="1" fill="#F43F5E"/><rect x="10" y="3" width="1" height="1" fill="#3A2E22"/><rect x="0" y="4" width="1" height="1" fill="#3A2E22"/><rect x="1" y="4" width="2" height="1" fill="#F43F5E"/><rect x="3" y="4" width="1" height="1" fill="#FFF8EC"/><rect x="4" y="4" width="7" height="1" fill="#F43F5E"/><rect x="11" y="4" width="1" height="1" fill="#3A2E22"/><rect x="0" y="5" width="1" height="1" fill="#3A2E22"/><rect x="1" y="5" width="1" height="1" fill="#F43F5E"/><rect x="2" y="5" width="1" height="1" fill="#FFF8EC"/><rect x="3" y="5" width="8" height="1" fill="#F43F5E"/><rect x="11" y="5" width="1" height="1" fill="#3A2E22"/><rect x="1" y="6" width="1" height="1" fill="#3A2E22"/><rect x="2" y="6" width="8" height="1" fill="#F43F5E"/><rect x="10" y="6" width="1" height="1" fill="#3A2E22"/><rect x="2" y="7" width="1" height="1" fill="#3A2E22"/><rect x="3" y="7" width="6" height="1" fill="#F43F5E"/><rect x="9" y="7" width="1" height="1" fill="#3A2E22"/><rect x="3" y="8" width="1" height="1" fill="#3A2E22"/><rect x="4" y="8" width="4" height="1" fill="#F43F5E"/><rect x="8" y="8" width="1" height="1" fill="#3A2E22"/><rect x="4" y="9" width="1" height="1" fill="#3A2E22"/><rect x="5" y="9" width="2" height="1" fill="#F43F5E"/><rect x="7" y="9" width="1" height="1" fill="#3A2E22"/><rect x="5" y="10" width="2" height="1" fill="#3A2E22"/></svg></div>
+        <div class="char-id">
+          <div class="char-name">心理咨询Agent（MINC方法源）<span class="lv">LV.MAX</span></div>
+          <div class="char-role">承接、现场导航、深度咨询、快乐咨询与阶段复盘</div>
+        </div>
+        <span class="badge on">在岗</span>
+      </header>
+
+      <div class="char-meta">
+        <span class="meta-k">运行方式</span><span class="meta-v">Hermes</span>
+        <span class="meta-k">入口</span><span class="meta-v">私密飞书</span>
+      </div>
+
+      <div class="char-sec">
+        <div class="sec-t">落点 · 它负责写哪儿</div>
+        <ul class="scope"><li>002 山楂的生活/001 心理健康</li></ul>
+      </div>
+
+      <div class="char-sec">
+        <div class="sec-t">交接给</div>
+        <div class="pips"><span class="pip none">不往下派活</span></div>
+      </div>
+
+      <div class="note"><b>小传 ·</b> 生产Profile唯一ID为psychological-consultation；MINC是方法与历史名称，不再作为独立运行Profile。</div>
+    </article>
+    <article class="char" data-life="production">
+      <header class="char-h">
+        <div class="sprite-wrap"><svg class="sprite" viewBox="0 0 12 12" width="60" height="60" role="img" aria-hidden="true" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="2" width="4" height="1" fill="#3A2E22"/><rect x="3" y="3" width="1" height="1" fill="#3A2E22"/><rect x="4" y="3" width="4" height="1" fill="#FFF8EC"/><rect x="8" y="3" width="1" height="1" fill="#3A2E22"/><rect x="2" y="4" width="1" height="1" fill="#3A2E22"/><rect x="3" y="4" width="2" height="1" fill="#FFF8EC"/><rect x="5" y="4" width="2" height="1" fill="#38BDF8"/><rect x="7" y="4" width="2" height="1" fill="#FFF8EC"/><rect x="9" y="4" width="1" height="1" fill="#3A2E22"/><rect x="1" y="5" width="1" height="1" fill="#3A2E22"/><rect x="2" y="5" width="2" height="1" fill="#FFF8EC"/><rect x="4" y="5" width="1" height="1" fill="#38BDF8"/><rect x="5" y="5" width="2" height="1" fill="#3A2E22"/><rect x="7" y="5" width="1" height="1" fill="#38BDF8"/><rect x="8" y="5" width="2" height="1" fill="#FFF8EC"/><rect x="10" y="5" width="1" height="1" fill="#3A2E22"/><rect x="1" y="6" width="1" height="1" fill="#3A2E22"/><rect x="2" y="6" width="2" height="1" fill="#FFF8EC"/><rect x="4" y="6" width="4" height="1" fill="#38BDF8"/><rect x="8" y="6" width="2" height="1" fill="#FFF8EC"/><rect x="10" y="6" width="1" height="1" fill="#3A2E22"/><rect x="2" y="7" width="1" height="1" fill="#3A2E22"/><rect x="3" y="7" width="2" height="1" fill="#FFF8EC"/><rect x="5" y="7" width="2" height="1" fill="#38BDF8"/><rect x="7" y="7" width="2" height="1" fill="#FFF8EC"/><rect x="9" y="7" width="1" height="1" fill="#3A2E22"/><rect x="3" y="8" width="1" height="1" fill="#3A2E22"/><rect x="4" y="8" width="4" height="1" fill="#FFF8EC"/><rect x="8" y="8" width="1" height="1" fill="#3A2E22"/><rect x="4" y="9" width="4" height="1" fill="#3A2E22"/></svg></div>
+        <div class="char-id">
+          <div class="char-name">小察<span class="lv">LV.MAX</span></div>
+          <div class="char-role">情绪识别、强度判断、需要识别与最小路由</div>
+        </div>
+        <span class="badge on">在岗</span>
+      </header>
+
+      <div class="char-meta">
+        <span class="meta-k">运行方式</span><span class="meta-v">Hermes</span>
+        <span class="meta-k">入口</span><span class="meta-v">飞书私聊</span>
+      </div>
+
+      <div class="char-sec">
+        <div class="sec-t">落点 · 它负责写哪儿</div>
+        <ul class="scope"><li>007原话 via write-fact</li><li>authorized emotion cards</li></ul>
+      </div>
+
+      <div class="char-sec">
+        <div class="sec-t">交接给</div>
+        <div class="pips"><span class="pip">心理咨询Agent（MINC方法源）</span><span class="pip">小管家</span></div>
+      </div>
+
+      <div class="note"><b>小传 ·</b> 加工后的强度、标签、置信度不得进入007。</div>
+    </article>
+    <article class="char" data-life="production">
+      <header class="char-h">
+        <div class="sprite-wrap"><svg class="sprite" viewBox="0 0 12 12" width="60" height="60" role="img" aria-hidden="true" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="0" width="2" height="1" fill="#3A2E22"/><rect x="4" y="1" width="1" height="1" fill="#3A2E22"/><rect x="5" y="1" width="2" height="1" fill="#FFF8EC"/><rect x="7" y="1" width="1" height="1" fill="#3A2E22"/><rect x="4" y="2" width="1" height="1" fill="#3A2E22"/><rect x="5" y="2" width="2" height="1" fill="#8B5CF6"/><rect x="7" y="2" width="1" height="1" fill="#3A2E22"/><rect x="4" y="3" width="1" height="1" fill="#3A2E22"/><rect x="5" y="3" width="2" height="1" fill="#8B5CF6"/><rect x="7" y="3" width="1" height="1" fill="#3A2E22"/><rect x="1" y="4" width="4" height="1" fill="#3A2E22"/><rect x="5" y="4" width="2" height="1" fill="#8B5CF6"/><rect x="7" y="4" width="4" height="1" fill="#3A2E22"/><rect x="0" y="5" width="1" height="1" fill="#3A2E22"/><rect x="1" y="5" width="1" height="1" fill="#FFF8EC"/><rect x="2" y="5" width="3" height="1" fill="#8B5CF6"/><rect x="5" y="5" width="2" height="1" fill="#FFF8EC"/><rect x="7" y="5" width="3" height="1" fill="#8B5CF6"/><rect x="10" y="5" width="1" height="1" fill="#FFF8EC"/><rect x="11" y="5" width="1" height="1" fill="#3A2E22"/><rect x="0" y="6" width="1" height="1" fill="#3A2E22"/><rect x="1" y="6" width="1" height="1" fill="#FFF8EC"/><rect x="2" y="6" width="3" height="1" fill="#8B5CF6"/><rect x="5" y="6" width="2" height="1" fill="#FFF8EC"/><rect x="7" y="6" width="3" height="1" fill="#8B5CF6"/><rect x="10" y="6" width="1" height="1" fill="#FFF8EC"/><rect x="11" y="6" width="1" height="1" fill="#3A2E22"/><rect x="1" y="7" width="4" height="1" fill="#3A2E22"/><rect x="5" y="7" width="2" height="1" fill="#8B5CF6"/><rect x="7" y="7" width="4" height="1" fill="#3A2E22"/><rect x="4" y="8" width="1" height="1" fill="#3A2E22"/><rect x="5" y="8" width="2" height="1" fill="#8B5CF6"/><rect x="7" y="8" width="1" height="1" fill="#3A2E22"/><rect x="4" y="9" width="1" height="1" fill="#3A2E22"/><rect x="5" y="9" width="2" height="1" fill="#8B5CF6"/><rect x="7" y="9" width="1" height="1" fill="#3A2E22"/><rect x="4" y="10" width="1" height="1" fill="#3A2E22"/><rect x="5" y="10" width="2" height="1" fill="#FFF8EC"/><rect x="7" y="10" width="1" height="1" fill="#3A2E22"/><rect x="5" y="11" width="2" height="1" fill="#3A2E22"/></svg></div>
+        <div class="char-id">
+          <div class="char-name">小管家<span class="lv">LV.MAX</span></div>
+          <div class="char-role">意图识别、最小路由、任务交接与异常升级</div>
+        </div>
+        <span class="badge on">在岗</span>
+      </header>
+
+      <div class="char-meta">
+        <span class="meta-k">运行方式</span><span class="meta-v">Hermes</span>
+        <span class="meta-k">入口</span><span class="meta-v">飞书群</span>
+      </div>
+
+      <div class="char-sec">
+        <div class="sec-t">落点 · 它负责写哪儿</div>
+        <ul class="scope"><li>dispatch receipts only</li></ul>
+      </div>
+
+      <div class="char-sec">
+        <div class="sec-t">交接给</div>
+        <div class="pips"><span class="pip">小F</span><span class="pip">小察</span><span class="pip">心理咨询Agent（MINC方法源）</span><span class="pip">小健</span><span class="pip">小日</span><span class="pip">小月</span><span class="pip">小D音视频转录</span></div>
+      </div>
+
+      <div class="note"><b>小传 ·</b> 必须读取注册表路由；不得接触心理咨询正文。</div>
+    </article>
+    <article class="char" data-life="production">
+      <header class="char-h">
+        <div class="sprite-wrap"><svg class="sprite" viewBox="0 0 12 12" width="60" height="60" role="img" aria-hidden="true" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="2" width="2" height="1" fill="#3A2E22"/><rect x="9" y="2" width="2" height="1" fill="#3A2E22"/><rect x="0" y="3" width="1" height="1" fill="#3A2E22"/><rect x="1" y="3" width="2" height="1" fill="#10B981"/><rect x="3" y="3" width="1" height="1" fill="#3A2E22"/><rect x="8" y="3" width="1" height="1" fill="#3A2E22"/><rect x="9" y="3" width="2" height="1" fill="#10B981"/><rect x="11" y="3" width="1" height="1" fill="#3A2E22"/><rect x="0" y="4" width="1" height="1" fill="#3A2E22"/><rect x="1" y="4" width="2" height="1" fill="#10B981"/><rect x="3" y="4" width="6" height="1" fill="#3A2E22"/><rect x="9" y="4" width="2" height="1" fill="#10B981"/><rect x="11" y="4" width="1" height="1" fill="#3A2E22"/><rect x="0" y="5" width="1" height="1" fill="#3A2E22"/><rect x="1" y="5" width="2" height="1" fill="#FFF8EC"/><rect x="3" y="5" width="6" height="1" fill="#10B981"/><rect x="9" y="5" width="2" height="1" fill="#FFF8EC"/><rect x="11" y="5" width="1" height="1" fill="#3A2E22"/><rect x="0" y="6" width="1" height="1" fill="#3A2E22"/><rect x="1" y="6" width="2" height="1" fill="#FFF8EC"/><rect x="3" y="6" width="6" height="1" fill="#10B981"/><rect x="9" y="6" width="2" height="1" fill="#FFF8EC"/><rect x="11" y="6" width="1" height="1" fill="#3A2E22"/><rect x="0" y="7" width="1" height="1" fill="#3A2E22"/><rect x="1" y="7" width="2" height="1" fill="#10B981"/><rect x="3" y="7" width="6" height="1" fill="#3A2E22"/><rect x="9" y="7" width="2" height="1" fill="#10B981"/><rect x="11" y="7" width="1" height="1" fill="#3A2E22"/><rect x="0" y="8" width="1" height="1" fill="#3A2E22"/><rect x="1" y="8" width="2" height="1" fill="#10B981"/><rect x="3" y="8" width="1" height="1" fill="#3A2E22"/><rect x="8" y="8" width="1" height="1" fill="#3A2E22"/><rect x="9" y="8" width="2" height="1" fill="#10B981"/><rect x="11" y="8" width="1" height="1" fill="#3A2E22"/><rect x="1" y="9" width="2" height="1" fill="#3A2E22"/><rect x="9" y="9" width="2" height="1" fill="#3A2E22"/></svg></div>
+        <div class="char-id">
+          <div class="char-name">小健<span class="lv">LV.MAX</span></div>
+          <div class="char-role">训练记录、恢复追踪与限定的当日三环提醒</div>
+        </div>
+        <span class="badge on">在岗</span>
+      </header>
+
+      <div class="char-meta">
+        <span class="meta-k">运行方式</span><span class="meta-v">Hermes</span>
+        <span class="meta-k">入口</span><span class="meta-v">飞书私聊</span>
+      </div>
+
+      <div class="char-sec">
+        <div class="sec-t">落点 · 它负责写哪儿</div>
+        <ul class="scope"><li>007原话 via write-fact</li></ul>
+      </div>
+
+      <div class="char-sec">
+        <div class="sec-t">交接给</div>
+        <div class="pips"><span class="pip">小F</span></div>
+      </div>
+
+      <div class="note"><b>小传 ·</b> 2026-10-16 复核升级：state.db 显示 20:22 收到&#x27;好多天没有训练&#x27;→调用 search_files/read_file/terminal 核实→20:23 回复带 007 绝对路径落点；原话已落 007（F-20261016-005）并可回读。核心闭环通过。仍不承担营养、睡眠管理。</div>
+    </article>
+    <article class="char" data-life="production">
+      <header class="char-h">
+        <div class="sprite-wrap"><svg class="sprite" viewBox="0 0 12 12" width="60" height="60" role="img" aria-hidden="true" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="0" width="2" height="1" fill="#3A2E22"/><rect x="2" y="1" width="1" height="1" fill="#3A2E22"/><rect x="3" y="1" width="2" height="1" fill="#0284C7"/><rect x="5" y="1" width="1" height="1" fill="#3A2E22"/><rect x="2" y="2" width="1" height="1" fill="#3A2E22"/><rect x="3" y="2" width="3" height="1" fill="#0284C7"/><rect x="6" y="2" width="1" height="1" fill="#3A2E22"/><rect x="2" y="3" width="1" height="1" fill="#3A2E22"/><rect x="3" y="3" width="4" height="1" fill="#0284C7"/><rect x="7" y="3" width="1" height="1" fill="#3A2E22"/><rect x="2" y="4" width="1" height="1" fill="#3A2E22"/><rect x="3" y="4" width="2" height="1" fill="#FFF8EC"/><rect x="5" y="4" width="3" height="1" fill="#0284C7"/><rect x="8" y="4" width="1" height="1" fill="#3A2E22"/><rect x="2" y="5" width="1" height="1" fill="#3A2E22"/><rect x="3" y="5" width="3" height="1" fill="#FFF8EC"/><rect x="6" y="5" width="3" height="1" fill="#0284C7"/><rect x="9" y="5" width="1" height="1" fill="#3A2E22"/><rect x="2" y="6" width="1" height="1" fill="#3A2E22"/><rect x="3" y="6" width="4" height="1" fill="#FFF8EC"/><rect x="7" y="6" width="3" height="1" fill="#0284C7"/><rect x="10" y="6" width="1" height="1" fill="#3A2E22"/><rect x="2" y="7" width="1" height="1" fill="#3A2E22"/><rect x="3" y="7" width="3" height="1" fill="#FFF8EC"/><rect x="6" y="7" width="3" height="1" fill="#0284C7"/><rect x="9" y="7" width="1" height="1" fill="#3A2E22"/><rect x="2" y="8" width="1" height="1" fill="#3A2E22"/><rect x="3" y="8" width="2" height="1" fill="#FFF8EC"/><rect x="5" y="8" width="3" height="1" fill="#0284C7"/><rect x="8" y="8" width="1" height="1" fill="#3A2E22"/><rect x="2" y="9" width="1" height="1" fill="#3A2E22"/><rect x="3" y="9" width="4" height="1" fill="#0284C7"/><rect x="7" y="9" width="1" height="1" fill="#3A2E22"/><rect x="2" y="10" width="1" height="1" fill="#3A2E22"/><rect x="3" y="10" width="3" height="1" fill="#0284C7"/><rect x="6" y="10" width="1" height="1" fill="#3A2E22"/><rect x="3" y="11" width="3" height="1" fill="#3A2E22"/></svg></div>
+        <div class="char-id">
+          <div class="char-name">小D音视频转录<span class="lv">LV.MAX</span></div>
+          <div class="char-role">音视频接收、转写、整理与交付</div>
+        </div>
+        <span class="badge on">在岗</span>
+      </header>
+
+      <div class="char-meta">
+        <span class="meta-k">运行方式</span><span class="meta-v">Hermes</span>
+        <span class="meta-k">入口</span><span class="meta-v">飞书私聊</span>
+      </div>
+
+      <div class="char-sec">
+        <div class="sec-t">落点 · 它负责写哪儿</div>
+        <ul class="scope"><li>transcript delivery locations defined by request</li></ul>
+      </div>
+
+      <div class="char-sec">
+        <div class="sec-t">交接给</div>
+        <div class="pips"><span class="pip none">不往下派活</span></div>
+      </div>
+
+      <div class="note"><b>小传 ·</b> 2026-10-16 复核升级：40分25秒音频→转写 14680 字→专名校对与去回声→落盘 &#x27;006 外部知识层\转录\Dots 引领 ChatGPT 的未来 - 跨国串门儿计划.md&#x27;（41604 字节，20:46）。收件/转写/落盘/交付四段全通。注意：档案目录有&#x27;小D音视频转录Agent&#x27;与&#x27;音视频转录Agent&#x27;两份，对应同一 profile。</div>
+    </article>
+    <article class="char" data-life="production">
+      <header class="char-h">
+        <div class="sprite-wrap"><svg class="sprite" viewBox="0 0 12 12" width="60" height="60" role="img" aria-hidden="true" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="0" width="2" height="1" fill="#3A2E22"/><rect x="4" y="1" width="1" height="1" fill="#3A2E22"/><rect x="5" y="1" width="2" height="1" fill="#EF4444"/><rect x="7" y="1" width="1" height="1" fill="#3A2E22"/><rect x="3" y="2" width="1" height="1" fill="#3A2E22"/><rect x="4" y="2" width="4" height="1" fill="#EF4444"/><rect x="8" y="2" width="1" height="1" fill="#3A2E22"/><rect x="3" y="3" width="1" height="1" fill="#3A2E22"/><rect x="4" y="3" width="1" height="1" fill="#EF4444"/><rect x="5" y="3" width="2" height="1" fill="#3A2E22"/><rect x="7" y="3" width="1" height="1" fill="#EF4444"/><rect x="8" y="3" width="1" height="1" fill="#3A2E22"/><rect x="2" y="4" width="1" height="1" fill="#3A2E22"/><rect x="3" y="4" width="2" height="1" fill="#EF4444"/><rect x="5" y="4" width="2" height="1" fill="#3A2E22"/><rect x="7" y="4" width="2" height="1" fill="#EF4444"/><rect x="9" y="4" width="1" height="1" fill="#3A2E22"/><rect x="2" y="5" width="1" height="1" fill="#3A2E22"/><rect x="3" y="5" width="2" height="1" fill="#EF4444"/><rect x="5" y="5" width="2" height="1" fill="#3A2E22"/><rect x="7" y="5" width="2" height="1" fill="#EF4444"/><rect x="9" y="5" width="1" height="1" fill="#3A2E22"/><rect x="1" y="6" width="1" height="1" fill="#3A2E22"/><rect x="2" y="6" width="3" height="1" fill="#EF4444"/><rect x="5" y="6" width="2" height="1" fill="#3A2E22"/><rect x="7" y="6" width="3" height="1" fill="#EF4444"/><rect x="10" y="6" width="1" height="1" fill="#3A2E22"/><rect x="1" y="7" width="1" height="1" fill="#3A2E22"/><rect x="2" y="7" width="8" height="1" fill="#EF4444"/><rect x="10" y="7" width="1" height="1" fill="#3A2E22"/><rect x="0" y="8" width="1" height="1" fill="#3A2E22"/><rect x="1" y="8" width="4" height="1" fill="#EF4444"/><rect x="5" y="8" width="2" height="1" fill="#3A2E22"/><rect x="7" y="8" width="4" height="1" fill="#EF4444"/><rect x="11" y="8" width="1" height="1" fill="#3A2E22"/><rect x="0" y="9" width="1" height="1" fill="#3A2E22"/><rect x="1" y="9" width="10" height="1" fill="#EF4444"/><rect x="11" y="9" width="1" height="1" fill="#3A2E22"/><rect x="0" y="10" width="12" height="1" fill="#EF4444"/><rect x="0" y="11" width="12" height="1" fill="#3A2E22"/></svg></div>
+        <div class="char-id">
+          <div class="char-name">异常值Agent（生活雷达）<span class="lv">LV.MAX</span></div>
+          <div class="char-role">每日 22:30 巡检007事实索引，挂基线发现偏离变化，分A/B/C级投递；报异常时附处理动作，他确认处理完则销号</div>
+        </div>
+        <span class="badge on">在岗</span>
+      </header>
+
+      <div class="char-meta">
+        <span class="meta-k">运行方式</span><span class="meta-v">Hermes</span>
+        <span class="meta-k">入口</span><span class="meta-v">飞书私聊</span>
+      </div>
+
+      <div class="char-sec">
+        <div class="sec-t">落点 · 它负责写哪儿</div>
+        <ul class="scope"><li>%LOCALAPPDATA%\hermes\cache\anomaly-detector\ledger.json（派生台账，不进知识库）</li></ul>
+      </div>
+
+      <div class="char-sec">
+        <div class="sec-t">交接给</div>
+        <div class="pips"><span class="pip">小管家</span></div>
+      </div>
+
+      <div class="note"><b>小传 ·</b> 只做『发现』不做诊断；不写知识库、不改源文件、不@人。处置与销号机制已于 2026-10-16 从 skill abnormal-value-tracking 并入 SOUL V1.2；该 skill 的 18:30 自动化已不存在，本岗是唯一在跑的异常值线。原 skill 型『异常值告警Agent』仍列在 incubating 层，飞书通道已解散。</div>
+    </article>
+    <article class="char" data-life="production">
+      <header class="char-h">
+        <div class="sprite-wrap"><svg class="sprite" viewBox="0 0 12 12" width="60" height="60" role="img" aria-hidden="true" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="0" width="1" height="1" fill="#3A2E22"/><rect x="5" y="0" width="2" height="1" fill="#64748B"/><rect x="7" y="0" width="1" height="1" fill="#3A2E22"/><rect x="4" y="1" width="1" height="1" fill="#3A2E22"/><rect x="5" y="1" width="2" height="1" fill="#64748B"/><rect x="7" y="1" width="1" height="1" fill="#3A2E22"/><rect x="4" y="2" width="4" height="1" fill="#3A2E22"/><rect x="3" y="3" width="1" height="1" fill="#3A2E22"/><rect x="4" y="3" width="4" height="1" fill="#64748B"/><rect x="8" y="3" width="1" height="1" fill="#3A2E22"/><rect x="0" y="4" width="3" height="1" fill="#3A2E22"/><rect x="3" y="4" width="2" height="1" fill="#64748B"/><rect x="5" y="4" width="2" height="1" fill="#3A2E22"/><rect x="7" y="4" width="2" height="1" fill="#64748B"/><rect x="9" y="4" width="3" height="1" fill="#3A2E22"/><rect x="0" y="5" width="2" height="1" fill="#64748B"/><rect x="2" y="5" width="1" height="1" fill="#3A2E22"/><rect x="3" y="5" width="1" height="1" fill="#64748B"/><rect x="4" y="5" width="1" height="1" fill="#3A2E22"/><rect x="7" y="5" width="1" height="1" fill="#3A2E22"/><rect x="8" y="5" width="1" height="1" fill="#64748B"/><rect x="9" y="5" width="1" height="1" fill="#3A2E22"/><rect x="10" y="5" width="2" height="1" fill="#64748B"/><rect x="0" y="6" width="2" height="1" fill="#64748B"/><rect x="2" y="6" width="1" height="1" fill="#3A2E22"/><rect x="3" y="6" width="1" height="1" fill="#64748B"/><rect x="4" y="6" width="1" height="1" fill="#3A2E22"/><rect x="7" y="6" width="1" height="1" fill="#3A2E22"/><rect x="8" y="6" width="1" height="1" fill="#64748B"/><rect x="9" y="6" width="1" height="1" fill="#3A2E22"/><rect x="10" y="6" width="2" height="1" fill="#64748B"/><rect x="0" y="7" width="3" height="1" fill="#3A2E22"/><rect x="3" y="7" width="2" height="1" fill="#64748B"/><rect x="5" y="7" width="2" height="1" fill="#3A2E22"/><rect x="7" y="7" width="2" height="1" fill="#64748B"/><rect x="9" y="7" width="3" height="1" fill="#3A2E22"/><rect x="3" y="8" width="1" height="1" fill="#3A2E22"/><rect x="4" y="8" width="4" height="1" fill="#64748B"/><rect x="8" y="8" width="1" height="1" fill="#3A2E22"/><rect x="4" y="9" width="4" height="1" fill="#3A2E22"/><rect x="4" y="10" width="1" height="1" fill="#3A2E22"/><rect x="5" y="10" width="2" height="1" fill="#64748B"/><rect x="7" y="10" width="1" height="1" fill="#3A2E22"/><rect x="4" y="11" width="1" height="1" fill="#3A2E22"/><rect x="5" y="11" width="2" height="1" fill="#64748B"/><rect x="7" y="11" width="1" height="1" fill="#3A2E22"/></svg></div>
+        <div class="char-id">
+          <div class="char-name">小运（Agent运维员）<span class="lv">LV.MAX</span></div>
+          <div class="char-role">每天08:00按本注册表巡检各岗，判PASS/WARN/FAIL；FAIL出维修单派WorkBuddy；修完重跑原失败测试关单</div>
+        </div>
+        <span class="badge on">在岗</span>
+      </header>
+
+      <div class="char-meta">
+        <span class="meta-k">运行方式</span><span class="meta-v">Hermes</span>
+        <span class="meta-k">入口</span><span class="meta-v">飞书私聊</span>
+      </div>
+
+      <div class="char-sec">
+        <div class="sec-t">落点 · 它负责写哪儿</div>
+        <ul class="scope"><li>008 Agent，孵化器\小运维Agent\03_巡检报告\</li><li>008 Agent，孵化器\小运维Agent\04_维修单\</li></ul>
+      </div>
+
+      <div class="char-sec">
+        <div class="sec-t">交接给</div>
+        <div class="pips"><span class="pip">小管家</span></div>
+      </div>
+
+      <div class="note"><b>小传 ·</b> 只做测/判/记/派/复测，不是通用助手。profile.yaml 的 description 已于 2026-10-16 从『飞书通用助手』改正为运维员口径。巡检名单以本注册表 agents[] 为准，故本岗自身入册以便被复核。</div>
+    </article>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-h"><h2>它们之间怎么交接</h2><em>谁把活交给谁，全部来自注册表的 routes_to</em><i></i></div>
+    <p class="sec-lead">
+      它们不互相 @、也不互相聊天：<b>一个人接住，判断完交给对的那个，然后闭嘴。</b>下面是全部实际登记在册的派活关系。
+    </p>
+
+    <div class="rel">
+      <div class="relrow">
+        <div class="rel-from">新力（心力运营官）</div>
+        <div class="rel-arrow">→</div>
+        <div class="rel-to"><span class="pip">小察</span><span class="pip">心理咨询Agent（MINC方法源）</span><span class="pip">小镜</span><span class="pip">小眠</span><span class="pip">异常值</span><span class="pip">小运</span><span class="pip">小管家</span></div>
+      </div>
+      <div class="relrow">
+        <div class="rel-from">小管家</div>
+        <div class="rel-arrow">→</div>
+        <div class="rel-to"><span class="pip">小F</span><span class="pip">小察</span><span class="pip">心理咨询Agent（MINC方法源）</span><span class="pip">小健</span><span class="pip">小日</span><span class="pip">小月</span><span class="pip">小D音视频转录</span></div>
+      </div>
+      <div class="relrow">
+        <div class="rel-from">小F</div>
+        <div class="rel-arrow">→</div>
+        <div class="rel-to"><span class="pip">小日</span><span class="pip">小月</span><span class="pip">小察</span><span class="pip">小健</span></div>
+      </div>
+      <div class="relrow">
+        <div class="rel-from">小察</div>
+        <div class="rel-arrow">→</div>
+        <div class="rel-to"><span class="pip">心理咨询Agent（MINC方法源）</span><span class="pip">小管家</span></div>
+      </div>
+      <div class="relrow">
+        <div class="rel-from">小日</div>
+        <div class="rel-arrow">→</div>
+        <div class="rel-to"><span class="pip">小月</span></div>
+      </div>
+      <div class="relrow">
+        <div class="rel-from">小健</div>
+        <div class="rel-arrow">→</div>
+        <div class="rel-to"><span class="pip">小F</span></div>
+      </div>
+      <div class="relrow">
+        <div class="rel-from">异常值Agent（生活雷达）</div>
+        <div class="rel-arrow">→</div>
+        <div class="rel-to"><span class="pip">小管家</span></div>
+      </div>
+      <div class="relrow">
+        <div class="rel-from">小运（Agent运维员）</div>
+        <div class="rel-arrow">→</div>
+        <div class="rel-to"><span class="pip">小管家</span></div>
+      </div>
+    </div>
+
+    <p class="rel-foot">
+      <b>不往下派活的：</b>小月、心理咨询Agent（MINC方法源）、小D音视频转录——它们是链路的终点，活到这里就落地了。
+    </p>
+  </section>
+
+  <section>
+    <div class="sec-h"><h2>还没上场的角色</h2><em>建了号，但没进巡检名单——不装成"已经在跑"</em><i></i></div>
+    <p class="sec-lead">
+      这部分是这页最该看的地方。系统里堆着很多"看起来像 Agent"的名字，但<b>名字不等于在跑</b>。
+      下面两层都写清楚它们和真正在跑的岗位是什么关系。
+    </p>
+
+    <div class="grps">
+      <div class="grp warn">
+        <div class="grp-h">孵化区 · profile 建了，但不在册</div>
+        <div class="grp-d">
+          注册表把它们记在 <code>incubating_or_design_only</code> 里——<b>故意不放进巡检名单</b>。
+          没跑通之前，它们不算队伍成员。
+        </div>
+        <div class="pips"><span class="pip ghost">流量教练Agent</span><span class="pip ghost">小红书标题教练Agent</span><span class="pip ghost">商业教练Agent</span><span class="pip ghost">异常值告警Agent（已被 anomaly-detector 接管 · 仅存历史资产）</span><span class="pip ghost">营养Agent</span><span class="pip ghost">睡眠Agent</span></div>
+        <div class="grp-d" style="margin-top:12px">
+          <b>已从这里毕业的：</b>心力运营官Agent —— 2026-10-17 接线验收通过后以 <b>新力（heart-power-officer）</b> 身份入册上岗，
+          本页已为它制图鉴卡，不再算孵化项。
+        </div>
+      </div>
+
+      <div class="grp">
+        <div class="grp-h">逻辑岗位 · 不是独立进程</div>
+        <div class="grp-d">
+          这些是<b>工作库里的"岗位名"</b>，不是常驻进程、不占飞书入口。历史文档把它们和真实运行岗位并列，
+          容易让人以为"多出了几个机器人"——这里显式拆开。
+        </div>
+        <div class="rel">
+      <div class="relrow">
+        <div class="rel-from">糖葫芦总调度</div>
+        <div class="rel-arrow">→</div>
+        <div class="rel-to"><span class="pip none">小管家（承担意图识别与路由执行）</span></div>
+      </div>
+      <div class="relrow">
+        <div class="rel-from">经营山楂</div>
+        <div class="rel-arrow">→</div>
+        <div class="rel-to"><span class="pip none">无对应运行实例</span></div>
+      </div>
+      <div class="relrow">
+        <div class="rel-from">内容山楂</div>
+        <div class="rel-arrow">→</div>
+        <div class="rel-to"><span class="pip none">无对应运行实例</span></div>
+      </div>
+      <div class="relrow">
+        <div class="rel-from">系统山楂</div>
+        <div class="rel-arrow">→</div>
+        <div class="rel-to"><span class="pip none">无对应运行实例</span></div>
+      </div>
+      <div class="relrow">
+        <div class="rel-from">报告生成员（周报/月报自动化）</div>
+        <div class="rel-arrow">→</div>
+        <div class="rel-to"><span class="pip none">weekly-review skill（按需调用，非常驻）</span></div>
+      </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>山楂 · 个人 Agent 系统 · 2026</span>
+    <span>数据源 agent-registry.json · 更新于 2026-10-17</span>
+  </footer>
+
+</div>
+</body>
+</html>
